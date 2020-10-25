@@ -1,3 +1,1 @@
-print("hello")
-print("y")
-print("y")
+print("heeljblo")
