@@ -1,2 +1,5 @@
 # Poker
-Poker
+
+---
+
+Mini jeu de poker
