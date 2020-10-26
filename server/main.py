@@ -1,10 +1,7 @@
 import socketio
-import eventlet
 
-sio = socketio.Server(cors_allowed_origins="*")
-app = socketio.WSGIApp(sio, static_files={
-    '/': {'content_type': 'text/html', 'filename': 'index.html'}
-})
+sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
+app = socketio.ASGIApp(sio)
 
 
 @sio.on('connect')
@@ -20,7 +17,3 @@ def msg(sid, m):
 @sio.on('disconnect')
 def disconnect(sid):
     print('client déconnecté')
-
-
-if __name__ == '__main__':
-    eventlet.wsgi.server(eventlet.listen(('', 8000)), app)
