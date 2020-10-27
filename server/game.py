@@ -1,8 +1,9 @@
 from random import randint
+import deck
 
 class Game:
     def __init__(self, nb_players=5, sm_blind=10, mode="high", limit="no-limit", dealer="random",
-                 coin_stacks="default", max_reraise=float(inf)):
+                 coin_stacks="default", max_reraise=float("inf")):
         """
         :param nb_players: int
         :param sm_blind: int
@@ -25,6 +26,10 @@ class Game:
         self.in_game = [True for _ in range(self.nb_players)]
         self.max_reraise = max_reraise
         self.current_reraise=0
+        self.deck = deck.Deck()
+        self.deck.shuffle()
+        self.cards = [[] for _ in range(self.nb_players)]
+        self.middle_cards = []
 
         # initialisation des jetons de chaque joueurs
         if coin_stacks == "default":
@@ -127,16 +132,22 @@ class Game:
         self.tmp_stacks = [0 for _ in range(N)]
         self.current_reraise = 0
         self.current_player = (self.dealer + 1) % N
+        self.cards = [[] for _ in range(self.nb_players)]
+
 
     #TODO distribute_pot_to_winner
     def distribute_pot_to_winner(self):
         pass
-    #TODO distribute_cards
+
     def distribute_cards(self):
-        pass
-    #TODO show_card
+        for _ in range(2):
+            for i in range(self.nb_players):
+                self.cards[i].append(self.deck.pop())
+
     def show_card(self):
-        pass
+        self.middle_cards.append(self.deck.pop())
     def show_flop(self):
         for _ in range(3):
             self.show_card()
+
+g = Game()
