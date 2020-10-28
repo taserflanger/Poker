@@ -125,7 +125,8 @@ def calculer_point(carte, table):
         jeu[i]=[jeu[i]]
     couleur=verifier_couleur(jeu)
     resultat["couleur"]=(couleur, ([], 0)) if couleur else False 
-
+    if couleur:
+        max_points=max(max_points, 370 + couleur[0][0] )
     return resultat, max_points
 
 
