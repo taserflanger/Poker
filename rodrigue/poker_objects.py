@@ -3,12 +3,12 @@ L'itérateur de la classe table permet de parcourir les joueurs restant dans la 
 en premier.
 Pour jouer une main:
 
-TODO:   - s'occuper de la fonctionnalité fold, et de l'attribut ind_speaker
+TODO:   - s'occuper de la fonctionnalité fold
         - s'occuper du cas de figure ou tout le monde sauf 1 s'est couché
         - retranscrire dans un modèle client/serveur, où le client n'a accès qu'aux informations qui le concernent
 """
 import random
-
+from math import inf
 class Deck:
 
     def __init__(self, standard=True):
@@ -82,7 +82,7 @@ class Table:
         self.id_dealer = 0  # l'indice du dealer
 
     def __iter__(self):
-        for player in self.r_players[self.id_speaker:] + self.r_players[:self.id_speaker - 1]:
+        for player in self.r_players[self.id_speaker:] + self.r_players[:self.id_speaker]:
             # à chaque début de round, le premier joueur parle, ensuite on appelle la méthode playersSpeak, qui va
             # interroger tous les joueurs sauf celui qui vient de miser
             yield player
@@ -96,6 +96,11 @@ class Table:
         self.pot = 0
         self.cards = []
         self.deck = Deck()
+
+    def reboot_id_speaker(self):
+        d_from_dealer = [id - self.id_dealer if id > self.id_dealer else inf if id == self.id_dealer
+                else self.nb_players - self.id_dealer + id for id in self.r_players_id]
+        self.id_speaker = self.r_players_id[d_from_dealer.index(min(d_from_dealer))]
 
     def hand(self):
         self.new_hand()
@@ -119,11 +124,13 @@ class Table:
         print(self.playersSpeak(self.bb))
 
     def flop(self):
+        self.reboot_id_speaker()
         self.cards += [self.deck.deal() for i in range(3)]
         print([str(card) for card in self.cards])
         self.playersSpeak()
 
     def turn_river(self):
+        self.reboot_id_speaker()
         self.cards += [self.deck.deal()]
         print([str(card) for card in self.cards])
         self.playersSpeak()
@@ -136,7 +143,6 @@ class Table:
                 player.on_going_bet = 0
 
         if len(self.r_players) > 1:
-
             for player in self:
                 if player == raiser:
                     return
