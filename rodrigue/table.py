@@ -1,3 +1,5 @@
+from rodrigue.deck import Deck
+
 """
 L'itérateur de la classe table permet de parcourir les joueurs restant dans la main, à partir de celui qui doit parler
 en premier.
@@ -10,78 +12,6 @@ TODO:   - s'occuper de la fonctionnalité fold, et de l'attribut ind_speaker
 
 """
 import random
-from math import inf
-
-
-class Deck:
-
-    def __init__(self, standard=True):
-
-        self.cards = []
-        for value in list(range(2, 15)):
-            for suit in list(range(4)):
-                self.cards.append(Card(card_value=value, card_suit=suit))
-
-        random.shuffle(self.cards)
-
-    def deal(self):
-        """Enlève une carte à la fin du paquet et la renvoie"""
-
-        last_card_ind = len(self.cards) - 1
-        card = self.cards[last_card_ind]
-        self.cards = self.cards[:-1]
-
-        return card
-
-
-class Player:
-
-    def __init__(self, player_name, player_stack, player_id, player_hand=[]):
-        self.name = player_name
-        self.stack = player_stack
-        self.id = player_id  # position sur la table
-        self.hand = player_hand
-        self.on_going_bet = 0
-
-    def speaks(self, amount_to_call):
-        player_action = ''
-        diff = amount_to_call - self.on_going_bet
-        c = "call"
-        bet = 0
-        raise_val = 0
-        if diff == 0: c = "check"
-        while player_action not in ['f', 'c', 'r']:
-            player_action = input(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n")
-        if player_action == 'c':
-            # TODO: - détecter lorsqu'un raise/call est un all-in. Faire en sorte qu'on ne peut pas gagner trop lorsqu'on
-            #       - se met all-in avec pas grand chose (selon les variantes c'est plus ou moins strict je crois)
-            if diff > self.stack:
-                print("all-in!")
-                diff = self.stack
-            bet = diff
-        elif player_action == 'r':
-            raise_val = float("inf")
-            while raise_val > self.stack:
-                raise_val = int(input('Raise = '))
-            bet = raise_val + diff
-        self.stack -= bet
-        self.on_going_bet += bet
-        print(f"{self.name} " + {'c': 'calls', 'r': 'raises', 'f': 'folds'}[player_action] + f" and bets {bet}.")
-        return player_action, raise_val
-
-
-class Card:
-
-    def __init__(self, card_value, card_suit):
-        self.suit = card_suit
-        self.value = card_value
-
-    dic_values = {2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: '10', 11: 'Jack', 12: 'Queen',
-                  13: 'King', 14: 'Ace'}
-    dic_suits = {0: 'clubs', 1: 'diamonds', 2: 'hearts', 3: 'spades'}
-
-    def __str__(self):
-        return Card.dic_values[self.value] + ' of ' + Card.dic_suits[self.suit]
 
 
 class Table:
@@ -107,13 +37,8 @@ class Table:
         i = (self.id_dealer + 1) % self.nb_players
         for k in range(self.nb_players):
             yield (i + k) % self.nb_players
-        for player in self.r_players[self.id_speaker:] + self.r_players[:self.id_speaker]:
-            # à chaque début de round, le premier joueur parle, ensuite on appelle la méthode playersSpeak, qui va
-            # interroger tous les joueurs sauf celui qui vient de miser
-            yield player
 
     def new_hand(self):
-        self.r_players = self.players  # remaining players
         for player in self.players:
             player.hand = []
         self.id_dealer = (self.id_dealer + 1) % self.nb_players
@@ -122,8 +47,8 @@ class Table:
         self.cards = []
         self.deck = Deck()
 
-    def next_player_id(self, id):
-        next_id = (id + 1) % self.nb_players
+    def next_player_id(self, player_id):
+        next_id = (player_id + 1) % self.nb_players
         while not self.active_players[next_id]:
             next_id = (next_id + 1) % self.nb_players
         return next_id
@@ -136,8 +61,8 @@ class Table:
 
     def hand(self):
         self.new_hand()
-        for round in [self.preFlop, self.flop, self.turn_river, self.turn_river]:
-            winner_id = round()
+        for f in [self.preFlop, self.flop, self.turn_river, self.turn_river]:
+            winner_id = f()
             if winner_id:
                 break
         print(f"{self.players[winner_id].name} wins")
@@ -157,7 +82,7 @@ class Table:
 
     def flop(self):
         self.initialise_round()
-        self.cards += [self.deck.deal() for i in range(3)]
+        self.cards += [self.deck.deal() for _ in range(3)]
         print([str(card) for card in self.cards])
         return self.playersSpeak()
 
@@ -186,11 +111,3 @@ class Table:
                 self.active_players[speaker] = False
             self.id_speaker = self.next_player_id(self.id_speaker)
             mise += amount
-
-
-if __name__ == '__main__':
-    names = ['Bond', 'DiCaprio', 'Scoubidou', 'B2oba', 'Vigéral', 'Onéla']
-    n = len(names)
-    players = [Player(player_name=names[i], player_stack=100, player_id=i) for i in range(n)]
-    table = Table(players, 5, 10)
-    table.hand()
