@@ -147,12 +147,12 @@ class Ui_MainWindow(object):
 
     def change_all(self):
         global table
-        self.label_7.setText(str([str(card) for card in table.players[0].hand]))
-        self.label_8.setText(str([str(card) for card in table.players[1].hand]))
-        self.label_9.setText(str([str(card) for card in table.players[2].hand]))
-        self.label_10.setText(str([str(card) for card in table.players[3].hand]))
-        self.label_11.setText(str([str(card) for card in table.players[4].hand]))
-        self.label_12.setText(str([str(card) for card in table.players[5].hand]))
+        self.label_7.setText(str([str(card) for card in table.players[0].set]))
+        self.label_8.setText(str([str(card) for card in table.players[1].set]))
+        self.label_9.setText(str([str(card) for card in table.players[2].set]))
+        self.label_10.setText(str([str(card) for card in table.players[3].set]))
+        self.label_11.setText(str([str(card) for card in table.players[4].set]))
+        self.label_12.setText(str([str(card) for card in table.players[5].set]))
 
         self.label_13.setText(str([str(card) for card in table.cards]))
 
@@ -186,7 +186,7 @@ if __name__ == "__main__":
     players = [po.Player(player_name=names[i], player_stack=100, player_id=i) for i in range(len(names))]
     table = po.Table(players, 5, 10)
 
-    y = threading.Thread(target=table.hand)
+    y = threading.Thread(target=table.set)
     y.start()
 
 

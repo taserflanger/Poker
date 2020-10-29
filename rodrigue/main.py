@@ -6,4 +6,4 @@ if __name__ == '__main__':
     n = len(names)
     players = [Player(player_name=names[i], player_stack=100, player_id=i) for i in range(n)]
     table = Table(players, 5, 10)
-    table.hand()
+    table.set()

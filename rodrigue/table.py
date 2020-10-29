@@ -40,7 +40,7 @@ class Table:
 
     def new_hand(self):
         for player in self.players:
-            player.hand = []
+            player.set = []
         self.id_dealer = (self.id_dealer + 1) % self.nb_players
         self.id_speaker = (self.id_dealer + 1) % self.nb_players
         self.pot = 0
@@ -59,40 +59,41 @@ class Table:
             player.on_going_bet = 0
         self.id_speaker = self.next_player_id(self.id_dealer)
 
-    def hand(self):
+    def set(self):
         self.new_hand()
-        for f in [self.preFlop, self.flop, self.turn_river, self.turn_river]:
-            winner_id = f()
+        for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
+            winner_id = round_ob()
             if winner_id:
                 break
         print(f"{self.players[winner_id].name} wins")
 
     def deal_and_blinds(self):
         for player in self.players * 2:
-            player.hand.append(self.deck.deal())
+            player.set.append(self.deck.deal())
         for i in range(2):
             print(f"{self.players[self.id_speaker].name} bets {[self.sb, self.bb][i]}")
             self.players[self.id_speaker].on_going_bet += [self.sb, self.bb][i]
             self.id_speaker = self.next_player_id(self.id_speaker)
 
-    def preFlop(self):
+    def pre_flop(self):
         print(f'Dealer : {self.id_dealer}', f"Speaker : {self.id_speaker}", sep='\n')
         self.deal_and_blinds()
-        return self.playersSpeak(self.bb)
+        return self.players_speak(self.bb)
 
     def flop(self):
         self.initialise_round()
         self.cards += [self.deck.deal() for _ in range(3)]
         print([str(card) for card in self.cards])
-        return self.playersSpeak()
+        return self.players_speak()
 
     def turn_river(self):
         self.initialise_round()
         self.cards += [self.deck.deal()]
         print([str(card) for card in self.cards])
-        return self.playersSpeak()
+        return self.players_speak()
 
-    def playersSpeak(self, mise=0):
+    def players_speak(self, mise=0):
+        # Todo: implémenter le tour depuis le raiser
         for _ in range(self.nb_players):
             speaker = self.id_speaker
             if sum(self.active_players) == 1:
