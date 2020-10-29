@@ -127,7 +127,7 @@ class Table:
 
         #trier liste des scores selon les points d'abord et selon les complémentaires ensuite       
         liste_des_scores.sort(key=lambda x:x[1], reverse=True)   #trie selon les complémentaires de façon décroissante
-        liste_des_scores.sort(key=lambda) x:x[0], reverse=True) #trie selon les points de facçon décroissante
+        liste_des_scores.sort(key=lambda x:x[0], reverse=True) #trie selon les points de facçon décroissante
         
         score_reference=liste_des_scores[0]  #score du gagnant
         for player in joueurs:               #si un jouer a le meme score que le gagnant alors il est gagnant 
