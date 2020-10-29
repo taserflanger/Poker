@@ -6,6 +6,7 @@ class Player:
         self.id = player_id  # position sur la table
         self.hand = []
         self.on_going_bet = 0
+        self.score #utile pour la fonction determiner gagnant
 
     def speaks(self, amount_to_call):
         player_action = ''
