@@ -115,14 +115,13 @@ class Table:
 
 
     def determiner_gagnants(self): #renvoie les gagnants sous forme de liste
-        table=self.cards[:]
         joueurs=self.active_players[:]
         n=len(joueurs)
         gagnants=[]
         liste_des_scores=[]*n
 
         for i in range(n):
-            joueurs[i].score= self.score(joueurs[i].carte)
+            joueurs[i].score= self.score(joueurs[i].hand)
             liste_des_scores[i]=joueurs[i].score 
 
         #trier liste des scores selon les points d'abord et selon les complémentaires ensuite       
@@ -145,19 +144,6 @@ class Table:
 # La fonction carte_haute donne ces cartes complémentaires.
 
 
-#renvoie les cartes complémentaires
-    def carte_hautes(self, main): 
-        table=self.cards[:]         
-        k=len(main)
-        complémentaires=[]
-        for carte in table:
-            if carte not in main:
-                complémentaires.append(carte)
-        complémentaires.sort(key= lambda x:x[0], reverse=True)
-        chiffre_complémentaire=""
-        for i in complémentaires[:(5-k)]:
-            chiffre_complémentaire+= str(i[0])
-        return complémentaires[:(5-k)], int(chiffre_complémentaire)
 
 #convention AS correspond au 14.
 #amélioration: dire le nom de la paire/full/brelan etc : paire d'as par exemple 
@@ -171,6 +157,18 @@ class Table:
 # mêmes points 
 # Si 2 scores sont égaux il y a ex aequo
     def calculer_point(self, carte):
+        def carte_hautes(main, jeu): #jeu = table + main = 7 cartes #changer les notations       
+            k=len(main)
+            complémentaires=[]
+            for carte in jeu:
+                if carte not in main:
+                    complémentaires.append(carte)
+            complémentaires.sort(key= lambda x:x[0], reverse=True)
+            chiffre_complémentaire=""
+            for i in complémentaires[:(5-k)]:
+                chiffre_complémentaire+= str(i[0])
+            return complémentaires[:(5-k)], int(chiffre_complémentaire)
+        
         table=self.cards[:]
         max_points=0
         jeu=carte+table
@@ -190,20 +188,20 @@ class Table:
             #carré
             if occurence==4 and not resultat["carré"]:
                 max_points=max(max_points, 650 + cards[0][0])
-                ch=self.carte_hautes( cards )
+                ch=carte_hautes( cards, jeu )
                 resultat["carré"]=(cards, ch)    
 
             #brelan
             elif occurence==3 and not resultat["brelan"]:
                 max_points=max(max_points, 330 + cards[0][0])
-                ch=self.carte_hautes( cards )
+                ch=carte_hautes( cards, jeu )
                 resultat["brelan"]=(cards, ch) 
 
             #double paire
             elif occurence==2 and resultat["paire"] and not resultat["double paire"]:
                 paire1=resultat["paire"][0]
                 max_points=max(max_points, 40 + paire1[0][0]*20 + cards[0][0])     
-                ch=self.carte_hautes( paire1 + cards )  
+                ch=carte_hautes( paire1 + cards, jeu )  
                 resultat["double paire"]= ([paire1, cards], ch)  
 
             #paire
@@ -211,13 +209,13 @@ class Table:
                 if occurence==3:
                     cards.pop(-1)
                 max_points=max(max_points, 20 + cards[0][0])
-                ch=self.carte_hautes( cards )         
+                ch=carte_hautes( cards, jeu )         
                 resultat["paire"]=(cards, ch)
      
             # carte haute
             elif cards and not resultat["carte haute"]:
                 max_points=max(max_points, cards[0][0])           
-                ch=self.carte_hautes( cards )
+                ch=carte_hautes( cards, jeu )
                 resultat["carte haute"]=(cards, ch)
         
         #full 
@@ -274,8 +272,10 @@ class Table:
                 meilleure_combi=(i, resultat[i])
                 break
         score=(max_points, meilleure_combi[1][1][1])
-        return score, meilleure_combi
+        return (score, meilleure_combi)
 
-    def score(self, table):
-        points, meilleure_combi=self.calculer_point(carte)
-        return points
+    def score(self, carte):
+        return self.calculer_point(carte)[0]
+
+    #renvoie les cartes complémentaires
+    
