@@ -130,9 +130,11 @@ def calculer_point(carte, table):
     return resultat, max_points
 
 
+
+# bug quinte 
 #extraction des données
 #ont pourra extraire les données différemment en fonction de comment on code le reste
-res, ptn=calculer_point([(3, "carreau"), (5, "coeur")], [(13, "coeur"), (14, "coeur"), (3, "pique"), (12, "pique"), (10, "carreau")] )
+res, ptn=calculer_point([(14, "pique"), (2, "carreau")], [(3, "pique"), (5, "pique"), (4, "pique"), (3, "coeur"), (10, "carreau")] )
 for i in res.items():
     print(i)
 for i in res:

@@ -141,11 +141,11 @@ class Table:
         liste_des_scores=[]*n
 
         for i in range(n):
-            joueurs[i].score= self.score(joueurs[i].hand)
+            joueurs[i].score, joueurs[i].combinaison= self.meilleure_combinaison(joueurs[i].hand)
             liste_des_scores[i]=joueurs[i].score 
 
         #trier liste des scores selon les points d'abord et selon les complémentaires ensuite       
-        liste_des_scores.sort(key=lambda x:x[1], reverse=True)   #trie selon les complémentaires de façon décroissante
+        liste_des_scores.sort(key=lambda x:x[1], reverse=True) #trie selon les complémentaires de façon décroissante
         liste_des_scores.sort(key=lambda x:x[0], reverse=True) #trie selon les points de facçon décroissante
         
         score_reference=liste_des_scores[0]  #score du gagnant
@@ -158,40 +158,46 @@ class Table:
 
 #le programme suivant donne la meilleure combinaison de 5 cartes parmi 7, les 7 cartes
 # correspodant à la main du joueur + les cartes sur la table
-# il renvoie les cartes formant la meilleure combinaison, c-a-d toujours 5 cartes car même s'il
-# n'y a qu'une paire de 3 par exemple, ceux sont les 2 plus hautes cartes parmi les 5 restantes 
-# qui forment la combinaison de 5 cartes. On appelle ces 3 cartes, les cartes complémentaires
-# La fonction carte_haute donne ces cartes complémentaires.
-
-
 
 #convention AS correspond au 14.
-#amélioration: dire le nom de la paire/full/brelan etc : paire d'as par exemple 
 #cette fonction renvoie la meilleure combinaison de 5 cartes parmi 7 et un score associé
-# La table des scores est faite de telle sorte que:  pour tout C1 et C2 des combinaisons
-# si C1 est meilleur combi que C2 alors score(C1)>score(C2) 
-# Le score se compose des points des cartes gagnantes (par exemple les points d'une paire d'AS cf table des points)
-#  et d'un numero des cartes complémentaires (qui correspond à la concatenation des numeros de chacune 
-# des cartes complémentaires: par exemple si les cartes complémentaires à paire d'AS sont 12, 11 et 10 alors 
-# le numero complémentaire est 121110. Cela permet de départager les combinaisons qui ont les
-# mêmes points 
-# Si 2 scores sont égaux il y a ex aequo
-    def calculer_point(self, carte):
-        def carte_hautes(main, jeu): #jeu = table + main = 7 cartes #changer les notations       
-            k=len(main)
+# Le score se compose des points de la combinaison gagnantes (paire d'AS) et d'un numero des cartes complémentaires 
+# à la combinaison (qui correspond à la concatenation des numeros de chacune des cartes complémentaires:
+#  par exemple si les cartes complémentaires à paire d'AS sont 12, 11 et 10 alors le numero complémentaire est 121110.
+
+    def meilleure_combinaison(self, hand):  
+        
+        def carte_hautes(cartes_combinaison, jeu): #jeu = table + main = 7 cartes        
+            k=len(cartes_combinaison)              #cartes_combinaison est par exemple une paire d'as [(AS, "pique"), (AS, "carreau")] 
             complémentaires=[]
             for carte in jeu:
-                if carte not in main:
+                if carte not in cartes_combinaison:
                     complémentaires.append(carte)
             complémentaires.sort(key= lambda x:x[0], reverse=True)
             chiffre_complémentaire=""
-            for i in complémentaires[:(5-k)]:
-                chiffre_complémentaire+= str(i[0])
+            for i in complémentaires[:(5-k)]:           #cocatenation des complémentaires: par exemple si 13, 12 sont 
+                chiffre_complémentaire+= str(i[0])      #des complémentaires, alors chiffre_complémentaire vaut 1312
             return complémentaires[:(5-k)], int(chiffre_complémentaire)
         
+        #permet de verifier la couleur d'un paquet pour la couleur et pour la quinte flush
+        def verifier_couleur(paquet):
+            for couleur in ['pique', 'trefle', 'coeur', 'carreau']: #pour tester la quinte flush
+                compteur=0  
+                qf=[]
+                for cartes in paquet:
+                    for carte in cartes:
+                        if carte[1]==couleur:
+                            compteur+=1
+                            qf.append(carte)
+                if compteur>=5:
+                    qf.sort(key=lambda x:x[0], reverse=True)
+                    return qf[:5]  
+            return False
+
+
         table=self.cards[:]
         max_points=0
-        jeu=carte+table
+        jeu=hand+table
         resultat={i:False for i in reversed(["carte haute", "paire", "double paire", "brelan", "quinte", "couleur", "full", "carré", "quinte flush"]) }
     
         #création d'un dictionnaire qui compte les occurences des cartes
@@ -201,8 +207,8 @@ class Table:
             if carte[0]==14:
                 c_suite[str("1")].append(carte)
 
-        for hauteur in range(14, 1, -1):
-            cards=c_suite[str(hauteur)]
+        for hauteur in range(14, 1, -1):     #hauteur d'un AS est 14 et 1 à la fois 
+            cards=c_suite[str(hauteur)]      
             occurence=len(cards)
         
             #carré
@@ -226,7 +232,7 @@ class Table:
 
             #paire
             elif occurence>=2 and not resultat["paire"]:
-                if occurence==3:
+                if occurence==3:                            #corrige le cas ou il y a 2 brelans dans le jeu
                     cards.pop(-1)
                 max_points=max(max_points, 20 + cards[0][0])
                 ch=carte_hautes( cards, jeu )         
@@ -243,21 +249,6 @@ class Table:
             max_points=max(max_points, 390 + resultat["brelan"][0][0][0]*20 + resultat["paire"][0][0][0])
             resultat["full"]= ( resultat["brelan"][0] + resultat["paire"][0] , ([], 0))
 
-
-        #permet de verifier la couleur d'un paquet pour la couleur et pour la quinte flush
-        def verifier_couleur(paquet):
-            for couleur in ['pique', 'trefle', 'coeur', 'carreau']: #pour tester la quinte flush
-                compteur=0  
-                qf=[]
-                for cartes in paquet:
-                    for carte in cartes:
-                        if carte[1]==couleur:
-                            compteur+=1
-                            qf.append(carte)
-                if compteur>=5:
-                    qf.sort(key=lambda x:x[0], reverse=True)
-                    return qf[:5]  
-            return False
 
         #quinte
         compteur=0
@@ -286,16 +277,15 @@ class Table:
         if couleur:
             max_points=max(max_points, 370 + couleur[0][0] )
 
-        score=(max_points)
+        #extraction des données (inutile de comprendre ce passage, c'est de la mise en forme)
         for i in resultat:
             if resultat[i]:
                 meilleure_combi=(i, resultat[i])
                 break
         score=(max_points, meilleure_combi[1][1][1])
-        return (score, meilleure_combi)
+        return score, meilleure_combi
 
-    def score(self, carte):
-        return self.calculer_point(carte)[0]
 
-    #renvoie les cartes complémentaires
+
+
     
