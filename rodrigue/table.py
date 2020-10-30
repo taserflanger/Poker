@@ -161,7 +161,7 @@ class Table:
         
         #permet de verifier la couleur d'un paquet pour la couleur et pour la quinte flush
         def verifier_couleur(paquet):
-            for couleur in ['pique', 'trefle', 'coeur', 'carreau']: #pour tester la quinte flush
+            for couleur in ['clubs', 'diamonds', 'hearts', 'spades']: #pour tester la quinte flush
                 compteur=0  
                 qf=[]
                 for cartes in paquet:
@@ -264,8 +264,4 @@ class Table:
                 break
         score=(max_points, meilleure_combi[1][1][1])
         return score, meilleure_combi
-
-
-
-
-    
+   
