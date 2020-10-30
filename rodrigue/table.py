@@ -12,7 +12,7 @@ TODO:   - s'occuper de la fonctionnalité fold, et de l'attribut ind_speaker
 import random
 from deck import Deck
 from hand_5 import Hand_5  ### RODRIGUE ###
-from itertool import combinations  ### RODRIGUE ### pour les combinaisons possibles de mains de 5 cartes
+#from itertools import combinations  ### RODRIGUE ### pour les combinaisons possibles de mains de 5 cartes
 import random_functions as r_f
 
 class Table:

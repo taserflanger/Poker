@@ -1,6 +1,7 @@
 from player import Player
 from table import Table
 
+
 if __name__ == '__main__':
     names = ['Bond', 'DiCaprio', 'Scoubidou', 'B2oba', 'Vigéral', 'Onéla']
     n = len(names)

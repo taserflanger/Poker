@@ -40,7 +40,6 @@ class Hand_5:
         return self.values == [i for i in range(top_value, top_value - 5, -1)]
 
     def get_combi(self):
-        #TODO: s'occuper du full
         """Renvoie le type de la main, concernant les combinaisons de cartes (paires, carrés, etc), sans considération
         des suites ou des couleurs; ainsi que les cartes concernées par ce type
         ex: renvoie ('brelan', 3) ou ('two_pair', [2, 5]), ou ('full', [3, 4]) pour un full des 3 par les 4"""
