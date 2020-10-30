@@ -1,5 +1,3 @@
-from rodrigue.deck import Deck
-
 """
 L'itérateur de la classe table permet de parcourir les joueurs restant dans la main, à partir de celui qui doit parler
 en premier.
@@ -12,7 +10,10 @@ TODO:   - s'occuper de la fonctionnalité fold, et de l'attribut ind_speaker
 
 """
 import random
-
+from deck import Deck
+from hand_5 import Hand_5  ### RODRIGUE ###
+from itertool import combinations  ### RODRIGUE ### pour les combinaisons possibles de mains de 5 cartes
+import random_functions as r_f
 
 class Table:
 
@@ -38,9 +39,10 @@ class Table:
         for k in range(self.nb_players):
             yield (i + k) % self.nb_players
 
-    def new_hand(self):
+    def new_set(self):
         for player in self.players:
-            player.set = []
+            player.hand = []
+            player.final_hand = None  ### RODRIGUE ###
         self.id_dealer = (self.id_dealer + 1) % self.nb_players
         self.id_speaker = (self.id_dealer + 1) % self.nb_players
         self.pot = 0
@@ -60,7 +62,7 @@ class Table:
         self.id_speaker = self.next_player_id(self.id_dealer)
 
     def set(self):
-        self.new_hand()
+        self.new_set()
         for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
             winner_id = round_ob()
             if winner_id:
@@ -69,7 +71,7 @@ class Table:
 
     def deal_and_blinds(self):
         for player in self.players * 2:
-            player.set.append(self.deck.deal())
+            player.hand.append(self.deck.deal())
         for i in range(2):
             print(f"{self.players[self.id_speaker].name} bets {[self.sb, self.bb][i]}")
             self.players[self.id_speaker].on_going_bet += [self.sb, self.bb][i]
@@ -113,8 +115,26 @@ class Table:
             self.id_speaker = self.next_player_id(self.id_speaker)
             mise += amount
 
+            ######### POUR DETERMINER LA MEILLEURE MAIN DE LA TABLE #########
 
-    def determiner_gagnants(self): #renvoie les gagnants sous forme de liste
+
+### RODRIGUE
+
+    def get_winner(self):
+        players_hands = [None] * self.nb_players
+        for player_id in range(self.nb_players):
+            player = self.players[player_id]
+            if self.active_players[player_id]:
+                possible_hands = [Hand_5(i) for i in combinations(self.cards + player.cards, 5)]
+                player.final_hand = max(possible_hands)
+                players_hands.append(player.final_hand)
+        winning_hand, winners_ids = r_f.max_with_ids(players_hands)
+        return winning_hand, winners_ids
+
+### ANDRES
+
+
+    def determiner_gagnants(self):  # renvoie les gagnants sous forme de liste
         joueurs=self.active_players[:]
         n=len(joueurs)
         gagnants=[]

@@ -1,6 +1,6 @@
 import random
 
-from rodrigue.card import Card
+from card import Card
 
 
 class Deck:
