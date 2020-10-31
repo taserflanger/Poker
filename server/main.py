@@ -1,19 +1,9 @@
-import socketio
+from player import Player
+from table import Table
 
-sio = socketio.AsyncServer(cors_allowed_origins="*", async_mode="asgi")
-app = socketio.ASGIApp(sio)
-
-
-@sio.on('connect')
-def connect(sid, e):
-    print('client connecté')
-
-
-@sio.on('msg')
-def msg(sid, m):
-    print(m)
-
-
-@sio.on('disconnect')
-def disconnect(sid):
-    print('client déconnecté')
+if __name__ == '__main__':
+    names = ['Bond', 'DiCaprio', 'Scoubidou', 'B2oba', 'Vigéral', 'Onéla']
+    n = len(names)
+    players = [Player(player_name=names[i], player_stack=100, player_id=i) for i in range(n)]
+    table = Table(players, 5, 10)
+    table.set()

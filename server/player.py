@@ -7,6 +7,11 @@ class Player:
         self.hand = []
         self.on_going_bet = 0
         self.score = 0 ### ANDRES ### #utile pour la fonction determiner gagnant
+        self.is_all_in = False
+
+    def put_on_going_bet(self, amount):
+        self.stack -= amount
+        self.on_going_bet += amount
 
     def speaks(self, amount_to_call):
         player_action = ''
@@ -23,15 +28,18 @@ class Player:
             #  Faire en sorte qu'on ne peut pas gagner trop lorsqu'on
             #  se met all-in avec pas grand chose (selon les variantes c'est plus ou moins strict je crois)
             if diff > self.stack:
-                print("all-in!")
                 diff = self.stack
             bet = diff
         elif player_action == 'r':
             raise_val = float("inf")
             while raise_val > self.stack:
-                raise_val = int(input('Raise = '))
+                raise_val = int(input(f"Raise? (current stack: {self.stack})  "))
             bet = raise_val + diff
         self.stack -= bet
         self.on_going_bet += bet
-        print(f"{self.name} " + {'c': 'calls', 'r': 'raises', 'f': 'folds'}[player_action] + f" and bets {bet}.")
+        if self.stack == 0:
+            self.is_all_in = True
+            print(f"{self.name} is now all in!")
+        else:
+            print(f"{self.name} " + {'c': 'calls', 'r': 'raises', 'f': 'folds'}[player_action] + f" and bets {bet}.")
         return player_action, raise_val
