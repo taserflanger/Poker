@@ -8,9 +8,7 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import poker_objects as po
-import time
-import threading
+import time, threading, player, table
 
 
 class Ui_MainWindow(object):
@@ -147,12 +145,12 @@ class Ui_MainWindow(object):
 
     def change_all(self):
         global table
-        self.label_7.setText(str([str(card) for card in table.players[0].set]))
-        self.label_8.setText(str([str(card) for card in table.players[1].set]))
-        self.label_9.setText(str([str(card) for card in table.players[2].set]))
-        self.label_10.setText(str([str(card) for card in table.players[3].set]))
-        self.label_11.setText(str([str(card) for card in table.players[4].set]))
-        self.label_12.setText(str([str(card) for card in table.players[5].set]))
+        self.label_7.setText(str([str(card) for card in table.players[0].hand]))
+        self.label_8.setText(str([str(card) for card in table.players[1].hand]))
+        self.label_9.setText(str([str(card) for card in table.players[2].hand]))
+        self.label_10.setText(str([str(card) for card in table.players[3].hand]))
+        self.label_11.setText(str([str(card) for card in table.players[4].hand]))
+        self.label_12.setText(str([str(card) for card in table.players[5].hand]))
 
         self.label_13.setText(str([str(card) for card in table.cards]))
 
@@ -177,27 +175,23 @@ def redraw_gui():
     while True:
         ui.change_all()
         ui.centralwidget.repaint()
-        time.sleep(1)
+        time.sleep(3)
 
 if __name__ == "__main__":
     import sys
 
     names = ['Bond', 'DiCaprio', 'Scoubidou', 'B2oba', 'Vigéral', 'Onéla']
-    players = [po.Player(player_name=names[i], player_stack=100, player_id=i) for i in range(len(names))]
-    table = po.Table(players, 5, 10)
-
-    y = threading.Thread(target=table.set)
-    y.start()
-
-
+    players = [player.Player(player_name=names[i], player_stack=100, player_id=i) for i in range(len(names))]
+    table = table.Table(players, 5, 10)
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
+    y = threading.Thread(target=table.set)
+    y.start()
     x = threading.Thread(target=redraw_gui)
     x.start()
-    MainWindow.show()
-
+    table.set()
 
     sys.exit(app.exec_())
 
