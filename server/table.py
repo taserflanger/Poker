@@ -3,8 +3,8 @@ from deck import Deck
 
 import random
 from deck import Deck
-from hand_5 import Hand_5  ### RODRIGUE ###
-from itertools import combinations  ### RODRIGUE ### pour les combinaisons possibles de mains de 5 cartes
+from hand_5 import Hand_5
+from itertools import combinations
 import random_functions as r_f
 
 # Todo: - pour l'implémentation des différents pots
@@ -19,11 +19,7 @@ import random_functions as r_f
 #       se sont couchés, et des cas où il ne reste plus qu'un active_player car certains ont fait tapis. Premier cas:
 #       il faut donner tout le pot à celui qui reste sans finir la partie. Deuxieme cas: il faut finir la partie
 #       (dévoiler toutes les cartes) et appeler give_pots().
-#
-#
-#
-#
-#
+
 
 
 class Table:
@@ -158,7 +154,8 @@ class Table:
             self.id_speaker = self.next_player_id(self.id_speaker)
 
     def rank_hands(self):
-        """ Renvoie une liste ordonnée des indices des joueurs par ordre croissant de la valeur de leur main."""
+        """ Renvoie un dictionnaire avec, pour chaque indice de joueur, le rang de sa main parmi tous les joueurs.
+        On fait ça pour gérer les cas d'égalité"""
         players_hands = [None] * self.nb_players
         for player_id in range(self.nb_players):
             player = self.players[player_id]
@@ -168,20 +165,16 @@ class Table:
                 possible_hands = [Hand_5(i) for i in combinations(self.cards + player.cards, 5)]
                 players_hands[player_id] = player.final_hand = max(possible_hands)
 
-        ranked_hands = r_f.sort_ids(players_hands)
+        ranked_hands = r_f.rank_dict(players_hands)
         return ranked_hands
 
 
     def give_pots(self):
-        """
-        Répartit les différents pots aux vainqueurs de chaque pot.
-        Ne prend pas encore les égalités entre les mains (ligne 4 pas suffisante)
-        """
-        ranked_hands = self.rank_hands()
+        """Répartit chaque pot à ses vainqueurs"""
+        ranked_hands = self.rank_hands()  # un dictionnaire avec pour chaque player_id, son rang sur la table
         for pot in self.pots:
             pot_players = pot[1]  # les joueurs qui participent à ce pot
-            pot_winners = r_f.maxes(pot_players, key=lambda x: ranked_hands.index(x))
+            pot_winners = r_f.maxes(pot_players, key=lambda p_id: ranked_hands[p_id])
             for player_id in pot_winners:
                 n = len(pot_winners)
-                self.players[player_id].stack += pot[0] / n  ### voir plus tard le cas où ce n'est pas un entier
-
+                self.players[player_id].stack += round(pot[0] / n)  ### voir plus tard le cas où ce n'est pas un entier
