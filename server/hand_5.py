@@ -1,4 +1,6 @@
 """
+ATTENTION : l'opérateur '==' ne correspond pas à l'égalité exacte de la main (d'ailleurs impossible), mais à l'égalité
+de la valeur de la main
 VOC:
 
 type (str) = le type de main, en prenant tout en compte
@@ -40,7 +42,6 @@ class Hand_5:
         return self.values == [i for i in range(top_value, top_value - 5, -1)]
 
     def get_combi(self):
-        #TODO: s'occuper du full
         """Renvoie le type de la main, concernant les combinaisons de cartes (paires, carrés, etc), sans considération
         des suites ou des couleurs; ainsi que les cartes concernées par ce type
         ex: renvoie ('brelan', 3) ou ('two_pair', [2, 5]), ou ('full', [3, 4]) pour un full des 3 par les 4"""
@@ -71,6 +72,8 @@ class Hand_5:
         return False, True  # dans le cas où on n'a pas réussi à départager les deux mains
 
     def __gt__(self, other_hand):
+        if other_hand is None:  # utile dans la méthode Table.get_winner()
+            return True
         type_ids = (Hand_5.types_ranking.index(self.type), Hand_5.types_ranking.index(other_hand.type))
         if type_ids[0] > type_ids[1]:
             return True
@@ -95,15 +98,5 @@ class Hand_5:
     def __le__(self, other_hand):
         return self < other_hand or self == other_hand
 
-
-if __name__ == '__main__':
-    deck = Deck()
-    hand_1 = Hand_5([deck.deal() for i in range(5)])
-    hand_2 = Hand_5([deck.deal() for i in range(5)])
-    print(  f"hand_1 : {[str(card.value) + ' of ' + str(card.suit) for card in hand_1.cards]}",
-            f"hand_2: {[str(card.value) + ' of ' + str(card.suit) for card in hand_2.cards]}",
-            f"hand_1 <= hand_2: {hand_1 <= hand_2}",
-            f"hand_1 >= hand_2: {hand_1 >= hand_2}",
-            f"hand_1 == hand_2: {hand_1 == hand_2}", sep='\n')
 
 

@@ -1,21 +1,13 @@
 from deck import Deck
 
-"""
-L'itérateur de la classe table permet de parcourir les joueurs restant dans la main, à partir de celui qui doit parler
-en premier.
-Pour jouer une main:
 
-TODO:   - retranscrire dans un modèle client/serveur, où le client n'a accès qu'aux informations qui le concernent
-        - (détail: Si un joueur n'a pas assez d'argent pour faire sa blinde, il doit être exclu au début)
-
-"""
 import random
 from deck import Deck
 from hand_5 import Hand_5  ### RODRIGUE ###
 from itertools import combinations  ### RODRIGUE ### pour les combinaisons possibles de mains de 5 cartes
 import random_functions as r_f
 
-# Todo: pour l'implémentation des différents pots
+# Todo: - pour l'implémentation des différents pots
 #       idée: amount to call est une liste qui correspond à chaque pot. Les pots sont ordonnés
 #       par ordre croissant de amount_to_call. Lorsqu'un nouveau joueur se met tapis, on crée
 #       un nouveau pot associé à la valeur du tapis, et on update le pot consécutif
@@ -23,6 +15,16 @@ import random_functions as r_f
 #       sont les joueurs du pot suivant + le joueur qui a fait tapis.
 #       On ajoute le joueur qui a fait tapis à tous les pots qui ont un amount_to_call
 #       moins important. (C'est pas clair mais je me comprends)
+#       - dans la méthode set(), s'occuper des cas où il ne reste plus qu'un active_player car tous les autres
+#       se sont couchés, et des cas où il ne reste plus qu'un active_player car certains ont fait tapis. Premier cas:
+#       il faut donner tout le pot à celui qui reste sans finir la partie. Deuxieme cas: il faut finir la partie
+#       (dévoiler toutes les cartes) et appeler give_pots().
+#
+#
+#
+#
+#
+
 
 class Table:
 
@@ -79,9 +81,9 @@ class Table:
         self.new_set()
         for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
             round_ob()
-            if sum(self.active_players) == 1:  # le cas où tout le monde s'est couché ou a fait tapis
+            if sum(self.active_players) == 1:
                 break
-        self.get_winner()
+        self.give_pots()
 
     def deal_and_blinds(self):
         for player in self.players * 2:
@@ -155,19 +157,31 @@ class Table:
                 self.last_raiser = speaker
             self.id_speaker = self.next_player_id(self.id_speaker)
 
-    def get_winner(self):
-        """
-        TODO (roro s'en occupe): la fonction doit faire une liste ordonnée par ordre décroissant de valeur des mains
-            des joueurs. Ensuite, en bouclant sur chaque pot, elle doit attribuer à chaque fois le pot au meilleur
-            joueur de ce pot. Dans cette étape, elle doit prendre en considération des éventuelles égalités.
-
-        """
+    def rank_hands(self):
+        """ Renvoie une liste ordonnée des indices des joueurs par ordre croissant de la valeur de leur main."""
         players_hands = [None] * self.nb_players
         for player_id in range(self.nb_players):
             player = self.players[player_id]
-            if self.active_players[player_id]:
+            remaining_players = self.pots[0][1]  # la liste des INDICES des joueurs participant au premier pot
+                                                            # (les pots étant ordonnés en pyramide)
+            if player_id in remaining_players:
                 possible_hands = [Hand_5(i) for i in combinations(self.cards + player.cards, 5)]
-                player.final_hand = max(possible_hands)
-                players_hands.append(player.final_hand)
-        winning_hand, winners_ids = r_f.max_with_ids(players_hands)
-        return winning_hand, winners_ids
+                players_hands[player_id] = player.final_hand = max(possible_hands)
+
+        ranked_hands = r_f.sort_ids(players_hands)
+        return ranked_hands
+
+
+    def give_pots(self):
+        """
+        Répartit les différents pots aux vainqueurs de chaque pot.
+        Ne prend pas encore les égalités entre les mains (ligne 4 pas suffisante)
+        """
+        ranked_hands = self.rank_hands()
+        for pot in self.pots:
+            pot_players = pot[1]  # les joueurs qui participent à ce pot
+            pot_winners = r_f.maxes(pot_players, key=lambda x: ranked_hands.index(x))
+            for player_id in pot_winners:
+                n = len(pot_winners)
+                self.players[player_id].stack += pot[0] / n  ### voir plus tard le cas où ce n'est pas un entier
+
