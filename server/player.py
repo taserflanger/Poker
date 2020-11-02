@@ -6,8 +6,15 @@ class Player:
         self.id = player_id  # position sur la table
         self.hand = []
         self.on_going_bet = 0
-        self.score = 0 ### ANDRES ### #utile pour la fonction determiner gagnant
+        self.score = 0  ### ANDRES ### #utile pour la fonction determiner gagnant
         self.is_all_in = False
+        self.folded = False
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
 
     def put_on_going_bet(self, amount):
         self.stack -= amount
@@ -32,11 +39,10 @@ class Player:
             bet = diff
         elif player_action == 'r':
             raise_val = float("inf")
-            while raise_val > self.stack:
-                raise_val = int(input(f"Raise? (current stack: {self.stack})  "))
+            while raise_val+diff > self.stack:
+                raise_val = int(input(f"Raise? (current stack: {self.stack}, max reraise: {self.stack - diff})  "))
             bet = raise_val + diff
-        self.stack -= bet
-        self.on_going_bet += bet
+        self.put_on_going_bet(bet)
         if self.stack == 0:
             self.is_all_in = True
             print(f"{self.name} is now all in!")
