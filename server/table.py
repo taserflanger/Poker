@@ -45,9 +45,10 @@ class Table:
         self.last_raiser = 0
 
     def __iter__(self):
-        yield self.players[self.id_speaker]
-        for i in range(sum(self.active_players) - 1):
-            yield self.next_player_id()
+        id_player = self.id_speaker
+        for i in range(sum(self.active_players)):
+            yield self.players[id_player]
+            id_player = self.next_player_id(id_player)
 
     def new_set(self):
         for player in self.players:
@@ -68,8 +69,8 @@ class Table:
         return next_id
 
     def initialise_round(self):
+        self.manage_pots()
         for player in self.players:
-            self.pot += player.on_going_bet
             player.on_going_bet = 0
         self.id_speaker = self.next_player_id(self.id_dealer)
 
@@ -94,7 +95,7 @@ class Table:
     def pre_flop(self):
         print(f'Dealer : {self.id_dealer}', f"Speaker : {self.id_speaker}", sep='\n')
         self.deal_and_blinds()
-        return self.players_speak()
+        return self.players_speak(self.bb)
 
     def flop(self):
         self.initialise_round()
@@ -108,11 +109,22 @@ class Table:
         print([str(card) for card in self.cards])
         return self.players_speak()
 
+    def manage_pots(self):
+        ogb_values = [0] + list(set([player.on_going_bet for player in self.players if not player.is_folded]))
+        # on met le 0 pour la ligne 18, pour le ogb_values[i-1]
+        for i in range(1, len(ogb_values)):
+            pot_value = 0
+            pot_players = []
+            for p_id in range(self.nb_players):
+                player_ogb = self.players[p_id].on_going_bet
+                if player_ogb >= ogb_values[i - 1]:  #
+                    pot_value += min(player_ogb - ogb_values[i - 1], ogb_values[i] - ogb_values[i - 1])
+                    # importance du min : si l'ogb du joueur se situe entre deux ogb_values => le joueur s'est couché
+                if player_ogb >= ogb_values[i]:
+                    pot_players.append(p_id)
+            self.pots.append((pot_value, pot_players))
 
-    def new_pot(self, amount):
-        pass
-
-    def players_speak_ro(self, mise=0, raiser=None):
+    def players_speak(self, mise=0, raiser=None):
         for active_player in self:
             if active_player == raiser:
                 return
@@ -123,35 +135,6 @@ class Table:
                 self.players_speak_ro(amount, raiser=active_player)
             if action == 'f':
                 self.active_players[player_id] = False
-
-    def players_speak(self):
-        # Todo: implémenter le tour depuis le raiser
-        while True:
-            speaker = self.id_speaker
-            previous_speaker = self.next_player_id(speaker, -1)
-            next_speaker = self.next_player_id(speaker)
-            if sum(self.active_players) == 1:
-                # cas où il ne reste plus qu'un joueur
-                winner_id = next_speaker  # on trouve le dernier joueur restant (qui est aussi le suivant)
-                return winner_id
-            if not self.active_players[speaker] or self.players[speaker].is_all_in:
-                # si le joueur est fold on le dégage
-                continue
-            amount_to_call = self.players[previous_speaker].on_going_bet
-
-            if speaker == self.last_raiser and \
-                    self.players[speaker].on_going_bet == amount_to_call:
-                # si personne n'a relancé dans le tour, on passe à l'étape suivante.
-                return
-
-            action, amount = self.players[speaker].speaks(amount_to_call)
-            if self.players[speaker].is_all_in:
-                self.new_pot(amount)
-            if action == "f":
-                self.active_players[speaker] = False
-            elif action == "r":
-                self.last_raiser = speaker
-            self.id_speaker = self.next_player_id(self.id_speaker)
 
     def rank_hands(self):
         """ Renvoie un dictionnaire avec, pour chaque indice de joueur, le rang de sa main parmi tous les joueurs.

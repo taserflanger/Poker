@@ -7,7 +7,7 @@ class Player:
         self.hand = []
         self.on_going_bet = 0
         self.score = 0 ### ANDRES ### #utile pour la fonction determiner gagnant
-        self.is_all_in = False
+        self.is_all_in = self.is_folded = False
 
     def put_on_going_bet(self, amount):
         self.stack -= amount
@@ -35,6 +35,8 @@ class Player:
             while raise_val > self.stack:
                 raise_val = int(input(f"Raise? (current stack: {self.stack})  "))
             bet = raise_val + diff
+        elif player_action == 'f':
+            self.is_folded = True
         self.stack -= bet
         self.on_going_bet += bet
         if self.stack == 0:
