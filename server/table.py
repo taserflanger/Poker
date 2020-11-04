@@ -39,7 +39,7 @@ class Table:
         self.bb = big_blind
         self.deck = Deck()
         self.cards = []
-        self.pots = [0]
+        self.pots = []
         self.players_in_pots = [list(range(self.nb_players))]
         self.id_dealer = 0  # l'indice du dealer
         self.last_raiser = 0
@@ -57,7 +57,7 @@ class Table:
             player.final_hand = None  ### RODRIGUE ###
         self.id_dealer = (self.id_dealer + 1) % self.nb_players
         self.id_speaker = (self.id_dealer + 1) % self.nb_players
-        self.pots = [0]
+        self.pots = []
         self.players_in_pots = [list(range(self.nb_players))]
         self.cards = []
         self.deck = Deck()
@@ -95,34 +95,35 @@ class Table:
     def pre_flop(self):
         print(f'Dealer : {self.id_dealer}', f"Speaker : {self.id_speaker}", sep='\n')
         self.deal_and_blinds()
-        return self.players_speak(self.bb)
+        self.players_speak(self.bb)
 
     def flop(self):
         self.initialise_round()
         self.cards += [self.deck.deal() for _ in range(3)]
         print([str(card) for card in self.cards])
-        return self.players_speak()
+        self.players_speak()
 
     def turn_river(self):
         self.initialise_round()
         self.cards += [self.deck.deal()]
         print([str(card) for card in self.cards])
-        return self.players_speak()
+        self.players_speak()
 
     def manage_pots(self):
         ogb_values = [0] + list(set([player.on_going_bet for player in self.players if not player.is_folded]))
         # on met le 0 pour la ligne 18, pour le ogb_values[i-1]
-        for i in range(1, len(ogb_values)):
-            pot_value = 0
-            pot_players = []
-            for p_id in range(self.nb_players):
-                player_ogb = self.players[p_id].on_going_bet
-                if player_ogb >= ogb_values[i - 1]:  #
-                    pot_value += min(player_ogb - ogb_values[i - 1], ogb_values[i] - ogb_values[i - 1])
-                    # importance du min : si l'ogb du joueur se situe entre deux ogb_values => le joueur s'est couché
-                if player_ogb >= ogb_values[i]:
-                    pot_players.append(p_id)
-            self.pots.append((pot_value, pot_players))
+        if ogb_values[1] > 0:  # dans le cas où tout le monde a check, on ne crée pas de pot -> gain de temps
+            for i in range(1, len(ogb_values)):
+                pot_value = 0
+                pot_players = []
+                for p_id in range(self.nb_players):
+                    player_ogb = self.players[p_id].on_going_bet
+                    if player_ogb >= ogb_values[i - 1]:  #
+                        pot_value += min(player_ogb - ogb_values[i - 1], ogb_values[i] - ogb_values[i - 1])
+                        # importance du min : si l'ogb du joueur se situe entre deux ogb_values => le joueur s'est couché
+                    if player_ogb >= ogb_values[i]:
+                        pot_players.append(p_id)
+                self.pots.append((pot_value, pot_players))
 
     def players_speak(self, mise=0, raiser=None):
         for active_player in self:
@@ -132,7 +133,8 @@ class Table:
             action, amount = active_player.speaks(mise)
             self.id_speaker = self.next_player_id(self.id_speaker)  # on passe mtn au prochain en cas de raise
             if action == 'r':
-                self.players_speak_ro(amount, raiser=active_player)
+                self.players_speak(mise + amount, raiser=active_player)
+                return
             if action == 'f':
                 self.active_players[player_id] = False
 
@@ -145,7 +147,7 @@ class Table:
             remaining_players = self.pots[0][1]  # la liste des INDICES des joueurs participant au premier pot
                                                             # (les pots étant ordonnés en pyramide)
             if player_id in remaining_players:
-                possible_hands = [Hand_5(i) for i in combinations(self.cards + player.cards, 5)]
+                possible_hands = [Hand_5(i) for i in combinations(self.cards + player.hand, 5)]
                 players_hands[player_id] = player.final_hand = max(possible_hands)
 
         ranked_hands = r_f.rank_dict(players_hands)

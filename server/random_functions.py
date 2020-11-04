@@ -10,7 +10,7 @@ def sort_ids(l):
 
 def maxes(l, key=lambda x: x):
     """Fonction max native, mais au lieu de renvoyer un élément max, renvoie tous les éléments max"""
-    key_of_max_l = key(max(l, key))
+    key_of_max_l = key(max(l, key=key))
     return [value for value in l if key(value) == key_of_max_l]
 
 def rank_dict(l):

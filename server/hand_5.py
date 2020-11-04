@@ -11,6 +11,9 @@ low_comb_values (list) = le reste des cartes (elles forment des hauteurs sauf da
 
 """
 from deck import Deck
+from itertools import combinations
+import time
+import random_functions as r_f
 
 class Hand_5:
     """Toute fonction commençant par c_ signifie 'compare'"""
@@ -34,12 +37,18 @@ class Hand_5:
 
     def is_flush(self):
         """Renvoie 'flush' si la main est une flush, False sinon"""
-        return self.suits[0] * 5 == self.suits
+        if self.suits[0] * 5 == self.suits:
+            return 'flush'
+        else:
+            return False
 
     def is_straight(self):
         """Renvoie 'straight' si la main est une suite, False sinon"""
         top_value = self.values[0]  # puisque cartes ordonnées
-        return self.values == [i for i in range(top_value, top_value - 5, -1)]
+        if self.values == [i for i in range(top_value, top_value - 5, -1)]:
+            return 'straight'
+        else:
+            return False
 
     def get_combi(self):
         """Renvoie le type de la main, concernant les combinaisons de cartes (paires, carrés, etc), sans considération
@@ -98,5 +107,27 @@ class Hand_5:
     def __le__(self, other_hand):
         return self < other_hand or self == other_hand
 
+def test_class(nb_players=6):
+    deck = Deck()
+    table_cards = [deck.deal() for _ in range(5)]
+    players_cards = [[deck.deal() for _ in range(2)] for _ in range(nb_players)]
+    players_fh = [None] * nb_players
+    print("table cards: ", [str(card) for card in table_cards])
+    t1 = time.time()
+    for i in range(nb_players):
+        print(f"player {i} cards: ", [str(card) for card in players_cards[i]])
+        possible_hands = [Hand_5(i) for i in combinations(table_cards + players_cards[i], 5)]
+        best_hand = max(possible_hands)
+        players_fh[i] = best_hand
+    ranked_hands = r_f.rank_dict(players_fh)
+    best_hand = max(players_fh)
+    t2 = time.time()
+    for i in range(nb_players):
+        print(f"player {i} : rank {ranked_hands[i]}")
+    print("Meilleure main : player ", players_fh.index(best_hand), [str(card) for card in best_hand.cards])
+    print(f"Temps d'exécution : {round((t2-t1)*1000, 5)} ms")
+
+if __name__ == '__main__':
+    test_class()
 
 

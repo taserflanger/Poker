@@ -8,9 +8,9 @@
 
 
 from PyQt5 import QtCore, QtGui, QtWidgets
-import poker_objects as po
 import time
 import threading
+import main
 
 
 class Ui_MainWindow(object):
@@ -56,7 +56,7 @@ class Ui_MainWindow(object):
         self.label_12.setGeometry(QtCore.QRect(50, 150, 200, 16))
         self.label_12.setObjectName("label_12")
         self.label_13 = QtWidgets.QLabel(self.centralwidget)
-        self.label_13.setGeometry(QtCore.QRect(340, 200, 500, 20))
+        self.label_13.setGeometry(QtCore.QRect(90, 200, 800, 20))
         self.label_13.setObjectName("label_13")
         self.label_14 = QtWidgets.QLabel(self.centralwidget)
         self.label_14.setGeometry(QtCore.QRect(360, 70, 200, 16))
@@ -77,7 +77,7 @@ class Ui_MainWindow(object):
         self.label_19.setGeometry(QtCore.QRect(160, 135, 200, 16))
         self.label_19.setObjectName("label_19")
         self.label_20 = QtWidgets.QLabel(self.centralwidget)
-        self.label_20.setGeometry(QtCore.QRect(350, 220, 200, 20))
+        self.label_20.setGeometry(QtCore.QRect(90, 220, 800, 20))
         self.label_20.setObjectName("label_20")
         self.label_21 = QtWidgets.QLabel(self.centralwidget)
         self.label_21.setGeometry(QtCore.QRect(370, 10, 200, 16))
@@ -147,12 +147,12 @@ class Ui_MainWindow(object):
 
     def change_all(self):
         global table
-        self.label_7.setText(str([str(card) for card in table.players[0].set]))
-        self.label_8.setText(str([str(card) for card in table.players[1].set]))
-        self.label_9.setText(str([str(card) for card in table.players[2].set]))
-        self.label_10.setText(str([str(card) for card in table.players[3].set]))
-        self.label_11.setText(str([str(card) for card in table.players[4].set]))
-        self.label_12.setText(str([str(card) for card in table.players[5].set]))
+        self.label_7.setText(str([str(card) for card in table.players[0].hand]))
+        self.label_8.setText(str([str(card) for card in table.players[1].hand]))
+        self.label_9.setText(str([str(card) for card in table.players[2].hand]))
+        self.label_10.setText(str([str(card) for card in table.players[3].hand]))
+        self.label_11.setText(str([str(card) for card in table.players[4].hand]))
+        self.label_12.setText(str([str(card) for card in table.players[5].hand]))
 
         self.label_13.setText(str([str(card) for card in table.cards]))
 
@@ -163,7 +163,7 @@ class Ui_MainWindow(object):
         self.label_18.setText('mise : ' + str(table.players[4].on_going_bet))
         self.label_19.setText('mise : ' + str(table.players[5].on_going_bet))
 
-        self.label_20.setText(str(table.pot))
+        self.label_20.setText(str([pot for pot in table.pots]))
 
         self.label_21.setText('stack : ' + str(table.players[0].stack))
         self.label_22.setText('stack : ' + str(table.players[1].stack))
@@ -176,28 +176,23 @@ def redraw_gui():
     global ui
     while True:
         ui.change_all()
-        ui.centralwidget.repaint()
         time.sleep(1)
 
 if __name__ == "__main__":
     import sys
-
-    names = ['Bond', 'DiCaprio', 'Scoubidou', 'B2oba', 'Vigéral', 'Onéla']
-    players = [po.Player(player_name=names[i], player_stack=100, player_id=i) for i in range(len(names))]
-    table = po.Table(players, 5, 10)
-
-    y = threading.Thread(target=table.set)
-    y.start()
-
-
+    table = main.main(GUI=True)
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
+
     x = threading.Thread(target=redraw_gui)
     x.start()
-    MainWindow.show()
 
+    y = threading.Thread(target=table.set)
+    y.start()
+
+    MainWindow.show()
 
     sys.exit(app.exec_())
 
