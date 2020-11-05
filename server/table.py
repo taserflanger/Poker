@@ -19,6 +19,8 @@ import random_functions as r_f
 #       se sont couchés, et des cas où il ne reste plus qu'un active_player car certains ont fait tapis. Premier cas:
 #       il faut donner tout le pot à celui qui reste sans finir la partie. Deuxieme cas: il faut finir la partie
 #       (dévoiler toutes les cartes) et appeler give_pots().
+#       - modifier dealandblinds pour le cas où la blinde du joueur est plus grosse que son stack et il doit faire
+#       all-in (une solution serait d'appeler player.speaks avec un paramètre blinds)
 
 
 
@@ -40,9 +42,9 @@ class Table:
         self.deck = Deck()
         self.cards = []
         self.pots = []
-        self.players_in_pots = [list(range(self.nb_players))]
+        self.players_in_pots = [list(range(self.nb_players))]  ### PAS UTILISÉ POUR L'INSTANT
         self.id_dealer = 0  # l'indice du dealer
-        self.last_raiser = 0
+        self.last_raiser = 0  ### PAS UTILISÉ POUR L'INSTANT
 
     def __iter__(self):
         id_player = self.id_speaker
@@ -120,7 +122,7 @@ class Table:
                     player_ogb = self.players[p_id].on_going_bet
                     if player_ogb >= ogb_values[i - 1]:  #
                         pot_value += min(player_ogb - ogb_values[i - 1], ogb_values[i] - ogb_values[i - 1])
-                        # importance du min : si l'ogb du joueur se situe entre deux ogb_values => le joueur s'est couché
+                        # importance du min : si l'ogb du joueur se situe entre deux ogb_values = le joueur s'est couché
                     if player_ogb >= ogb_values[i]:
                         pot_players.append(p_id)
                 self.pots.append((pot_value, pot_players))
@@ -133,7 +135,7 @@ class Table:
             action, amount = active_player.speaks(mise)
             self.id_speaker = self.next_player_id(self.id_speaker)  # on passe mtn au prochain en cas de raise
             if action == 'r':
-                self.players_speak(mise + amount, raiser=active_player)
+                self.players_speak(amount, raiser=active_player)
                 return
             if action == 'f':
                 self.active_players[player_id] = False

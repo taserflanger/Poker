@@ -148,6 +148,7 @@ class Ui_MainWindow(object):
     def change_all(self):
         global table
         self.label_7.setText(str([str(card) for card in table.players[0].hand]))
+        #self.imgcard.setPixmap(QtGui.QPixmap(table.players[0].hand[0]))
         self.label_8.setText(str([str(card) for card in table.players[1].hand]))
         self.label_9.setText(str([str(card) for card in table.players[2].hand]))
         self.label_10.setText(str([str(card) for card in table.players[3].hand]))

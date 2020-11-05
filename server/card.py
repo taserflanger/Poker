@@ -3,6 +3,7 @@ class Card:
     def __init__(self, card_value, card_suit):
         self.suit = card_suit
         self.value = card_value
+        self.img = str(self.value) + '_' + str(self.suit) + '.png'
 
     dic_values = {2: '2', 3: '3', 4: '4', 5: '5', 6: '6', 7: '7', 8: '8', 9: '9', 10: '10', 11: 'Jack', 12: 'Queen',
                   13: 'King', 14: 'Ace'}

@@ -10,6 +10,9 @@ def main(GUI=False):
     if GUI:
         return table
     table.set()
+    for player in table.players:
+        print(player.stack)
 
 if __name__ == '__main__':
     main()
+
