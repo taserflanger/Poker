@@ -81,7 +81,7 @@ class Hand_5:
         return False, True  # dans le cas où on n'a pas réussi à départager les deux mains
 
     def __gt__(self, other_hand):
-        if other_hand is None:  # utile dans la méthode Table.get_winner()
+        if other_hand is None:  # utile dans rank_hands: les joueurs couchés ont la main None
             return True
         type_ids = (Hand_5.types_ranking.index(self.type), Hand_5.types_ranking.index(other_hand.type))
         if type_ids[0] > type_ids[1]:
@@ -92,6 +92,8 @@ class Hand_5:
             return False
 
     def __eq__(self, other_hand):
+        if other_hand is None:  # utile dans rank_hands: les joueurs couchés ont la main None
+            return False
         type_ids = (Hand_5.types_ranking.index(self.type), Hand_5.types_ranking.index(other_hand.type))
         if type_ids[0] == type_ids[1]:
             return Hand_5.c_same_type(self, other_hand)[1]

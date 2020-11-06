@@ -6,34 +6,28 @@ class Player:
         self.id = player_id  # position sur la table
         self.hand = []
         self.on_going_bet = 0
-        self.score = 0 ### ANDRES ### #utile pour la fonction determiner gagnant
         self.is_all_in = self.is_folded = False
 
-    def put_on_going_bet(self, amount):
-        self.stack -= amount
-        self.on_going_bet += amount
-
-    def speaks(self, amount_to_call):
+    def speaks(self, amount_to_call, blind=False):
         player_action = ''
         bet = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
         c = "call"
         if bet == 0:
             c = "check"
-        while player_action not in ['f', 'c', 'r']:
-            player_action = input(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n")
-        if player_action == 'c':
+        if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
+            while player_action not in ['f', 'c', 'r']:
+                player_action = input(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n")
+        if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'r':
             bet = self.raises(bet)
         elif player_action == 'f':
-            self.is_folded = True
+            return self.folds()
         self.stack -= bet
         self.on_going_bet += bet
         if self.stack == 0:
             self.is_all_in = True
-            print(f"{self.name} is now all in with {bet} !")
-        else:
-            print(f"{self.name} " + {'c': 'calls', 'r': 'raises', 'f': 'folds'}[player_action] + f" and bets {bet}.")
+        self.print_action(player_action, bet, blind)
         return player_action, bet
 
     def calls(self, bet):
@@ -46,3 +40,16 @@ class Player:
         while raise_val > self.stack:
             raise_val = int(input(f"Raise? (current stack: {self.stack})  "))
         return raise_val + bet
+
+    def folds(self):
+        self.is_folded = True
+        print(f"{self.name} folds")
+        return 'f', 0
+
+    def print_action(self, player_action, bet, blind):
+        if self.is_all_in:
+            print(f"{self.name} is now all in and bets {bet} ")
+        elif blind:
+            print(f"{self.name} bets {bet}")
+        else:
+            print({'c': 'calls', 'r': 'raises'}[player_action] + f" and bets {bet}.")
