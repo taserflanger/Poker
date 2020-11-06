@@ -1,12 +1,13 @@
 class Player:
 
-    def __init__(self, player_name, player_stack, player_id):
+    def __init__(self, player_name, player_stack):
         self.name = player_name
         self.stack = player_stack
-        self.id = player_id  # position sur la table
+        self.id = None  # position sur la table
         self.hand = []
         self.on_going_bet = 0
         self.is_all_in = self.is_folded = False
+        self.final_hand = None
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
