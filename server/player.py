@@ -9,6 +9,8 @@ class Player:
         self.is_all_in = self.is_folded = False
         self.final_hand = None
         self.connexion=None
+        self.infos_connexion= None
+        self.ready=False
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
