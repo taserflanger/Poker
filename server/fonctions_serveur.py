@@ -46,9 +46,10 @@ def actualiser(table): # il manque l'envoie des cartes du flop etc. ainsi que l'
 
 
 
-def ready(joueurs):
+def ready(players):
     coefficient=0.7
-    return True if sum(joueurs) >= coefficient*len(joueurs) else False
+
+    return True if sum([joueur.ready for joueur in players]) >= coefficient*len(players) else False
 
 
 def repartion_joueurs_sur_tables(nbr_joueurs, n_max):  
@@ -57,6 +58,7 @@ def repartion_joueurs_sur_tables(nbr_joueurs, n_max):
     repartition_tables=[n_max]*nbr_tables  
     if table_min != 0:
         repartition_tables += [table_min]   
+        nbr_tables+=1
 
     def determiner_joueurs_mal_repartis(repartition):
         reference= min (repartition_tables)
@@ -75,3 +77,4 @@ def repartion_joueurs_sur_tables(nbr_joueurs, n_max):
         nbr_joueurs_mal_repartis = determiner_joueurs_mal_repartis(repartition_tables)
  
     return repartition_tables
+
