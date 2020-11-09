@@ -6,7 +6,7 @@ from deck import Deck
 from hand_5 import Hand_5
 from itertools import combinations
 import random_functions as r_f
-
+from fonctions_serveur import initialiser_actualisation, actualiser
 
 class Table:
 
@@ -25,6 +25,7 @@ class Table:
         self.deck = Deck()
         self.cards = []
         self.pots = []
+        self.final_hand= False
 
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
@@ -75,6 +76,7 @@ class Table:
             blind_amount = [self.sb, self.bb][i]
             self.speaker.speaks(blind_amount, blind=True)
             self.speaker = self.next_player(self.speaker)
+        initialiser_actualisation(self, self.sb, self.bb)  # envoie aux clients les infos du tour cf fonction_serveur
 
     def pre_flop(self):
         print(f'Dealer : {self.dealer.name}')
@@ -101,6 +103,7 @@ class Table:
                 continue
             action, amount = player.speaks(mise)
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
+            actualiser(self)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur 
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
 

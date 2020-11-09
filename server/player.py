@@ -8,6 +8,7 @@ class Player:
         self.on_going_bet = 0
         self.is_all_in = self.is_folded = False
         self.final_hand = None
+        self.connexion=None
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
@@ -17,7 +18,8 @@ class Player:
             c = "check"
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
             while player_action not in ['f', 'c', 'r']:
-                player_action = input(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n")
+                self.connexion.send(str(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n").encode())
+                player_action = self.connexion.recv(1024).decode()
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'r':
