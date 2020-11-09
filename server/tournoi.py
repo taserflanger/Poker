@@ -7,12 +7,12 @@ from fonctions_serveur import ready, repartion_joueurs_sur_tables
 from table import Table
 from player import Player
 
+#TODO: gerer une deconnexion de force d'un client
         
-
 def gerer_table(table):
     table.game()
         
-class Tournoi(): #self.n_max est le nombre maximal de joueur par table
+class Tournoi: #self.n_max est le nombre maximal de joueur par table
     
     def __init__(self, serveur, n_max, stack):
         self.liste_noms=[]
@@ -20,6 +20,7 @@ class Tournoi(): #self.n_max est le nombre maximal de joueur par table
         self.n_max=n_max
         self.stack=stack
         self.serveur=serveur
+        self.tables=[]
     
     def ask_ready_and_name(self, joueur): 
         joueur.name=self.ask_name(joueur)
@@ -49,20 +50,18 @@ class Tournoi(): #self.n_max est le nombre maximal de joueur par table
     
     
     def remplir_tables(self, repartition_):
-        tables_du_tournoi=[]
         marqueur=0
         for taille_table in repartition_:
             nouvelle_table=Table(self.players[marqueur : marqueur+taille_table], 5, 10)  # qui contient les joueurs de marqueurs à marqueurs + i
             marqueur+=taille_table
-            tables_du_tournoi.append(nouvelle_table)
-        return tables_du_tournoi
+            self.tables.append(nouvelle_table)
 
     def lancer_tournoi(self):
         self.connexion_des_joueurs()
         repartion=repartion_joueurs_sur_tables(len(self.players), self.n_max)
-        table_tournoi=self.remplir_tables(repartion)
+        self.remplir_tables(repartion)
         thread_table=[]
-        for table in table_tournoi:
+        for table in self.tables:
             thread_table.append(threading.Thread(None, gerer_table, None, (table), {}))
             thread_table[-1].start()
     
