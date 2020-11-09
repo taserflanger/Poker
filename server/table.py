@@ -6,7 +6,7 @@ from deck import Deck
 from hand_5 import Hand_5
 from itertools import combinations
 import random_functions as r_f
-from fonctions_serveur import initialiser_actualisation, actualiser
+#from fonctions_serveur import initialiser_actualisation, actualiser
 
 class Table:
 
