@@ -29,8 +29,7 @@ def actualiser(table): # il manque l'envoie des cartes du flop etc. ainsi que l'
         for joueur in table:
             client=joueur.connexion
             information_fin_tour= {"cartes" : [(joueur.hand if joueur.final_hand else None) for joueur in table.players], 
-                                   "combinaison": ...
-                                   "gagnants" : ...                               
+                                   "gagnants" : table.final_winners                          
                 }
             information_fin_tour_encodé=json.dumps(information_fin_tour)
             client.send(information_fin_tour_encodé)

@@ -6,7 +6,8 @@ from deck import Deck
 from hand_5 import Hand_5
 from itertools import combinations
 import random_functions as r_f
-#from fonctions_serveur import initialiser_actualisation, actualiser
+import fonctions_serveur as f_s
+
 
 class Table:
 
@@ -26,6 +27,7 @@ class Table:
         self.cards = []
         self.pots = []
         self.final_hand= False
+        self.final_winners= []
 
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
@@ -49,6 +51,8 @@ class Table:
         self.pots = []
         self.cards = []
         self.deck = Deck()
+        self.final_winners= []
+        self.final_hand=False
 
     def next_player(self, player):
         return self.players[(player.id + 1) % self.nb_players]
@@ -57,6 +61,7 @@ class Table:
         for player in self.players:
             player.on_going_bet = 0
         self.speaker = self.next_player(self.dealer)
+        
 
     def game(self):
         all_folded = False
@@ -67,6 +72,7 @@ class Table:
             if self.folded_players() == self.nb_players - 1:
                 all_folded = True
                 break
+        self.final_hand=True
         self.give_pots(all_folded)
 
     def deal_and_blinds(self):
@@ -76,7 +82,7 @@ class Table:
             blind_amount = [self.sb, self.bb][i]
             self.speaker.speaks(blind_amount, blind=True)
             self.speaker = self.next_player(self.speaker)
-        initialiser_actualisation(self, self.sb, self.bb)  # envoie aux clients les infos du tour cf fonction_serveur
+        f_s.initialiser_actualisation(self, self.sb, self.bb)  # envoie aux clients les infos du tour cf fonction_serveur
 
     def pre_flop(self):
         print(f'Dealer : {self.dealer.name}')
@@ -103,7 +109,7 @@ class Table:
                 continue
             action, amount = player.speaks(mise)
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
-            actualiser(self)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur 
+            f_s.actualiser(self)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur 
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
 
@@ -159,3 +165,6 @@ class Table:
                 player.stack += value_for_player
                 pot_value -= value_for_player
                 n -= 1
+            self.final_winners= pot_winners[:]
+            f_s.actualiser(self)
+
