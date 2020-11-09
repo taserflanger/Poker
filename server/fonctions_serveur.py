@@ -1,5 +1,5 @@
 import json
-
+import threading
 def initialiser_actualisation(table, small_blind, big_blind):
     for joueur in table:
         client=joueur.connexion
@@ -78,3 +78,7 @@ def repartion_joueurs_sur_tables(nbr_joueurs, n_max):
  
     return repartition_tables
 
+
+def supprimer_thread(thread):
+    thread.raise_execption()
+    thread.join()
