@@ -1,3 +1,5 @@
+from fonctions_serveur import remaniement
+
 class Player:
 
     def __init__(self, player_name, player_stack):
@@ -11,6 +13,9 @@ class Player:
         self.connexion=None
         self.infos_connexion= None
         self.ready=False
+        self.deconnecte=False
+        self.table=None
+        self.tournoi=None
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
@@ -21,7 +26,17 @@ class Player:
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
             while player_action not in ['f', 'c', 'r']:
                 self.connexion.send(str(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n").encode())
-                player_action = self.connexion.recv(1024).decode()
+                try:
+                    player_action = self.connexion.recv(1024).decode()
+                    self.deconnecte=False
+                except: #si le joueur ne repond pas 2 fois de suite alors il est deconnecté
+                    player_action='f'
+                    if self.deconnecte:
+                        remaniement(self) #supprimer joueur et  créer une nouvelle table
+                        pass
+                    else:
+                        self.deconnecte=True
+
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'r':

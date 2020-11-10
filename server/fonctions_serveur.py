@@ -51,7 +51,13 @@ def ready(players):
 
     return True if sum([joueur.ready for joueur in players]) >= coefficient*len(players) else False
 
-
+def determiner_joueurs_mal_repartis(repartition_des_tables): #repartition_des_tables est une liste contenant
+        reference= min (repartition_des_tables)              # le nbr de joueurs par table
+        nbr_joueurs_mal_repartis=0
+        for taille_table in repartition_des_tables:
+            nbr_joueurs_mal_repartis += (taille_table - reference)
+        return nbr_joueurs_mal_repartis
+    
 def repartion_joueurs_sur_tables(nbr_joueurs, n_max):  
     nbr_tables= nbr_joueurs // n_max
     table_min=nbr_joueurs % n_max  
@@ -59,16 +65,8 @@ def repartion_joueurs_sur_tables(nbr_joueurs, n_max):
     if table_min != 0:
         repartition_tables += [table_min]   
         nbr_tables+=1
-
-    def determiner_joueurs_mal_repartis(repartition):
-        reference= min (repartition_tables)
-        nbr_joueurs_mal_repartis=0
-        for taille_table in repartition_tables:
-            nbr_joueurs_mal_repartis += (taille_table - reference)
-        return nbr_joueurs_mal_repartis
     
     nbr_joueurs_mal_repartis = determiner_joueurs_mal_repartis(repartition_tables) 
-
     while nbr_joueurs_mal_repartis >= nbr_tables:
         id_table_min= repartition_tables.index( min (repartition_tables) )
         id_table_max= repartition_tables.index( max (repartition_tables) )
@@ -82,3 +80,22 @@ def repartion_joueurs_sur_tables(nbr_joueurs, n_max):
 def supprimer_thread(thread):
     thread.raise_execption()
     thread.join()
+
+
+def remaniement(joueur): # si cette fonction est appelée c'est qu'un joueur s'est déconnecté
+    tournoi=joueur.tournoi
+    repartit_tables=[len(table.players) for table in tournoi.tables]
+    nbr_j_mal_repartis=determiner_joueurs_mal_repartis(repartit_tables)
+
+    joueur.table.players.remove(joueur)
+    if nbr_j_mal_repartis >= len(tournoi.tables) and len(tournoi.tables)>=2: 
+        tournoi.changement_table()
+    else: #création d'une nouvelle table sans le joueur déconnecté 
+        old_table=joueur.table
+        tournoi.supprimer_joueur(joueur)
+        tournoi.créer_table(old_table.players)
+        tournoi.supprimer_table(old_table)
+
+
+        #supprimer joueur et créer une nouvelle table
+

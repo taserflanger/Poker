@@ -7,6 +7,7 @@ from hand_5 import Hand_5
 from itertools import combinations
 import random_functions as r_f
 import fonctions_serveur as f_s
+import time
 
 
 class Table:
@@ -28,6 +29,8 @@ class Table:
         self.pots = []
         self.final_hand= False
         self.final_winners= []
+        self.in_game=False
+        self.in_change=False
 
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
@@ -53,6 +56,13 @@ class Table:
         self.deck = Deck()
         self.final_winners= []
         self.final_hand=False
+
+        self.in_game=False   #protocole deconnexion forcée client cf tournoi.changement_table
+        time.sleep(10)        
+        if not self.in_change:
+            self.in_game=True
+        
+        
 
     def next_player(self, player):
         return self.players[(player.id + 1) % self.nb_players]

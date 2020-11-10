@@ -25,51 +25,16 @@ class Tournoi: #self.n_max est le nombre maximal de joueur par table
         self.sb=small_blind
         self.bb=big_blind
         self.thread_table={}
-    
-    def ask_ready_and_name(self, joueur): 
-        joueur.name=self.ask_name(joueur)
-        client=joueur.connexion
-        self.liste_noms.append(joueur.name)
-        msg_reçu=b""
-        while msg_reçu!= b"yes":
-            msg_envoie= str( "Il y a", len(self.players), "joueurs connectés", "\n Etes vous prêts?")
-            client.send(msg_envoie.encode())
-            msg_reçu=client.recv(1024).decode()
-            if msg_reçu == "no":
-                client.send("En attente d'autres joueurs...".encode())
-                time.sleep(5)
-            elif msg_reçu != "yes":
-                client.send("Erreur".encode())
-        joueur.ready=True
-        client.send("La partie va commencer! (attendez qq instants que les autres joueurs soient prêts) ".encode())
+        self.thread_client={}
 
-    def ask_name(self, joueur):   #on peut ajouter une confirmation
-        client=joueur.connexion
-        client.send("C'est quoi ton blase?".encode())
-        msg_reçu=client.recv(1024).decode()
-        while msg_reçu in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
-            client.send("Ce nom est déja pris ou n'est pas assez long, saisi un nouveau nom: ".encode())
-            msg_reçu=client.recv(1024).decode()
-        return msg_reçu
-    
-    
-    def remplir_tables(self, repartition_):
-        marqueur=0
-        for taille_table in repartition_:
-            nouvelle_table=Table(self.players[marqueur : marqueur+taille_table], self.sb, self.bb)  # qui contient les joueurs de marqueurs à marqueurs + i
-            marqueur+=taille_table
-            self.tables.append(nouvelle_table)
 
     def lancer_tournoi(self):
         self.connexion_des_joueurs()
         repartion=repartion_joueurs_sur_tables(len(self.players), self.n_max)
         self.remplir_tables(repartion)
-        for table in self.tables:
-            self.thread_table[str(table)]=threading.Thread(None, gerer_table, None, (table), {})
-            self.thread_table[str(table)].start()
-    
+
+
     def connexion_des_joueurs(self):
-        thread_client=[]
         while not ready(self.players) or len(self.players) < 2:  
             connexions_demandees, wlist, xlist = select.select([self.serveur], [], [], 0.05)
             for connexion in connexions_demandees:
@@ -77,31 +42,92 @@ class Tournoi: #self.n_max est le nombre maximal de joueur par table
                 nouveau_joueur=Player("nom_provisioire", self.stack) 
                 nouveau_joueur.connexion=client
                 nouveau_joueur.infos_connexion=infos_client    
+                nouveau_joueur.tournoi=self
                 self.players.append( nouveau_joueur )
-                thread_client.append(threading.Thread(None, self.ask_ready_and_name, None, (nouveau_joueur) , {}))
-                thread_client[-1].start()
+                self.thread_client[str(client)]=threading.Thread(None, self.ask_ready_and_name, None, (nouveau_joueur) , {})
+                self.thread_client[str(client)].start()
    
 
-    def deconnexion(self): #il faut que j'ajoute que deconnexion attende que table min et table max ait fini leur tour
-        if len(self.tables)>1:
-            table_max=self.tables.index( max(self.tables) )
-            table_min=self.tables.index( min(self.tables) ) #qui est la table dans laquelle qqun s'est déconnecté
-            joueur_changé = []
+    def remplir_tables(self, repartition_):
+        marqueur=0
+        for taille_table in repartition_:
+            self.créer_table(self.players[marqueur : marqueur+taille_table])
+            marqueur+=taille_table
 
-            for old_table in [table_max, table_min]:
-                #suppression des anciens threads
-                supprimer_thread(self.thread_table[str(old_table)])
-                del self.thread_table[str(old_table)]
 
-                #redifinission des tables suite à la deconnexion d'un joueur
-                joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) )
-                new_table= Table(old_table.players + [joueur_changé], self.sb, self.bb)
-                joueur_changé=joueur_à_changer
-                self.tables.pop( self.tables.index(old_table))
-                self.tables.append(new_table) 
+    def créer_table(self, joueurs):
+        nouvelle_table=Table(joueurs, self.sb, self.bb)  # qui contient les joueurs de marqueurs à marqueurs + i
+        for joueur in nouvelle_table.players:
+                joueur.table=nouvelle_table
+        self.tables.append(nouvelle_table)
+        self.thread_table[str(nouvelle_table)]=threading.Thread(None, gerer_table, None, (nouvelle_table), {})
+        self.thread_table[str(nouvelle_table)].start()
 
-                #ajout des nouveaux threads
-                self.thread_table[str(new_table)]=threading.Thread(None, gerer_table, None, (new_table), {})
-                self.thread_table[str(new_table)].start()
-                
-          
+    def supprimer_table(self, table): 
+        self.tables.remove(table)
+        supprimer_thread(self.thread_table[ str(table) ])
+        del self.thread_table[ str(table) ]
+        del table
+
+    def supprimer_joueur(self, joueur):
+        self.players.remove(joueur)
+        joueur.connexion.close()
+        supprimer_thread(self.thread_client[ str(joueur.connexion) ])
+        del self.thread_client[ str(joueur.connexion) ]
+        del joueur
+
+    def changement_table(self): #il faut que j'ajoute que deconnexion attende que table min et table max ait fini leur tour
+        table_max=self.tables.index( max(self.tables) )
+        table_min=self.tables.index( min(self.tables) ) #qui est la table dans laquelle qqun s'est déconnecté
+        joueur_changé = []
+
+        #avant de run le code en dessous il faut s'assurer que table_max n'est pas in_game
+        #avertir les clients de la table_min qu'ils sont en attente
+        while table_max.in_game:
+            time.sleep(3) 
+        table_max.in_change=True
+        joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) )
+        for old_table in [table_max, table_min]:
+            self.créer_table( old_table.players + joueur_changé)
+            joueur_changé=joueur_à_changer
+            self.supprimer_table(old_table)                
+        
+    def ask_ready_and_name(self, joueur): 
+        joueur.connexion.settimeout(60)  #on laisse 1 min pour que le joueur donne son nom
+        joueur.name=self.ask_name(joueur)
+        client=joueur.connexion
+        self.liste_noms.append(joueur.name)
+        msg_reçu=b""
+        while msg_reçu!= b"yes":
+            msg_envoie= str( "Il y a", len(self.players), "joueurs connectés", "\n Etes vous prêts?")
+            client.send(msg_envoie.encode())
+            try: 
+                msg_reçu=client.recv(1024).decode()
+                if msg_reçu == "no":
+                    client.send("En attente d'autres joueurs...".encode())
+                    time.sleep(5)
+                elif msg_reçu != "yes":
+                    client.send("Erreur, votre saisi est incorrecte".encode())
+            except:
+                self.supprimer_joueur(joueur)
+                msg_reçu=b"yes"  #s'avère inutle car supp detruit le thread en cours
+
+        joueur.connexion.settimeout(30)  # pour la suite on laisse 30 seconde au joueur pour faire une action
+        joueur.ready=True
+        client.send("La partie va commencer! (attendez qq instants que les autres joueurs soient prêts) ".encode())
+
+    def ask_name(self, joueur):   #on peut ajouter une confirmation
+        client=joueur.connexion
+        client.send("C'est quoi ton blase?".encode())
+        try:
+            msg_reçu=client.recv(1024).decode()
+            while msg_reçu in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
+                client.send("Ce nom est déja pris ou n'est pas assez long, saisi un nouveau nom: ".encode())
+                try:
+                    msg_reçu=client.recv(1024).decode()
+                except:
+                    self.supprimer_joueur(joueur)
+            return msg_reçu
+        except:
+            self.supprimer_joueur(joueur)
+    
