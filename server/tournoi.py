@@ -8,7 +8,6 @@ from fonctions_serveur import ready, repartion_joueurs_sur_tables, supprimer_thr
 from table import Table
 from player import Player
 
-#TODO: gerer une deconnexion de force d'un client
         
 def gerer_table(table):
     table.game()
@@ -44,7 +43,7 @@ class Tournoi: #self.n_max est le nombre maximal de joueur par table
                 nouveau_joueur.infos_connexion=infos_client    
                 nouveau_joueur.tournoi=self
                 self.players.append( nouveau_joueur )
-                self.thread_client[str(client)]=threading.Thread(None, self.ask_ready_and_name, None, (nouveau_joueur) , {})
+                self.thread_client[str(client)]=threading.Thread(None, self.ask_ready_and_name, None, [nouveau_joueur] , {})
                 self.thread_client[str(client)].start()
    
 
@@ -60,7 +59,7 @@ class Tournoi: #self.n_max est le nombre maximal de joueur par table
         for joueur in nouvelle_table.players:
                 joueur.table=nouvelle_table
         self.tables.append(nouvelle_table)
-        self.thread_table[str(nouvelle_table)]=threading.Thread(None, gerer_table, None, (nouvelle_table), {})
+        self.thread_table[str(nouvelle_table)]=threading.Thread(None, gerer_table, None, [nouvelle_table], {})
         self.thread_table[str(nouvelle_table)].start()
 
     def supprimer_table(self, table): 
@@ -89,8 +88,8 @@ class Tournoi: #self.n_max est le nombre maximal de joueur par table
         client=joueur.connexion
         self.liste_noms.append(joueur.name)
         msg_reçu=b""
-        while msg_reçu!= b"yes":
-            msg_envoie= str( "Il y a", len(self.players), "joueurs connectés", "\n Etes vous prêts?")
+        while msg_reçu!= "yes":
+            msg_envoie=  "Il y a " + str( len(self.players) ) + " joueurs connectés \n Etes vous prêts?"
             client.send(msg_envoie.encode())
             try: 
                 msg_reçu=client.recv(1024).decode()
@@ -101,7 +100,7 @@ class Tournoi: #self.n_max est le nombre maximal de joueur par table
                     client.send("Erreur, votre saisi est incorrecte".encode())
             except:
                 self.supprimer_joueur(joueur)
-                msg_reçu=b"yes"  #s'avère inutle car supp detruit le thread en cours
+                msg_reçu="yes"  #s'avère inutle car supp detruit le thread en cours
 
         joueur.connexion.settimeout(30)  # pour la suite on laisse 30 seconde au joueur pour faire une action
         joueur.ready=True

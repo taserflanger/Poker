@@ -3,7 +3,7 @@ import threading
 def initialiser_actualisation(table, small_blind, big_blind):
     for joueur in table:
         client=joueur.connexion
-        information_table={"dealer": table.dealer, 
+        information_table={"dealer": table.dealer.name, 
                            "id joueur" : [gamer.id for gamer in table],
                            "cartes" : joueur.hand,
                            "small and big blinds": [small_blind, big_blind]
@@ -29,21 +29,11 @@ def actualiser(table): # il manque l'envoie des cartes du flop etc. ainsi que l'
         for joueur in table:
             client=joueur.connexion
             information_fin_tour= {"cartes" : [(joueur.hand if joueur.final_hand else None) for joueur in table.players], 
-                                   "gagnants" : table.final_winners                          
+                                   "gagnants" : [gagnant.name for gagnant in table.final_winners]                          
                 }
             information_fin_tour_encodé=json.dumps(information_fin_tour)
             client.send(information_fin_tour_encodé)
                         
-                      
-
-
-
-                  
-
-
-
-#**********************************************************************
-
 
 
 def ready(players):
