@@ -1,25 +1,32 @@
 from fonctions_serveur import demander_reequilibrage
 import time
-class Cash_game:  #à  faire
+import threading
+from player import Player
+from table import Table 
+import select
+from salon import Salon
 
-    def __init__(self, n_max, small_blind, big_blind):
-        self.tables=[]
-        self.wait_file=[]
-        self.n_max=n_max
-        self.sb=small_blind
-        self.bb=big_blind
+class Cash_game(Salon):  #à  faire
 
-    def creer_table(self, joueurs):
-        pass
+    def __init__(self, serveur, n_max, stack, small_blind, big_blind):
+        Salon.__init__(self, serveur, n_max, stack, small_blind, big_blind)
 
-    def minute_check(self):
+    def deconnexion(self, joueur):
+        table=joueur.table
+        self.supprimer_joueur(joueur)
+        if len(table.players)==1:
+            self.wait_file.insert(0, table.players)
+            self.supprimer_table(table)
+    
+
+    def minute_check(self, timeout=60):
         #+ 3 j en liste d'attente
         if len(self.wait_file) >= 3:
             if len(self.wait_file) >=self.n_max:
-                self.creer_table(self.wait_file[:self.n_max]) # il peut y avoir trop de joueur dans la liste d'attente ==> créer plusieurs tables
+                self.créer_table(self.wait_file[:self.n_max]) # il peut y avoir trop de joueur dans la liste d'attente ==> créer plusieurs tables
                 del self.wait_file[:self.n_max] # ne marche pas ?
             else:
-                self.creer_table(self.wait_file)
+                self.créer_table(self.wait_file)
                 self.wait_file=[]
 
         # - de 4 joueurs dans une table        
@@ -33,12 +40,13 @@ class Cash_game:  #à  faire
         table_max=self.tables[-1]
         if len(table_max.players) - len(table_min.players) >= 3:
             demander_reequilibrage(self.tables)
+
         
         #fusion entre 2 tables possibles
         ...
 
         #relance
-        time.sleep(60)
+        time.sleep(timeout)
         self.minute_check()
 
         
