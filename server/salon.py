@@ -4,7 +4,7 @@ import select
 import time
 import json
 from random import randint
-from fonctions_serveur import ready, repartion_joueurs_sur_tables, supprimer_thread
+from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread
 from table import Table
 from player import Player
 
@@ -33,8 +33,8 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         return False
         
     def connexion_des_joueurs(self):
-        while not self.ready() or len(self.players) < 2:  
-            connexions_demandees, wlist, xlist = select.select([self.serveur], [], [], 0.05)
+        while not self.ready():  
+            connexions_demandees, wlist, xlist = select.select([self.serveur], [], [], 1)
             for connexion in connexions_demandees:
                 client, infos_client = connexion.accept()  
                 nouveau_joueur=Player("nom_provisioire", self.stack) 
@@ -42,7 +42,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
                 nouveau_joueur.infos_connexion=infos_client    
                 nouveau_joueur.tournoi=self
                 self.players.append( nouveau_joueur )
-                self.thread_client[str(client)]=threading.Thread(None, self.ask_ready_and_name, None, (nouveau_joueur) , {})
+                self.thread_client[str(client)]=threading.Thread(None, self.ask_ready_and_name, None, [nouveau_joueur] , {})
                 self.thread_client[str(client)].start()
                 self.wait_file.append(nouveau_joueur)
 
@@ -52,7 +52,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         for joueur in nouvelle_table.players:
                 joueur.table=nouvelle_table
         self.tables.append(nouvelle_table)
-        self.thread_table[str(nouvelle_table)]=threading.Thread(None, gerer_table, None, (nouvelle_table), {})
+        self.thread_table[str(nouvelle_table)]=threading.Thread(None, gerer_table, None, [nouvelle_table], {})
         self.thread_table[str(nouvelle_table)].start()
 
     def supprimer_table(self, table): 
@@ -76,8 +76,8 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         client=joueur.connexion
         self.liste_noms.append(joueur.name)
         msg_reçu=b""
-        while msg_reçu!= b"yes":
-            msg_envoie= str( "Il y a", len(self.players), "joueurs connectés", "\n Etes vous prêts?")
+        while msg_reçu!= "yes":
+            msg_envoie= "Il y a " + str(len(self.players)) + " joueurs connectés, \n Etes vous prêts?"
             client.send(msg_envoie.encode())
             try: 
                 msg_reçu=client.recv(1024).decode()

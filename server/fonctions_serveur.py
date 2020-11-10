@@ -3,14 +3,15 @@ import threading
 def initialiser_actualisation(table, small_blind, big_blind):
     for joueur in table:
         client=joueur.connexion
-        information_table={"dealer": table.dealer, 
+        
+        information_table={"dealer": table.dealer.name, 
                            "id joueur" : [gamer.id for gamer in table],
                            "cartes" : joueur.hand,
                            "small and big blinds": [small_blind, big_blind]
                            }
         information_table_encodé=json.dumps(information_table)
         client.send(information_table_encodé)
-        
+
 def actualiser(table): # il manque l'envoie des cartes du flop etc. ainsi que l'envoie des cartes des joueurs à la fin
     for joueur in table:
         client=joueur.connexion
@@ -29,23 +30,14 @@ def actualiser(table): # il manque l'envoie des cartes du flop etc. ainsi que l'
         for joueur in table:
             client=joueur.connexion
             information_fin_tour= {"cartes" : [(joueur.hand if joueur.final_hand else None) for joueur in table.players], 
-                                   "gagnants" : table.final_winners                          
+                                   "gagnants" : [gagnant.name for gagnant in table.final_winners]                          
                 }
             information_fin_tour_encodé=json.dumps(information_fin_tour)
             client.send(information_fin_tour_encodé)
+            
+
                         
                       
-
-
-
-                  
-
-
-
-#**********************************************************************
-
-
-
 
 
 def determiner_joueurs_mal_repartis(repartition_des_tables): #repartition_des_tables est une liste contenant
@@ -75,23 +67,23 @@ def repartion_joueurs_sur_tables(nbr_joueurs, n_max):
 
 
 def supprimer_thread(thread):
-    thread.raise_execption()
+    thread.raise_exception()
     thread.join()
 
 
-
-def demander_reequilibrage(tournoi):   #marche aussi pour le cash game
-    repartit_tables=[len(table.players) for table in tournoi.tables]
+def demander_reequilibrage(salon):  
+    repartit_tables=[len(table.players) for table in salon.tables]
     nbr_j_mal_repartis=determiner_joueurs_mal_repartis(repartit_tables)
-    if nbr_j_mal_repartis >= len(tournoi.tables) and len(tournoi.tables)>=2: 
-        transfert_joueur(tournoi.tables)
+    if nbr_j_mal_repartis >= len(salon.tables) and len(salon.tables)>=2: 
+        transfert_joueur(salon.tables)
 
 
+#salon fait reference à tournoi ou cashgame
 def remaniement(joueur): # si cette fonction est appelée c'est qu'un joueur s'est déconnecté
-    tournoi=joueur.tournoi
+    salon=joueur.salon 
     joueur.table.players.remove(joueur)
-    demander_reequilibrage(tournoi)
-    tournoi.supprimer_joueur(joueur)
+    demander_reequilibrage(salon)
+    salon.supprimer_joueur(joueur)
   
 
 import itertools

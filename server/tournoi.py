@@ -4,7 +4,7 @@ import select
 import time
 import json
 from random import randint
-from fonctions_serveur import ready, repartion_joueurs_sur_tables, supprimer_thread
+from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread
 from table import Table
 from player import Player
 from salon import Salon
@@ -28,7 +28,7 @@ class Tournoi(Salon): #self.n_max est le nombre maximal de joueur par table
    
     def ready(self):
         coefficient=0.7
-        return True if sum([joueur.ready for joueur in self.players]) >= coefficient*len(self.players) else False
+        return True if sum([joueur.ready for joueur in self.players]) >= coefficient*len(self.players) and len(self.players) >= 2 else False
 
     def remplir_tables(self, repartition_):
         marqueur=0
