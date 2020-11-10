@@ -82,20 +82,53 @@ def supprimer_thread(thread):
     thread.join()
 
 
-def remaniement(joueur): # si cette fonction est appelée c'est qu'un joueur s'est déconnecté
-    tournoi=joueur.tournoi
+
+def demander_reequilibrage(tournoi):   #marche aussi pour le cash game
     repartit_tables=[len(table.players) for table in tournoi.tables]
     nbr_j_mal_repartis=determiner_joueurs_mal_repartis(repartit_tables)
-
-    joueur.table.players.remove(joueur)
     if nbr_j_mal_repartis >= len(tournoi.tables) and len(tournoi.tables)>=2: 
-        tournoi.changement_table()
-    else: #création d'une nouvelle table sans le joueur déconnecté 
-        old_table=joueur.table
-        tournoi.supprimer_joueur(joueur)
-        tournoi.créer_table(old_table.players)
-        tournoi.supprimer_table(old_table)
+        transfert_joueur(tournoi.tables)
 
 
-        #supprimer joueur et créer une nouvelle table
+def remaniement(joueur): # si cette fonction est appelée c'est qu'un joueur s'est déconnecté
+    tournoi=joueur.tournoi
+    joueur.table.players.remove(joueur)
+    demander_reequilibrage(tournoi)
+    tournoi.supprimer_joueur(joueur)
+  
+
+import itertools
+import time
+from random import randint
+
+#fonction qui sert à mettre en pause 2 tables sans interrompre leur partie, donc 
+#les mettre en pause pendant table.in_game= False
+#la premiere qui finit attend l'autre
+def wait_for_table(table1, table2): 
+    boucle=[table1, table2]
+    actuel=True
+    while boucle[actuel].in_game:
+        actuel= not actuel
+        time.sleep(3) 
+    boucle[actuel].in_change=True
+    actuel=not actuel
+    while boucle[actuel].in_game:
+        time.sleep(3)
+    boucle[actuel].in_change=True
+
+
+#la plus grosse table envoie un joueur à la plus petite
+def transfert_joueur(liste_tables): 
+    liste_tables.sort(key=lambda table: len(table.players))
+    table_min=liste_tables[0]
+    table_max=liste_tables[-1]
+    wait_for_table(table_max, table_min)
+
+    joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) )
+    joueur_à_changer.connexion.send("Vous allez changer de table, patientez un instant".encode())
+    table_max.players.remove(joueur_à_changer)
+    table_min.players.append(joueur_à_changer)
+
+    table_min.in_change=False
+    table_max.in_change=False
 

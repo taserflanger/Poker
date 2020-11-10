@@ -45,6 +45,13 @@ class Table:
             i += 1
 
     def set_up_game(self):
+        self.in_game=False   #protocole deconnexion forcée client cf tournoi.changement_table
+        time.sleep(10)        
+        if not self.in_change:
+            self.in_game=True
+        else:
+            self.end_game()
+
         for player in self.players:
             player.hand = []
             player.is_all_in = player.is_folded = False
@@ -56,14 +63,14 @@ class Table:
         self.deck = Deck()
         self.final_winners= []
         self.final_hand=False
-
-        self.in_game=False   #protocole deconnexion forcée client cf tournoi.changement_table
-        time.sleep(10)        
-        if not self.in_change:
-            self.in_game=True
         
         
-
+    def end_game(self):
+        for player in self.players:
+            player.connexion.send("Un joueur s'est déconnecté sur une table, attendez un instant ".encode())
+        while self.in_change: #attente de suppression de la table, ou d'ajout d'un joueur
+            time.sleep(10)
+        
     def next_player(self, player):
         return self.players[(player.id + 1) % self.nb_players]
 
@@ -72,7 +79,6 @@ class Table:
             player.on_going_bet = 0
         self.speaker = self.next_player(self.dealer)
         
-
     def game(self):
         all_folded = False
         self.set_up_game()

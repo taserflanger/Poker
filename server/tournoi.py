@@ -75,22 +75,13 @@ class Tournoi: #self.n_max est le nombre maximal de joueur par table
         supprimer_thread(self.thread_client[ str(joueur.connexion) ])
         del self.thread_client[ str(joueur.connexion) ]
         del joueur
+               
+        
 
-    def changement_table(self): #il faut que j'ajoute que deconnexion attende que table min et table max ait fini leur tour
-        table_max=self.tables.index( max(self.tables) )
-        table_min=self.tables.index( min(self.tables) ) #qui est la table dans laquelle qqun s'est déconnecté
-        joueur_changé = []
 
-        #avant de run le code en dessous il faut s'assurer que table_max n'est pas in_game
-        #avertir les clients de la table_min qu'ils sont en attente
-        while table_max.in_game:
-            time.sleep(3) 
-        table_max.in_change=True
-        joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) )
-        for old_table in [table_max, table_min]:
-            self.créer_table( old_table.players + joueur_changé)
-            joueur_changé=joueur_à_changer
-            self.supprimer_table(old_table)                
+
+
+
         
     def ask_ready_and_name(self, joueur): 
         joueur.connexion.settimeout(60)  #on laisse 1 min pour que le joueur donne son nom
