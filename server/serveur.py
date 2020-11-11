@@ -1,7 +1,9 @@
 import socket
 from tournoi import Tournoi
 serveur=socket.socket(socket.AF_INET, socket.SOCK_STREAM)  
-serveur.bind(("", 12800))  
+adresse_serveur="176.160.246.2"
+#adresse_serveur=""
+serveur.bind((adresse_serveur, 12800))  
 serveur.listen(5)  
 
 def tournoi(joueur_par_table, stack_initial, sb, bb):

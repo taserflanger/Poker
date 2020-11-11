@@ -1,9 +1,10 @@
 import socket
 import json
-adresseIP = "127.0.0.1"	# Ici, le poste local
+adresseIP_server_andres = "176.160.246.2"	# Ici, le poste local
+#adresseIP_local="127.00.01"
 port = 12800	# Se connecter sur le port 50000
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((adresseIP, port))
+client.connect((adresseIP_server_andres, port))
 print("Connecté au serveur")
 print("Tapez FIN pour terminer la conversation. ")
 message = ""

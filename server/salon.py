@@ -36,7 +36,6 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
             connexions_demandees, wlist, xlist = select.select([self.serveur], [], [], 0.05)
             #self.send_len_players()
             for connexion in connexions_demandees:
-                ip=connexion.getpeername()
                 client, infos_client = connexion.accept()  
                 nouveau_joueur=Player("nom_provisioire", self.stack) 
                 nouveau_joueur.connexion=client
