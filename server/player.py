@@ -1,5 +1,6 @@
 from fonctions_serveur import remaniement
-
+import json
+import time
 class Player:
 
     def __init__(self, player_name, player_stack):
@@ -24,13 +25,22 @@ class Player:
         if bet == 0:
             c = "check"
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
+            """
+            balise1={"jouer": True}
+            balise1_encodé=json.dumps(balise1)
+            self.connexion.send(balise1_encodé.encode())
+            """
+            self.connexion.send("jouer".encode())
+            time.sleep(2)
             while player_action not in ['f', 'c', 'r']:
                 self.connexion.send(str(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n").encode())
                 try:
                     player_action = self.connexion.recv(1024).decode()
+                    print("p_a", player_action)
                     self.deconnecte=False
                 except: #si le joueur ne repond pas 2 fois de suite alors il est deconnecté
                     player_action='f'
+                    print("error")
                     if self.deconnecte:
                         remaniement(self) #supprimer joueur et  créer une nouvelle table
                         pass
@@ -43,6 +53,9 @@ class Player:
             bet = self.raises(bet)
         elif player_action == 'f':
             return self.folds()
+        time.sleep(0.05)
+        balise2="fin action"
+        self.connexion.send(balise2.encode())
         self.stack -= bet
         self.on_going_bet += bet
         if self.stack == 0:
@@ -56,9 +69,22 @@ class Player:
         return bet
 
     def raises(self, bet):
+        balise3="raise"
+        self.connexion.send(balise3.encode())
+        infos=str("current stack: " + str(self.stack) + "\n Raise how much?")  
+        self.connexion.send(infos.encode())
         raise_val = float("inf")
-        while raise_val > self.stack:
-            raise_val = int(input(f"Raise? (current stack: {self.stack})  "))
+        while raise_val > self.stack: #ajouter un try
+            try: 
+                raise_val = int(self.connexion.recv(1024).decode())
+                if raise_val > self.stack:
+                    self.connexion.send("erreur".encode())
+            except:
+                self.deconnecte=True
+                self.player_action="f"
+                self.folds()
+        balise4="fin raise"
+        self.connexion.send(balise4.encode())
         return raise_val + bet
 
     def folds(self):

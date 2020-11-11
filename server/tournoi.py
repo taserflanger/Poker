@@ -18,10 +18,11 @@ class Tournoi(Salon): #self.n_max est le nombre maximal de joueur par table
     
     def __init__(self, serveur, n_max, stack, small_blind, big_blind):
         Salon.__init__(self, serveur, n_max, stack, small_blind, big_blind)
-
+        
 
     def lancer_tournoi(self):
         self.connexion_des_joueurs()
+        self.start=True
         repartion=repartion_joueurs_sur_tables(len(self.players), self.n_max)
         self.remplir_tables(repartion)
 

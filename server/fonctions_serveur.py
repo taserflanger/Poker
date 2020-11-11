@@ -1,43 +1,41 @@
 import json
 import threading
+
+#utiliser info_dictionnaire=json.loads(message)   pour retranscrir en dict
 def initialiser_actualisation(table, small_blind, big_blind):
     for joueur in table:
         client=joueur.connexion
-        
-        information_table={"dealer": table.dealer.name, 
-                           "id joueur" : [gamer.id for gamer in table],
-                           "cartes" : joueur.hand,
-                           "small and big blinds": [small_blind, big_blind]
+        client.send("actualisation debut".encode("utf-8"))
+        info_round={"nom joueurs" : str([player.name for player in table.players]),
+                           "dealer": table.dealer.name,
+                           "cartes" : str(joueur.hand[0]) + "/" + str(joueur.hand[1]),
+                           "small and big blinds": str([small_blind, big_blind])
                            }
-        information_table_encodé=json.dumps(information_table)
-        client.send(information_table_encodé)
+        info_round_json=json.dumps(info_round).encode("utf-8")
+        client.send(info_round_json)
 
-def actualiser(table): # il manque l'envoie des cartes du flop etc. ainsi que l'envoie des cartes des joueurs à la fin
+def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
     for joueur in table:
         client=joueur.connexion
-        information_table={"stacks": [gamer.stack for gamer in table.players], 
-                           "on going bet" : [gamer.on_going_bet for gamer in table.players],
-                           "folded" : [gamer.is_folded for gamer in table.players],
-                           "all in" : [gamer.is_all_in for gamer in table.players],
-                           "pots" : table.pots,
-                           "cartes table": table.cards
+        client.send("actualisation tour".encode("utf-8"))
+        info_table={"stacks": str([gamer.stack for gamer in table.players]), 
+                           "on going bet" : str([gamer.on_going_bet for gamer in table.players]),
+                           "folded" : str([gamer.is_folded for gamer in table.players]),
+                           "all in" : str([gamer.is_all_in for gamer in table.players]),
+                           "pots" : str(table.pots),
+                           "cartes table": str( [str(carte) for carte in table.cards ])
                            }
-        information_table_encodé=json.dumps(information_table)
-        client.send(information_table_encodé)
-        #utiliser info_dictionnaire=json.loads(message)   pour retranscrir en dict
+        info_table_json=json.dumps(info_table)
+        client.send(info_table_json.encode("utf-8"))
 
     if table.final_hand:
         for joueur in table:
             client=joueur.connexion
-            information_fin_tour= {"cartes" : [(joueur.hand if joueur.final_hand else None) for joueur in table.players], 
-                                   "gagnants" : [gagnant.name for gagnant in table.final_winners]                          
-                }
-            information_fin_tour_encodé=json.dumps(information_fin_tour)
-            client.send(information_fin_tour_encodé)
-            
-
-                        
-                      
+            client.send("actualisation fin".encode("utf-8"))
+            info_winners= {"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
+                            "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
+            info_winners_json=json.dumps(info_winners)
+            client.send(info_winners_json.encode("utf-8"))
 
 
 def determiner_joueurs_mal_repartis(repartition_des_tables): #repartition_des_tables est une liste contenant
@@ -120,4 +118,7 @@ def transfert_joueur(liste_tables):
 
     table_min.in_change=False
     table_max.in_change=False
+
+
+
 

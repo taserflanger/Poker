@@ -109,6 +109,8 @@ class Table:
         self.initialise_round()
         self.cards += [self.deck.deal() for _ in range(3)]
         print([str(card) for card in self.cards])
+        f_s.actualiser(self)
+        time.sleep(1)
         self.players_speak()
 
     def turn_river(self):
