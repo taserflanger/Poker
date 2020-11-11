@@ -21,11 +21,8 @@ class Player:
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
         bet = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
-        c = "call"
-        if bet == 0:
-            c = "check"
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur       
-            self.connexion.send("action joueur".encode("utf-8"))
+            self.connexion.send("action".encode("utf-8"))
             time.sleep(2)
             try:
                 player_action = self.connexion.recv(1024).decode("utf-8")
@@ -45,7 +42,8 @@ class Player:
             return self.folds()
         else:                    # si non (f) et non (c) c'est que le joueur raise
             bet = int(player_action)
-        time.sleep(0.05)
+            player_action="r"
+        time.sleep(0.5)
         self.stack -= bet
         self.on_going_bet += bet
         if self.stack == 0:

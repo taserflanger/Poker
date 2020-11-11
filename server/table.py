@@ -56,6 +56,7 @@ class Table:
             player.hand = []
             player.is_all_in = player.is_folded = False
             player.final_hand = None
+            player.on_going_bet=0
         self.dealer = self.next_player(self.dealer)
         self.speaker = self.next_player(self.speaker)
         self.pots = []
@@ -99,6 +100,7 @@ class Table:
             self.speaker.speaks(blind_amount, blind=True)
             self.speaker = self.next_player(self.speaker)
         f_s.initialiser_actualisation(self, self.sb, self.bb)  # envoie aux clients les infos du tour cf fonction_serveur
+        time.sleep(1)
 
     def pre_flop(self):
         print(f'Dealer : {self.dealer.name}')
@@ -128,6 +130,7 @@ class Table:
             action, amount = player.speaks(mise)
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
             f_s.actualiser(self)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur 
+            time.sleep(1)
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
 
@@ -184,5 +187,6 @@ class Table:
                 pot_value -= value_for_player
                 n -= 1
             self.final_winners= pot_winners[:]
-            f_s.actualiser(self)
+        f_s.actualiser(self)
+        time.sleep(1)
 

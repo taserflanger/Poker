@@ -4,14 +4,12 @@ import select
 import time
 import json
 from random import randint
-from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread
+from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread, gerer_table
 from table import Table
 from player import Player
 
 #TODO: gerer une deconnexion de force d'un client
-        
-def gerer_table(table):
-    table.game()
+
         
 class Salon: #self.n_max est le nombre maximal de joueur par table
     
@@ -35,9 +33,10 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         
     def connexion_des_joueurs(self):
         while not self.ready():  
-            connexions_demandees, wlist, xlist = select.select([self.serveur], [], [], 1)
-            self.send_len_players()
+            connexions_demandees, wlist, xlist = select.select([self.serveur], [], [], 0.05)
+            #self.send_len_players()
             for connexion in connexions_demandees:
+                ip=connexion.getpeername()
                 client, infos_client = connexion.accept()  
                 nouveau_joueur=Player("nom_provisioire", self.stack) 
                 nouveau_joueur.connexion=client
@@ -61,12 +60,13 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
             self.wait_file.append(joueur)
             joueur.connexion.recv(1024).decode("utf-8")  #le client envoie "pret", il ne peut rien envoyer d'autre
             joueur.ready=True     
-            joueur.connexion.settimeout(30)  # pour la suite on laisse 30 seconde au joueur pour faire une action
+            joueur.connexion.settimeout(300)  # pour la suite on laisse 30 seconde au joueur pour faire une action
         else: # le tournoi a déjà commencé
             self.supprimer_joueur(joueur)
 
     def ask_name(self, joueur):   #on peut ajouter une confirmation
         client=joueur.connexion
+        client.send("preparation".encode("utf-8"))
         try:
             msg_reçu=client.recv(1024).decode("utf-8")
             while msg_reçu in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
@@ -75,6 +75,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
                     msg_reçu=client.recv(1024).decode("utf-8")
                 except:
                     self.supprimer_joueur(joueur)
+            client.send("ok".encode("utf-8"))
             return msg_reçu
         except:
             self.supprimer_joueur(joueur)

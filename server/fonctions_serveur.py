@@ -12,6 +12,7 @@ def initialiser_actualisation(table, small_blind, big_blind):
                            "small and big blinds": str([small_blind, big_blind])
                            }
         info_round_json=json.dumps(info_round).encode("utf-8")
+        time.sleep(0.5)
         client.send(info_round_json)
 
 def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
@@ -22,20 +23,31 @@ def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
                            "on going bet" : str([gamer.on_going_bet for gamer in table.players]),
                            "folded" : str([gamer.is_folded for gamer in table.players]),
                            "all in" : str([gamer.is_all_in for gamer in table.players]),
-                           "pots" : str(table.pots),
+                           "pots" : str( [pot[0] for pot in table.pots]),
                            "cartes table": str( [str(carte) for carte in table.cards ])
                            }
         info_table_json=json.dumps(info_table)
+        time.sleep(0.5)
         client.send(info_table_json.encode("utf-8"))
 
     if table.final_hand:
         for joueur in table:
             client=joueur.connexion
             client.send("actualisation fin".encode("utf-8"))
-            info_winners= {"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
-                            "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
+            info_winners= {"gagnants" : str([gagnant.name for gagnant in table.final_winners])}
+            #{"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
+             #               "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
             info_winners_json=json.dumps(info_winners)
+            time.sleep(0.5)
             client.send(info_winners_json.encode("utf-8"))
+
+#'Daniel', 'cartes': '10 of clubs/King of hearts'
+#'cartes': '10 of spades/Jack of hearts'
+
+        
+def gerer_table(table):
+    for i in range(10):
+        table.game()
 
 
 def determiner_joueurs_mal_repartis(repartition_des_tables): #repartition_des_tables est une liste contenant

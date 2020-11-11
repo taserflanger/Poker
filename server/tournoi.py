@@ -4,16 +4,14 @@ import select
 import time
 import json
 from random import randint
-from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread
+from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread, gerer_table
 from table import Table
 from player import Player
 from salon import Salon
 
 #TODO: gerer une deconnexion de force d'un client
         
-def gerer_table(table):
-    table.game()
-        
+
 class Tournoi(Salon): #self.n_max est le nombre maximal de joueur par table
     
     def __init__(self, serveur, n_max, stack, small_blind, big_blind):
