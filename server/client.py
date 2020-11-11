@@ -1,6 +1,6 @@
 import socket
 import json
-adresseIP_server_andres = "176.160.246.2"	# Ici, le poste local
+adresseIP_server_andres = "192.168.1.11"	# Ici, le poste local
 #adresseIP_local="127.00.01"
 port = 12800	# Se connecter sur le port 50000
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
