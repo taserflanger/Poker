@@ -1,4 +1,4 @@
-from fonctions_serveur import remaniement
+from fonctions_serveur import remaniement, try_send
 import json
 import time
 class Player:
@@ -22,8 +22,8 @@ class Player:
         player_action = ''
         bet = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur       
-            self.connexion.send("action".encode("utf-8"))
-            time.sleep(2)
+            try_send(self, "action".encode("utf-8"))
+            time.sleep(0.3)
             try:
                 player_action = self.connexion.recv(1024).decode("utf-8")
                 self.deconnecte=False
@@ -43,7 +43,7 @@ class Player:
         else:                    # si non (f) et non (c) c'est que le joueur raise
             bet = int(player_action)
             player_action="r"
-        time.sleep(0.5)
+        time.sleep(0.3)
         self.stack -= bet
         self.on_going_bet += bet
         if self.stack == 0:

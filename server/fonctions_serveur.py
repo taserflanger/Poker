@@ -1,11 +1,20 @@
 import json
 import threading
 
+
+def try_send(joueur, message):
+    client=joueur.connexion
+    try:
+        client.send(message)
+    except:
+        remaniement(joueur)
+        #le client à quitter la session
+
 #utiliser info_dictionnaire=json.loads(message)   pour retranscrir en dict
 def initialiser_actualisation(table, small_blind, big_blind):
     for joueur in table:
         client=joueur.connexion
-        client.send("actualisation debut".encode("utf-8"))
+        try_send(joueur,"actualisation debut".encode("utf-8"))
         info_round={"nom joueurs" : str([player.name for player in table.players]),
                            "dealer": table.dealer.name,
                            "cartes" : str(joueur.hand[0]) + "/" + str(joueur.hand[1]),
@@ -13,12 +22,14 @@ def initialiser_actualisation(table, small_blind, big_blind):
                            }
         info_round_json=json.dumps(info_round).encode("utf-8")
         time.sleep(0.5)
-        client.send(info_round_json)
+        try_send(joueur, info_round_json)
+
+
 
 def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
     for joueur in table:
         client=joueur.connexion
-        client.send("actualisation tour".encode("utf-8"))
+        try_send(joueur, "actualisation tour".encode("utf-8"))
         info_table={"stacks": str([gamer.stack for gamer in table.players]), 
                            "on going bet" : str([gamer.on_going_bet for gamer in table.players]),
                            "folded" : str([gamer.is_folded for gamer in table.players]),
@@ -27,26 +38,23 @@ def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
                            "cartes table": str( [str(carte) for carte in table.cards ])
                            }
         info_table_json=json.dumps(info_table)
-        time.sleep(0.5)
-        client.send(info_table_json.encode("utf-8"))
+        time.sleep(0.3)
+        try_send(joueur, info_table_json.encode("utf-8"))
 
     if table.final_hand:
         for joueur in table:
             client=joueur.connexion
-            client.send("actualisation fin".encode("utf-8"))
+            try_send(joueur, "actualisation fin".encode("utf-8"))
             info_winners= {"gagnants" : str([gagnant.name for gagnant in table.final_winners])}
             #{"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
              #               "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
             info_winners_json=json.dumps(info_winners)
-            time.sleep(0.5)
-            client.send(info_winners_json.encode("utf-8"))
-
-#'Daniel', 'cartes': '10 of clubs/King of hearts'
-#'cartes': '10 of spades/Jack of hearts'
+            time.sleep(0.3)
+            try_send(joueur, info_winners_json.encode("utf-8"))
 
         
 def gerer_table(table):
-    for i in range(10):
+    for _ in range(10):
         table.game()
 
 
@@ -90,7 +98,7 @@ def demander_reequilibrage(salon):
 
 #salon fait reference à tournoi ou cashgame
 def remaniement(joueur): # si cette fonction est appelée c'est qu'un joueur s'est déconnecté
-    salon=joueur.salon 
+    salon=joueur.tournoi
     joueur.table.players.remove(joueur)
     demander_reequilibrage(salon)
     salon.supprimer_joueur(joueur)

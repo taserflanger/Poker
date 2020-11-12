@@ -10,6 +10,7 @@ import fonctions_serveur as f_s
 import time
 
 
+
 class Table:
 
     def __init__(self, table_players, small_blind, big_blind, id_dealer="random"):
@@ -65,12 +66,17 @@ class Table:
         self.final_winners= []
         self.final_hand=False
         
-        
     def end_game(self):
         for player in self.players:
             player.connexion.send("Un joueur s'est déconnecté sur une table, attendez un instant ".encode())
         while self.in_change: #attente de suppression de la table, ou d'ajout d'un joueur
             time.sleep(10)
+        
+    def check_player_stack(self):
+        for player in self.players:
+            if player.stack < self.bb:
+                self.players.remove(player)
+                player.tournoi.supprimer_joueur(player) 
         
     def next_player(self, player):
         return self.players[(player.id + 1) % self.nb_players]
@@ -83,6 +89,7 @@ class Table:
     def game(self):
         all_folded = False
         self.set_up_game()
+        self.check_player_stack()
         for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
             round_ob()
             self.manage_pots()
@@ -130,7 +137,7 @@ class Table:
             action, amount = player.speaks(mise)
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
             f_s.actualiser(self)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur 
-            time.sleep(1)
+            time.sleep(0.3)
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
 
@@ -173,6 +180,7 @@ class Table:
         """Répartit chaque pot à ses vainqueurs"""
         if all_folded:
             winner = [player for player in self.players if not player.is_folded][0]
+            self.final_winners=winner
         else:
             self.get_final_hands()
         for pot_value, pot_players in self.pots:
@@ -188,5 +196,5 @@ class Table:
                 n -= 1
             self.final_winners= pot_winners[:]
         f_s.actualiser(self)
-        time.sleep(1)
+        time.sleep(0.3)
 
