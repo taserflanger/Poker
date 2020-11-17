@@ -14,7 +14,6 @@ import time
 class Table:
 
     def __init__(self, table_players, small_blind, big_blind, id_dealer="random"):
-        self.nb_players = len(table_players)
         self.players = table_players
         self.nb_players = len(self.players)
         self.give_players_ids()
@@ -32,6 +31,9 @@ class Table:
         self.final_winners= []
         self.in_game=False
         self.in_change=False
+        self.end=False
+        self.waiting=[]
+        self.ply_disconct=[]
 
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
@@ -45,14 +47,28 @@ class Table:
             player.id = i
             i += 1
 
+    # gere les files d'attentes
+    def manage_file(self):
+        while self.waiting:
+            self.add_player(self.waiting.pop(0))
+        while self.ply_disconct: #players disconnected
+            self.delete(self.ply_disconct.pop(0))
+        
+
     def set_up_game(self):
-        self.in_game=False   #protocole deconnexion forcée client cf tournoi.changement_table
+        #protocole deconnexion forcée client cf tournoi.changement_table
+        self.in_game=False   
         time.sleep(10)        
         if not self.in_change:
             self.in_game=True
         else:
-            self.end_game()
+            self.pause_game() #renommer pause_game
 
+        self.in_change=True
+        self.manage_file() # gere les files d'attentes
+        self.in_change=False
+        
+        #initialisation des variables du round
         for player in self.players:
             player.hand = []
             player.is_all_in = player.is_folded = False
@@ -66,18 +82,37 @@ class Table:
         self.final_winners= []
         self.final_hand=False
         
-    def end_game(self):
-        for player in self.players:
-            player.connexion.send("Un joueur s'est déconnecté sur une table, attendez un instant ".encode())
-        while self.in_change: #attente de suppression de la table, ou d'ajout d'un joueur
+    def pause_game(self):
+        while self.in_change: 
             time.sleep(10)
-        
+        if self.end:
+            return
+    
+
+    #à modifier...
+    def delete(self, player):
+        print("ciao ", player.name)
+        #modifier cela par une deconnexion de joueur car sinon pas d'autorisation sur les varaible interdites threads
+        self.players.remove(player)
+        #player.tournoi.supprimer_joueur(player)
+        self.give_players_ids() 
+        self.nb_players-=1
+
+    def add_player(self, player):
+        print("hello", player.name)
+        self.players.append(player)
+        self.give_players_ids()
+        self.nb_players+=1
+        player.table=self
+    
+    def __len__(self):
+        return len(self.players) + len(self.waiting) - len(self.ply_disconct)
+
     def check_player_stack(self):
         for player in self.players:
             if player.stack < self.bb:
-                self.players.remove(player)
-                player.tournoi.supprimer_joueur(player) 
-        
+                self.delete(player)
+                
     def next_player(self, player):
         return self.players[(player.id + 1) % self.nb_players]
 
@@ -89,7 +124,7 @@ class Table:
     def game(self):
         all_folded = False
         self.set_up_game()
-        self.check_player_stack()
+        #self.check_player_stack()
         for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
             round_ob()
             self.manage_pots()
@@ -180,7 +215,7 @@ class Table:
         """Répartit chaque pot à ses vainqueurs"""
         if all_folded:
             winner = [player for player in self.players if not player.is_folded][0]
-            self.final_winners=winner
+            self.final_winners=[winner]
         else:
             self.get_final_hands()
         for pot_value, pot_players in self.pots:

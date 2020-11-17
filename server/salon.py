@@ -4,7 +4,7 @@ import select
 import time
 import json
 from random import randint
-from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread, gerer_table
+from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread, gerer_table, try_recv, try_send, wait_for_table, give_table_min_max, determiner_joueurs_mal_repartis
 from table import Table
 from player import Player
 
@@ -25,7 +25,8 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         self.thread_table={}
         self.thread_client={}
         self.wait_file=[]
-        self.start=False
+        self.started=False
+        self.let_modif_thread=True
    
 
     def ready(self):
@@ -53,34 +54,25 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
     def ask_ready_and_name(self, joueur): 
         joueur.connexion.settimeout(60)  #on laisse 1 min pour que le joueur donne son nom
         joueur.name=self.ask_name(joueur)
-        if not self.start:
+        if not self.started:
             self.liste_noms.append(joueur.name)
             self.players.append( joueur )
             self.wait_file.append(joueur)
-            joueur.connexion.recv(1024).decode("utf-8")  #le client envoie "pret", il ne peut rien envoyer d'autre
+            try_recv(joueur) #le client envoie "pret", il ne peut rien envoyer d'autre
             joueur.ready=True     
             joueur.connexion.settimeout(300)  # pour la suite on laisse 30 seconde au joueur pour faire une action
-        else: # le tournoi a déjà commencé
+        else: # le tournoi a déjà commencé, marche aussi en cash game car self.started=False tout le temps
             self.supprimer_joueur(joueur)
 
     def ask_name(self, joueur):   #on peut ajouter une confirmation
-        client=joueur.connexion
-        client.send("preparation".encode("utf-8"))
-        try:
-            msg_reçu=client.recv(1024).decode("utf-8")
-            while msg_reçu in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
-                client.send("erreur nom".encode("utf-8"))   #erreur nom correspond à un nom deja pris
-                try:
-                    msg_reçu=client.recv(1024).decode("utf-8")
-                except:
-                    self.supprimer_joueur(joueur)
-            client.send("ok".encode("utf-8"))
-            return msg_reçu
-        except:
-            self.supprimer_joueur(joueur)
-    
-
-
+        try_send(joueur, "preparation".encode("utf-8"))
+        msg_reçu=try_recv(joueur)
+        while msg_reçu in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
+            try_send(joueur, "erreur nom".encode("utf-8"))   #erreur nom correspond à un nom deja pris
+            msg_reçu=try_recv(joueur)
+        try_send(joueur, "ok".encode("utf-8"))
+        return msg_reçu
+   
     def créer_table(self, joueurs):
         nouvelle_table=Table(joueurs, self.sb, self.bb)  # qui contient les joueurs de marqueurs à marqueurs + i
         for joueur in nouvelle_table.players:
@@ -90,14 +82,12 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         self.thread_table[str(nouvelle_table)].start()
 
     def supprimer_table(self, table): 
-        self.tables.remove(table)
-        supprimer_thread(self.thread_table[ str(table) ])
-        del self.thread_table[ str(table) ]
-        del table
+        #self.tables.remove(table)
+        table.end=True
+        #del table
 
     def supprimer_joueur(self, joueur):
+        #supprimer_thread(self.thread_client[ str(joueur.connexion) ])
+        #del self.thread_client[ str(joueur.connexion) ]
         joueur.connexion.close()
-        supprimer_thread(self.thread_client[ str(joueur.connexion) ])
-        del self.thread_client[ str(joueur.connexion) ]
-        del joueur
-               
+        #del joueur

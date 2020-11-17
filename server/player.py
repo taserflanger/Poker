@@ -1,4 +1,4 @@
-from fonctions_serveur import remaniement, try_send
+from fonctions_serveur import try_send, try_recv
 import json
 import time
 class Player:
@@ -14,9 +14,10 @@ class Player:
         self.connexion=None
         self.infos_connexion= None
         self.ready=False
-        self.deconnecte=False
+        self.disconct=False #disconnected
         self.table=None
         self.tournoi=None
+        self.disconct=False
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
@@ -24,18 +25,7 @@ class Player:
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur       
             try_send(self, "action".encode("utf-8"))
             time.sleep(0.3)
-            try:
-                player_action = self.connexion.recv(1024).decode("utf-8")
-                self.deconnecte=False
-            except: #si le joueur ne repond pas 2 fois de suite alors il est deconnecté
-                player_action='f'
-                print(self.name, " n'a pas repondu")
-                if self.deconnecte:
-                    remaniement(self) #supprimer joueur et  créer une nouvelle table
-                    pass
-                else:
-                    self.deconnecte=True
-
+            player_action = try_recv(self) if not self.disconct else "f" 
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'f':
