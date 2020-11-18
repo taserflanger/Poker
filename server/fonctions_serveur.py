@@ -8,7 +8,7 @@ from random import randint
 def try_recv(joueur):
     client=joueur.connexion
     salon=joueur.tournoi
-    if not joueur.disconct:
+    if not joueur.disco:
         try:
             msg_reçu=client.recv(1024).decode("utf-8")
             return msg_reçu
@@ -20,7 +20,7 @@ def try_recv(joueur):
 def try_send(joueur, message):
     client=joueur.connexion
     salon=joueur.tournoi
-    if not joueur.disconct:
+    if not joueur.disco:
         try:
             client.send(message)
         except: # joueur deconnecté de force
@@ -36,8 +36,9 @@ def initialiser_actualisation(table, small_blind, big_blind):
                            "small and big blinds": str([small_blind, big_blind])
                            }
         info_round_json=json.dumps(info_round).encode("utf-8")
-        time.sleep(0.5)
+        time.sleep(0.1)
         try_send(joueur, info_round_json)
+    time.sleep(0.1)
 
 def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
     for joueur in table:
@@ -50,7 +51,7 @@ def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
                            "cartes table": str( [str(carte) for carte in table.cards ])
                            }
         info_table_json=json.dumps(info_table)
-        time.sleep(0.3)
+        time.sleep(0.1)
         try_send(joueur, info_table_json.encode("utf-8"))
 
     if table.final_hand:
@@ -60,15 +61,15 @@ def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
             #{"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
              #               "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
             info_winners_json=json.dumps(info_winners)
-            time.sleep(0.3)
+            time.sleep(0.1)
             try_send(joueur, info_winners_json.encode("utf-8"))
+    time.sleep(0.1)
 
         
 def gerer_table(table):
     while not table.end:
-        table.game()
+        table.set_up_game()
     return
-
 
 def determiner_joueurs_mal_repartis(repartition_des_tables, reference): #repartition_des_tables est une liste contenant    # le nbr de joueurs par table
         nbr_joueurs_mal_repartis=0
@@ -133,7 +134,6 @@ def wait_for_table(table1, table2):
     while boucle[actuel].in_game:
         time.sleep(3)
     boucle[actuel].in_change=True
-
 
 def give_table_min_max(list_tables, booleen=True): #mettre en pause les autres threads pour pas de pblm
     list_tables.sort(key=lambda table: len(table))

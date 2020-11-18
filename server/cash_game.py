@@ -1,4 +1,3 @@
-from fonctions_serveur import demander_reequilibrage
 import time
 import threading
 from player import Player
@@ -32,14 +31,16 @@ class Cash_game(Salon):  #à  faire
         # - de 4 joueurs dans une table        
         for table in self.tables:
             if len(table.players) <= 3:
-                demander_reequilibrage(self.tables)
+                #demander_reequilibrage(self.tables)
+                pass
         
         #differce de taille entre 2 tables >=3
         self.tables.sort(key=lambda table: len(table.players))
         table_min=self.tables[0]
         table_max=self.tables[-1]
         if len(table_max.players) - len(table_min.players) >= 3:
-            demander_reequilibrage(self.tables)
+            #demander_reequilibrage(self.tables)
+            pass
 
         
         #fusion entre 2 tables possibles

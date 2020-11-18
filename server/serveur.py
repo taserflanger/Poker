@@ -10,5 +10,5 @@ def tournoi(joueur_par_table, stack_initial, sb, bb):
     tournoi=Tournoi(serveur, joueur_par_table, stack_initial, sb, bb)
     tournoi.lancer_tournoi()
 
-tournoi(3, 500, 5, 10)
+tournoi(4, 500, 5, 10)
 serveur.close()

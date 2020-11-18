@@ -25,3 +25,9 @@ revoir:
 table.delete et suppression de tables
 protocole table.in_change pendant remaniement
  joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) ) #embettant car la vrai taille est table.taille
+
+ tester transfert_joueur, remaniement, redistribution, check player.stack=0, gagnant finale
+ reussir à fermer les threads mieux
+ voir si client envoie prêt trop tard (ie alors que tournoi.started) ==> pblm?
+
+ redistribution est faux

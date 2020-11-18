@@ -22,19 +22,11 @@ class Table:
         else:
             self.dealer = self.players[id_dealer]
         self.speaker = self.next_player(self.dealer)
-        self.sb = small_blind
-        self.bb = big_blind
+        self.sb, self.bb = small_blind, big_blind
         self.deck = Deck()
-        self.cards = []
-        self.pots = []
-        self.final_hand= False
-        self.final_winners= []
-        self.in_game=False
-        self.in_change=False
-        self.end=False
-        self.waiting=[]
-        self.ply_disconct=[]
-
+        self.cards, self.pots, self.final_winners, self.wait_in, self.wait_out=map(list, [])
+        self.final_hand, self.in_change, self.in_game, self.end, self.redistribution=map(bool, False)
+        
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
         speaker_id = self.speaker.id
@@ -47,84 +39,79 @@ class Table:
             player.id = i
             i += 1
 
-    # gere les files d'attentes
     def manage_file(self):
-        while self.waiting:
-            self.add_player(self.waiting.pop(0))
-        while self.ply_disconct: #players disconnected
-            self.delete(self.ply_disconct.pop(0))
+        """ gere les joueurs qui attendent d'entrer ou sortir de la table"""
+        self.in_change=True
+        while self.wait_in:
+            self.add_player(self.wait_in.pop(0))
+        while self.wait_out: #players disconnected
+            self.delete(self.wait_out.pop(0))
+        self.in_change=False
         
-
     def set_up_game(self):
-        #protocole deconnexion forcée client cf tournoi.changement_table
-        self.in_game=False   
+        self.check_player_stack()        
+        self.check_len()
+        self.protocole_deconnexion()
+        if not self.end:
+            self.initialisation_attributs()
+            self.game()
+    
+    def protocole_deconnexion(self):
+        """protocole deconnexion forcée client cf tournoi.changement_table"""
+        self.in_game=False
+        if self.redistribution==True:
+            salon=self.players[0].tournoi # moche à changer
+            salon.redistribution(self)  
         time.sleep(10)        
         if not self.in_change:
             self.in_game=True
         else:
-            self.pause_game() #renommer pause_game
-
-        self.in_change=True
-        self.manage_file() # gere les files d'attentes
-        self.in_change=False
-        
-        #initialisation des variables du round
-        for player in self.players:
-            player.hand = []
-            player.is_all_in = player.is_folded = False
-            player.final_hand = None
-            player.on_going_bet=0
-        self.dealer = self.next_player(self.dealer)
-        self.speaker = self.next_player(self.speaker)
-        self.pots = []
-        self.cards = []
-        self.deck = Deck()
-        self.final_winners= []
-        self.final_hand=False
-        
+            self.pause_game() 
+        self.manage_file()
+    
     def pause_game(self):
         while self.in_change: 
-            time.sleep(10)
-        if self.end:
-            return
+            time.sleep(2)
     
-
-    #à modifier...
+    def check_len(self):
+        """verifie si il reste des joueurs dans la table"""
+        self.manage_file() 
+        if len(self.players) == 1:
+            unique_joueur=self.players[0]
+            salon=unique_joueur.tournoi
+            if len(salon.tables) == 1:
+                self.end=True
+                salon.vainqueur(unique_joueur)
+            else:
+                salon.gerer_joueur_seul(self, unique_joueur) 
+        self.manage_file()
+        
     def delete(self, player):
         print("ciao ", player.name)
-        #modifier cela par une deconnexion de joueur car sinon pas d'autorisation sur les varaible interdites threads
         self.players.remove(player)
-        #player.tournoi.supprimer_joueur(player)
-        self.give_players_ids() 
         self.nb_players-=1
-
+        self.give_players_ids() 
+        
     def add_player(self, player):
-        print("hello", player.name)
+        print("hello", player.name, "has joined", self)
         self.players.append(player)
-        self.give_players_ids()
+        player.id=self.nb_players
         self.nb_players+=1
         player.table=self
     
     def __len__(self):
-        return len(self.players) + len(self.waiting) - len(self.ply_disconct)
+        return len(self.players) + len(self.wait_in) - len(self.wait_out)
 
     def check_player_stack(self):
         for player in self.players:
             if player.stack < self.bb:
                 self.delete(player)
+                player.connexion.close()
                 
     def next_player(self, player):
         return self.players[(player.id + 1) % self.nb_players]
-
-    def initialise_round(self):
-        for player in self.players:
-            player.on_going_bet = 0
-        self.speaker = self.next_player(self.dealer)
         
     def game(self):
-        all_folded = False
-        self.set_up_game()
-        #self.check_player_stack()
         for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
             round_ob()
             self.manage_pots()
@@ -133,7 +120,12 @@ class Table:
                 break
         self.final_hand=True
         self.give_pots(all_folded)
-
+    
+    def pre_flop(self):
+        print(f'Dealer : {self.dealer.name}')
+        self.deal_and_blinds()
+        self.players_speak(self.bb)
+    
     def deal_and_blinds(self):
         for player in self.players * 2:
             player.hand.append(self.deck.deal())
@@ -142,25 +134,24 @@ class Table:
             self.speaker.speaks(blind_amount, blind=True)
             self.speaker = self.next_player(self.speaker)
         f_s.initialiser_actualisation(self, self.sb, self.bb)  # envoie aux clients les infos du tour cf fonction_serveur
-        time.sleep(1)
-
-    def pre_flop(self):
-        print(f'Dealer : {self.dealer.name}')
-        self.deal_and_blinds()
-        self.players_speak(self.bb)
-
+    
     def flop(self):
         self.initialise_round()
         self.cards += [self.deck.deal() for _ in range(3)]
         print([str(card) for card in self.cards])
         f_s.actualiser(self)
-        time.sleep(1)
         self.players_speak()
+
+    def initialise_round(self):
+        for player in self.players:
+            player.on_going_bet = 0
+        self.speaker = self.next_player(self.dealer)
 
     def turn_river(self):
         self.initialise_round()
         self.cards += [self.deck.deal()]
         print([str(card) for card in self.cards])
+        f_s.actualiser(self)
         self.players_speak()
 
     def players_speak(self, mise=0, raiser=None):
@@ -172,7 +163,6 @@ class Table:
             action, amount = player.speaks(mise)
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
             f_s.actualiser(self)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur 
-            time.sleep(0.3)
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
 
@@ -210,7 +200,6 @@ class Table:
         winners = r_f.maxes(players_hands, key=lambda players_hand: players_hand[0])  # max selon la main du joueur
         return [pot_winner[1] for pot_winner in winners]
 
-
     def give_pots(self, all_folded=False):
         """Répartit chaque pot à ses vainqueurs"""
         if all_folded:
@@ -231,5 +220,18 @@ class Table:
                 n -= 1
             self.final_winners= pot_winners[:]
         f_s.actualiser(self)
-        time.sleep(0.3)
 
+    def initialisation_attributs(self):
+        self.all_folded=False
+        for player in self.players:
+            player.hand = []
+            player.is_all_in = player.is_folded = False
+            player.final_hand = None
+            player.on_going_bet=0
+        self.dealer = self.next_player(self.dealer)
+        self.speaker = self.next_player(self.speaker)
+        self.pots = []
+        self.cards = []
+        self.deck = Deck()
+        self.final_winners= []
+        self.final_hand=False

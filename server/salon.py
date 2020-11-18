@@ -52,7 +52,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
     
 
     def ask_ready_and_name(self, joueur): 
-        joueur.connexion.settimeout(60)  #on laisse 1 min pour que le joueur donne son nom
+        joueur.connexion.settimeout(600)  #on laisse 1 min pour que le joueur donne son nom
         joueur.name=self.ask_name(joueur)
         if not self.started:
             self.liste_noms.append(joueur.name)

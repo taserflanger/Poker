@@ -14,10 +14,10 @@ class Player:
         self.connexion=None
         self.infos_connexion= None
         self.ready=False
-        self.disconct=False #disconnected
+        self.disco=False #disconnected
         self.table=None
         self.tournoi=None
-        self.disconct=False
+        self.disco=False
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
@@ -25,7 +25,7 @@ class Player:
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur       
             try_send(self, "action".encode("utf-8"))
             time.sleep(0.3)
-            player_action = try_recv(self) if not self.disconct else "f" 
+            player_action = try_recv(self) if not self.disco else "f" 
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'f':
