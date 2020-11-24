@@ -1,6 +1,3 @@
-from deck import Deck
-
-
 import random
 from deck import Deck
 from hand_5 import Hand_5
@@ -25,6 +22,7 @@ class Table:
         self.deck = Deck()
         self.cards = []
         self.pots = []
+        self.history = []
 
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
@@ -59,6 +57,7 @@ class Table:
 
     def game(self):
         all_folded = False
+        self.history.append([])
         self.set_up_game()
         for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
             round_ob()
@@ -99,7 +98,8 @@ class Table:
                 return
             if player == raiser or player.is_all_in or player.is_folded:
                 continue
-            action, amount = player.speaks(mise)
+            action, amount, decision_time = player.speaks(mise)
+            self.history[-1].append((player.name, action, amount, decision_time))
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
@@ -137,7 +137,6 @@ class Table:
         players_hands = [(player.final_hand, player) for player in players if not player.is_folded]
         winners = r_f.maxes(players_hands, key=lambda players_hand: players_hand[0])  # max selon la main du joueur
         return [pot_winner[1] for pot_winner in winners]
-
 
     def give_pots(self, all_folded=False):
         """Répartit chaque pot à ses vainqueurs"""

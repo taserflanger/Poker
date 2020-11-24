@@ -1,3 +1,7 @@
+from inputimeout import inputimeout, TimeoutOccurred
+from time import time
+
+
 class Player:
 
     def __init__(self, player_name, player_stack):
@@ -15,24 +19,36 @@ class Player:
         c = "check"
         if bet > 0:
             c = f"{bet} to call {amount_to_call}"
+
+        lastimeout = 120
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
-            while player_action not in ['f', 'c', 'r'] or (player_action=='r' and bet >= self.stack):
-                player_action = input(f"{self.name} : {c} (c), raise (r), fold (f) ?            ("
-                                      f"stack: {self.stack})\n")
-                if player_action=='r' and bet >= self.stack:
+            while player_action not in ['f', 'c', 'r'] or (player_action == 'r' and bet >= self.stack):
+                a = time()
+                try:
+                    player_action = inputimeout(
+                        prompt=f"{self.name} : {c} (c), raise (r), fold (f) ?        "
+                               f"({round(lastimeout)}s left --- stack: {self.stack})\n",
+                        timeout=lastimeout)
+                except TimeoutOccurred:
+                    print("too slow to make a decision")
+                    player_action = "f"
+                lastimeout -= time() - a
+                if player_action == 'r' and bet >= self.stack:
                     print("not enough money to reraise")
+        decision_time = 120 - lastimeout
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'r':
             bet = self.raises(bet)
         elif player_action == 'f':
-            return self.folds()
+            self.is_folded = True
+            bet = 0
         self.stack -= bet
         self.on_going_bet += bet
         if self.stack == 0:
             self.is_all_in = True
         self.print_action(player_action, bet, blind)
-        return player_action, bet
+        return player_action, bet, decision_time
 
     def calls(self, bet):
         if bet > self.stack:
@@ -41,19 +57,20 @@ class Player:
 
     def raises(self, bet):
         raise_val = float("inf")
-        while raise_val > self.stack-bet:
-            raise_val = int(input(f"Raise? (max-raise: {self.stack-bet})  "))
+        while raise_val > self.stack - bet:
+            raise_val = int(input(f"Raise? (max-raise: {self.stack - bet})  "))
         return raise_val + bet
 
-    def folds(self):
-        self.is_folded = True
-        print(f"{self.name} folds")
-        return 'f', 0
-
     def print_action(self, player_action, bet, blind):
+        txt = "not implemented error"
         if self.is_all_in:
-            print(f"{self.name} is now all in and bets {bet} ")
+            txt = f"{self.name} is now all in and bets {bet} "
         elif blind:
-            print(f"{self.name} bets {bet}")
-        else:
-            print({'c': 'calls', 'r': 'raises'}[player_action] + f" and bets {bet}.")
+            txt = f"{self.name} puts a blind of {bet}"
+        elif player_action == "c":
+            txt = f"calls for {bet}" if bet > 0 else f"checks"
+        elif player_action == "r":
+            txt = f"raises for {bet}."
+        elif player_action == "f":
+            txt = f"folds"
+        print(self.name, txt)
