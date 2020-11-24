@@ -12,12 +12,15 @@ class Player:
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
         bet = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
-        c = "call"
-        if bet == 0:
-            c = "check"
+        c = "check"
+        if bet > 0:
+            c = f"{bet} to call {amount_to_call}"
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
-            while player_action not in ['f', 'c', 'r']:
-                player_action = input(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n")
+            while player_action not in ['f', 'c', 'r'] or (player_action=='r' and bet >= self.stack):
+                player_action = input(f"{self.name} : {c} (c), raise (r), fold (f) ?            ("
+                                      f"stack: {self.stack})\n")
+                if player_action=='r' and bet >= self.stack:
+                    print("not enough money to reraise")
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'r':
@@ -38,8 +41,8 @@ class Player:
 
     def raises(self, bet):
         raise_val = float("inf")
-        while raise_val > self.stack:
-            raise_val = int(input(f"Raise? (current stack: {self.stack})  "))
+        while raise_val > self.stack-bet:
+            raise_val = int(input(f"Raise? (max-raise: {self.stack-bet})  "))
         return raise_val + bet
 
     def folds(self):
