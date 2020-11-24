@@ -7,7 +7,7 @@ from random import randint
 
 def try_recv(joueur):
     client=joueur.connexion
-    salon=joueur.tournoi
+    salon=joueur.salon
     if not joueur.disco:
         try:
             msg_reçu=client.recv(1024).decode("utf-8")
@@ -19,7 +19,7 @@ def try_recv(joueur):
 
 def try_send(joueur, message):
     client=joueur.connexion
-    salon=joueur.tournoi
+    salon=joueur.salon
     if not joueur.disco:
         try:
             client.send(message)
@@ -71,7 +71,7 @@ def gerer_table(table):
         table.set_up_game()
     return
 
-def determiner_joueurs_mal_repartis(repartition_des_tables, reference): #repartition_des_tables est une liste contenant    # le nbr de joueurs par table
+def give_chaises_dispo(repartition_des_tables, reference): #repartition_des_tables est une liste contenant    # le nbr de joueurs par table
         nbr_joueurs_mal_repartis=0
         for taille_table in repartition_des_tables:
             nbr_joueurs_mal_repartis += abs(taille_table - reference)
@@ -87,13 +87,13 @@ def repartion_joueurs_sur_tables(nbr_joueurs, n_max):
     
 
     #interresant car recursif  ==> à présenter devant le jury
-    nbr_joueurs_mal_repartis = determiner_joueurs_mal_repartis(repartition_tables, min (repartition_tables) ) 
+    nbr_joueurs_mal_repartis = give_chaises_dispo(repartition_tables, min (repartition_tables) ) 
     while nbr_joueurs_mal_repartis >= nbr_tables:   
         id_table_min= repartition_tables.index( min (repartition_tables) )
         id_table_max= repartition_tables.index( max (repartition_tables) )
         repartition_tables[id_table_min]+=1
         repartition_tables[id_table_max]-=1
-        nbr_joueurs_mal_repartis = determiner_joueurs_mal_repartis(repartition_tables, min(repartition_tables))
+        nbr_joueurs_mal_repartis = give_chaises_dispo(repartition_tables, min(repartition_tables))
  
     return repartition_tables
 
@@ -105,7 +105,7 @@ def supprimer_thread(thread):
 """
 def demander_reequilibrage(salon):  
     repartit_tables=[len(table.players) for table in salon.tables]
-    nbr_j_mal_repartis=determiner_joueurs_mal_repartis(repartit_tables, min(repartit_tables))
+    nbr_j_mal_repartis=give_chaises_dispo(repartit_tables, min(repartit_tables))
     #joueur_seul= True if sum([True if len(salon.players)==1 else False]) else False
     if nbr_j_mal_repartis >= len(salon.tables) and len(salon.tables)>=2:  
         transfert_joueur(salon.tables)
@@ -141,8 +141,6 @@ def give_table_min_max(list_tables, booleen=True): #mettre en pause les autres t
     table_max=list_tables[-1]
     return table_min, table_max if booleen else table_min
         
-
-
 
 
 

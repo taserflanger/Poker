@@ -24,8 +24,8 @@ class Table:
         self.speaker = self.next_player(self.dealer)
         self.sb, self.bb = small_blind, big_blind
         self.deck = Deck()
-        self.cards, self.pots, self.final_winners, self.wait_in, self.wait_out=map(list, [])
-        self.final_hand, self.in_change, self.in_game, self.end, self.redistribution=map(bool, False)
+        self.cards, self.pots, self.final_winners, self.wait_in, self.wait_out=map(list, ([] for i in range(5)))
+        self.final_hand, self.in_change, self.in_game, self.end, self.redistribution=map(bool, (False for i in range(5)))
         
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
@@ -45,6 +45,7 @@ class Table:
         while self.wait_in:
             self.add_player(self.wait_in.pop(0))
         while self.wait_out: #players disconnected
+            #print(self.wait_out, self.wait_in)
             self.delete(self.wait_out.pop(0))
         self.in_change=False
         
@@ -60,7 +61,7 @@ class Table:
         """protocole deconnexion forcée client cf tournoi.changement_table"""
         self.in_game=False
         if self.redistribution==True:
-            salon=self.players[0].tournoi # moche à changer
+            salon=self.players[0].salon # moche à changer
             salon.redistribution(self)  
         time.sleep(10)        
         if not self.in_change:
@@ -77,8 +78,9 @@ class Table:
         """verifie si il reste des joueurs dans la table"""
         self.manage_file() 
         if len(self.players) == 1:
+            print('len1')
             unique_joueur=self.players[0]
-            salon=unique_joueur.tournoi
+            salon=unique_joueur.salon
             if len(salon.tables) == 1:
                 self.end=True
                 salon.vainqueur(unique_joueur)
@@ -112,6 +114,7 @@ class Table:
         return self.players[(player.id + 1) % self.nb_players]
         
     def game(self):
+        all_folded=False
         for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
             round_ob()
             self.manage_pots()
@@ -222,7 +225,6 @@ class Table:
         f_s.actualiser(self)
 
     def initialisation_attributs(self):
-        self.all_folded=False
         for player in self.players:
             player.hand = []
             player.is_all_in = player.is_folded = False

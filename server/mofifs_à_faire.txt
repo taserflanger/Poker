@@ -4,9 +4,7 @@ IP internet: 176.160.246.2
 bug:
 si raise<call
 si raise>player.stack
-trouver moyen d'actualiser
-mettre sur internet
-sortir supprimer joueur de salon
+dealer
 cahnger tournoi en salon
 
 
