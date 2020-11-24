@@ -1,6 +1,6 @@
 class Player:
 
-    def __init__(self, player_name, player_stack, is_bot=False):
+    def __init__(self, player_name, player_stack):
         self.name = player_name
         self.stack = player_stack
         self.id = None  # position sur la table
@@ -8,23 +8,16 @@ class Player:
         self.on_going_bet = 0
         self.is_all_in = self.is_folded = False
         self.final_hand = None
-        self.is_bot = is_bot
-        self.bot = None
-        if self.is_bot:
-            self.bot = Bot()
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
         bet = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
-        c = "check"
-        if bet > 0:
-            c = f"{bet} to call {amount_to_call}"
+        c = "call"
+        if bet == 0:
+            c = "check"
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
-            while player_action not in ['f', 'c', 'r'] or (player_action=='r' and bet >= self.stack):
-                player_action = input(f"{self.name} : {c} (c), raise (r), fold (f) ?            ("
-                                      f"stack: {self.stack})\n")
-                if player_action=='r' and bet >= self.stack:
-                    print("not enough money to reraise")
+            while player_action not in ['f', 'c', 'r']:
+                player_action = input(f"{self.name}, {amount_to_call} : {c} (c), raise (r), fold (f) ?\n")
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'r':
@@ -45,8 +38,8 @@ class Player:
 
     def raises(self, bet):
         raise_val = float("inf")
-        while raise_val > self.stack-bet:
-            raise_val = int(input(f"Raise? (max-raise: {self.stack-bet})  "))
+        while raise_val > self.stack:
+            raise_val = int(input(f"Raise? (current stack: {self.stack})  "))
         return raise_val + bet
 
     def folds(self):
