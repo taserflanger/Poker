@@ -24,6 +24,10 @@ class Table:
         self.pots = []
         self.history = []
 
+        # rajouter les joueurs à la table
+        for p in self.players:
+            p.table = self
+
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
         speaker_id = self.speaker.id
@@ -99,10 +103,19 @@ class Table:
             if player == raiser or player.is_all_in or player.is_folded:
                 continue
             action, amount, decision_time = player.speaks(mise)
-            self.history[-1].append((player.name, action, amount, decision_time))
+            self.history[-1].append(
+                (self.distance_to_dealer(player), ["r", "c", "f"].index(action), amount, decision_time)
+            )
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
+
+    def distance_to_dealer(self, player):
+        d=0
+        for p in self:
+            if p == self.dealer:
+                break
+        return d % self.nb_players
 
     def active_players(self):
         return sum([True for player in self.players if not (player.is_folded or player.is_all_in)])

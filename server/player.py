@@ -1,5 +1,9 @@
+from itertools import combinations
+
 from inputimeout import inputimeout, TimeoutOccurred
 from time import time
+
+from hand_5 import Hand_5
 
 
 class Player:
@@ -8,6 +12,7 @@ class Player:
         self.name = player_name
         self.stack = player_stack
         self.id = None  # position sur la table
+        self.table = None #table attribuée (None par défaut)
         self.hand = []
         self.on_going_bet = 0
         self.is_all_in = self.is_folded = False
@@ -19,8 +24,28 @@ class Player:
         c = "check"
         if bet > 0:
             c = f"{bet} to call {amount_to_call}"
+        a = time()
+        player_action = self.ask_action(bet, blind, c, player_action, 120)
+        decision_time = time() - a
+        # on calcule le temps de décision car ask_action est implémenté sans timer pour les bots
+        if player_action == 'c' or blind:
+            bet = self.calls(bet)
+        if player_action == 'r':
+            a = time()
+            bet, player_action = self.ask_amount(bet, 120 - decision_time)
+            decision_time += time() - a
+        if player_action == 'f':
+            self.is_folded = True
+            bet = 0
+        self.stack -= bet
+        self.on_going_bet += bet
+        if self.stack == 0:
+            self.is_all_in = True
+        self.print_action(player_action, bet, blind)
+        return player_action, bet, decision_time
 
-        lastimeout = 120
+    def ask_action(self, bet, blind, c, player_action, max_time):
+        lastimeout = max_time
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
             while player_action not in ['f', 'c', 'r'] or (player_action == 'r' and bet >= self.stack):
                 a = time()
@@ -35,31 +60,21 @@ class Player:
                 lastimeout -= time() - a
                 if player_action == 'r' and bet >= self.stack:
                     print("not enough money to reraise")
-        decision_time = 120 - lastimeout
-        if player_action == 'c' or blind:
-            bet = self.calls(bet)
-        elif player_action == 'r':
-            bet = self.raises(bet)
-        elif player_action == 'f':
-            self.is_folded = True
-            bet = 0
-        self.stack -= bet
-        self.on_going_bet += bet
-        if self.stack == 0:
-            self.is_all_in = True
-        self.print_action(player_action, bet, blind)
-        return player_action, bet, decision_time
+        return player_action
 
     def calls(self, bet):
         if bet > self.stack:
             bet = self.stack
         return bet
 
-    def raises(self, bet):
+    def ask_amount(self, bet, remaining_time):
         raise_val = float("inf")
         while raise_val > self.stack - bet:
-            raise_val = int(input(f"Raise? (max-raise: {self.stack - bet})  "))
-        return raise_val + bet
+            try:
+                raise_val = int(inputimeout(f"Raise? (max-raise: {self.stack - bet})  "))
+            except TimeoutOccurred:
+                return 0, "f"
+        return raise_val + bet, "r"
 
     def print_action(self, player_action, bet, blind):
         txt = "not implemented error"
@@ -74,3 +89,9 @@ class Player:
         elif player_action == "f":
             txt = f"folds"
         print(self.name, txt)
+
+    def get_current_best_hand(self):
+        # ne fonctionne qu’à partir du flop
+        if len(self.table.cards) == 0:
+            return -1
+        return max([Hand_5(i) for i in combinations(self.table.cards + self.hand, 5)])
