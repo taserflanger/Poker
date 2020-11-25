@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import socket
 import json
 #adresseIP_server_andres = "192.168.1.11"	# Ici, le poste local

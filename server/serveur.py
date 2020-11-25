@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import socket
 from tournoi import Tournoi
 serveur=socket.socket(socket.AF_INET, socket.SOCK_STREAM)  

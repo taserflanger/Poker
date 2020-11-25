@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import time
 import threading
 from player import Player

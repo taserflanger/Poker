@@ -1,4 +1,5 @@
-import socket
+# -*- coding: utf-8 -*-
+ socket
 import threading
 import select
 import time

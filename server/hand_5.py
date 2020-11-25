@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 ATTENTION : l'opérateur '==' ne correspond pas à l'égalité exacte de la main (d'ailleurs impossible), mais à l'égalité
 de la valeur de la main

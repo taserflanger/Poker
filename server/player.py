@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from fonctions_serveur import try_send, try_recv
 import json
 import time
