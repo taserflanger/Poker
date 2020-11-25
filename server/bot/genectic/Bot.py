@@ -1,21 +1,40 @@
+from typing import List, Union
+import nptyping
 import numpy as np
+from nptyping import NDArray
 from bot.genectic.utils import relu, softmax
 from player import Player
 
 
 class Bot(Player):
-    def __init__(self, player_name, player_stack, sizes):
+    def __init__(self, player_name: str,
+                 player_stack: int,
+                 sizes: List[int],
+                 W: Union[str, List[NDArray]] = "random",
+                 b: Union[str, List[NDArray]] = "random",
+                 f: Union[str, List[NDArray]] = "random"):
         """
         bot dont les paramètres du réseau de neurones se modifient génétiquement
+        :param player_name: nom du bot
         :param sizes: tailles des layers
+        :param W: weights (doivent être dans les bonnes dimensions par rapport à sizes)
+        :param b: biases (idem)
+        :param f: fonction de morph des unités d’histoire
         """
         super().__init__(player_name, player_stack)
         self.sizes = [5] + sizes + [4]
         self.nb_layers = len(self.sizes)
-        self.W = [np.random.randn(self.sizes[k - 1], self.sizes[k]) for k in range(self.nb_layers)]
-        self.b = [np.random.randn(self.sizes[k]) for k in range(self.nb_layers)]
+        self.W = [np.random.randn(self.sizes[k - 1], self.sizes[k]) for k in
+                  range(self.nb_layers)] if W == "random" else W
+        self.b = [np.random.randn(self.sizes[k]) for k in range(self.nb_layers)] if b == "random" else b
         self.L = [np.zeros((self.sizes[k])) for k in range(self.nb_layers)]
-        self.f = np.random.randn(4)
+        self.f = [np.random.randn(self.sizes[0], self.sizes[1]) for _ in range(4)] if f == "random" else f
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return self.name
 
     def calculate_hidden_layer(self, k):
         """
@@ -23,7 +42,6 @@ class Bot(Player):
         :param k: 1<k<L
         :return: hidden layer k
         """
-
         self.L[k] = relu(self.W[k].transpose() @ self.L[k - 1] + self.b[k])
 
     def history_mapper(self, x):
@@ -40,10 +58,11 @@ class Bot(Player):
         :param history:
         :return:
         """
-        W1 = self.W[1]
+        metaW = [self.W[1]]
         for i in range(len(history) - 1):
-            W1 = self.history_mapper(W1)
-            W1 = np.concatenate([W1, self.W[1]])
+            metaW = list(map(self.history_mapper, metaW))
+            metaW.append(self.W[1])
+        W1 = np.concatenate(metaW)
         self.L[1] = W1.transpose() @ history.flatten() + self.b[1]
 
     def calculate_last_layer(self):
@@ -58,15 +77,26 @@ class Bot(Player):
         :return:
         """
         # calculate the first layer form history
-        self.calculate_first_layer(np.array(history))
-        for k in range(2, self.nb_layers):
+        self.calculate_first_layer(np.array(list(history)))
+        for k in range(2, self.nb_layers-1):
             self.calculate_hidden_layer(k)
         self.calculate_last_layer()
 
     def ask_action(self, bet, blind, c, player_action, max_time):
-        if self.stack > bet:
-            return np.random.choice(["f", "c", "r"])
-        return np.random.choice(["f", "c"])
+        if blind:
+            return "c"
+        else:
+            self.forward_propagate(reversed(self.table.history))
+            action_layer = self.L[-1][1:]
+            # TODO ajouter un moyen virtuel à un bot de pouvoir jouer sur le temps de réponse
+            # à priori tant qu’on ne le fait pas jouer contre des gens chez qui l’influence du temps
+            # compte, ça na marchera pas
+            action = ["f", "c", "r"][action_layer.argmax()]
+            if action == "r" and self.stack <= bet:
+                action = "c"
+            return action
 
     def ask_amount(self, bet, remaining_time):
-        return np.ramdom.randint(0, self.stack - bet)
+        # pas besoin de recalculer le dernier layer vu qu’on demande toujours
+        # la donnée de amount après avoir demandé l’action
+        return max(bet+1, min(self.stack, self.L[-1][0])), "r"

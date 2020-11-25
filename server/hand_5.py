@@ -13,7 +13,7 @@ low_comb_values (list) = le reste des cartes (elles forment des hauteurs sauf da
 from deck import Deck
 from itertools import combinations
 import time
-import random_functions as r_f
+import utils as r_f
 
 class Hand_5:
     """Toute fonction commençant par c_ signifie 'compare'"""
@@ -28,6 +28,11 @@ class Hand_5:
     types_ranking = [False, 'high', 'pair', 'two_pair', 'three', 'straight', 'flush', 'full', 'four', 'straight_flush']
     # on met le False en première position pour la méthode get_type()
 
+    def __str__(self):
+        return self.type
+
+    def __repr__(self):
+        return self.type
 
     def get_type(self):
         """Renvoie le type de main """

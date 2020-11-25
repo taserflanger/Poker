@@ -37,12 +37,15 @@ class Player:
         if player_action == 'f':
             self.is_folded = True
             bet = 0
+        self.finalize_action(bet, blind, player_action)
+        return player_action, bet, decision_time
+
+    def finalize_action(self, bet, blind, player_action):
         self.stack -= bet
         self.on_going_bet += bet
         if self.stack == 0:
             self.is_all_in = True
         self.print_action(player_action, bet, blind)
-        return player_action, bet, decision_time
 
     def ask_action(self, bet, blind, c, player_action, max_time):
         lastimeout = max_time
@@ -55,11 +58,12 @@ class Player:
                                f"({round(lastimeout)}s left --- stack: {self.stack})\n",
                         timeout=lastimeout)
                 except TimeoutOccurred:
-                    print("too slow to make a decision")
+                    #print("too slow to make a decision")
                     player_action = "f"
                 lastimeout -= time() - a
                 if player_action == 'r' and bet >= self.stack:
-                    print("not enough money to reraise")
+                    #print("not enough money to reraise")
+                    pass
         return player_action
 
     def calls(self, bet):
@@ -79,19 +83,19 @@ class Player:
     def print_action(self, player_action, bet, blind):
         txt = "not implemented error"
         if self.is_all_in:
-            txt = f"{self.name} is now all in and bets {bet} "
+            txt = f"is now all in and bets {bet}"
         elif blind:
-            txt = f"{self.name} puts a blind of {bet}"
+            txt = f"puts a blind of {bet}"
         elif player_action == "c":
             txt = f"calls for {bet}" if bet > 0 else f"checks"
         elif player_action == "r":
             txt = f"raises for {bet}."
         elif player_action == "f":
             txt = f"folds"
-        print(self.name, txt)
+        #print(self.name, txt, f"     (new stack: {self.stack})")
 
     def get_current_best_hand(self):
         # ne fonctionne qu’à partir du flop
         if len(self.table.cards) == 0:
             return -1
-        return max([Hand_5(i) for i in combinations(self.table.cards + self.hand, 5)])
+        return Hand_5.types_ranking.index(max([Hand_5(i) for i in combinations(self.table.cards + self.hand, 5)]).type)

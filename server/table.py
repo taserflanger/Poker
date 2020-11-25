@@ -1,13 +1,20 @@
 import random
+from typing import List
+
 from deck import Deck
 from hand_5 import Hand_5
 from itertools import combinations
-import random_functions as r_f
+import utils
+from player import Player
 
 
 class Table:
 
-    def __init__(self, table_players, small_blind, big_blind, id_dealer="random"):
+    def __init__(self,
+                 table_players: List[Player],
+                 small_blind: int,
+                 big_blind: int,
+                 id_dealer="random"):
         self.nb_players = len(table_players)
         self.players = table_players
         self.nb_players = len(self.players)
@@ -41,17 +48,26 @@ class Table:
             i += 1
 
     def set_up_game(self):
+
         for player in self.players:
             player.hand = []
             player.is_all_in = player.is_folded = False
+            if player.stack == 0:
+                player.is_folded = True
             player.final_hand = None
         self.dealer = self.next_player(self.dealer)
-        self.speaker = self.next_player(self.speaker)
+        while self.dealer.is_folded:
+            self.dealer = self.next_player(self.dealer)
+        #print(f"Dealer is {self.dealer.name}")
+        self.speaker = self.next_player(self.speaker) # ?? je ne comprends pas ça
         self.pots = []
         self.cards = []
-        self.deck = Deck()
+        if len(self.deck) < self.nb_players*2 + 5:
+            # on remélange tout le paquet lorsque le paquet précédent est fini
+            # ou pas assez de cartes restantes
+            self.deck = Deck()
 
-    def next_player(self, player):
+    def next_player(self, player: Player):
         return self.players[(player.id + 1) % self.nb_players]
 
     def initialise_round(self):
@@ -61,7 +77,6 @@ class Table:
 
     def game(self):
         all_folded = False
-        self.history.append([])
         self.set_up_game()
         for round_ob in [self.pre_flop, self.flop, self.turn_river, self.turn_river]:
             round_ob()
@@ -77,23 +92,28 @@ class Table:
         for i in range(2):
             blind_amount = [self.sb, self.bb][i]
             self.speaker.speaks(blind_amount, blind=True)
+            self.history.append(
+                (self.distance_to_dealer(self.speaker),
+                 0, blind_amount, 0,
+                 -1)
+            )
             self.speaker = self.next_player(self.speaker)
 
     def pre_flop(self):
-        print(f'Dealer : {self.dealer.name}')
+        #print(f'Dealer : {self.dealer.name}')
         self.deal_and_blinds()
         self.players_speak(self.bb)
 
     def flop(self):
         self.initialise_round()
         self.cards += [self.deck.deal() for _ in range(3)]
-        print([str(card) for card in self.cards])
+        #print([str(card) for card in self.cards])
         self.players_speak()
 
     def turn_river(self):
         self.initialise_round()
         self.cards += [self.deck.deal()]
-        print([str(card) for card in self.cards])
+        #print([str(card) for card in self.cards])
         self.players_speak()
 
     def players_speak(self, mise=0, raiser=None):
@@ -103,19 +123,25 @@ class Table:
             if player == raiser or player.is_all_in or player.is_folded:
                 continue
             action, amount, decision_time = player.speaks(mise)
-            self.history[-1].append(
-                (self.distance_to_dealer(player), ["r", "c", "f"].index(action), amount, decision_time)
+            self.history.append(
+                (self.distance_to_dealer(player),
+                 ["r", "c", "f"].index(action),
+                 amount,
+                 decision_time,
+                 player.get_current_best_hand())
             )
+            amount_to_call = self.speaker.on_going_bet
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
             if action == 'r':
-                return self.players_speak(amount, raiser=player)
+                return self.players_speak(amount_to_call, raiser=player)
 
     def distance_to_dealer(self, player):
         d=0
-        for p in self:
-            if p == self.dealer:
-                break
-        return d % self.nb_players
+        i = self.players.index(player)
+        while self.players[i] != self.dealer:
+            i=(i+1)%self.nb_players
+            d+=1
+        return d
 
     def active_players(self):
         return sum([True for player in self.players if not (player.is_folded or player.is_all_in)])
@@ -148,13 +174,14 @@ class Table:
     def get_winners(self, players):
         """Prend une liste de joueurs en entrée, renvoie les vainqueurs (meilleures mains finales)"""
         players_hands = [(player.final_hand, player) for player in players if not player.is_folded]
-        winners = r_f.maxes(players_hands, key=lambda players_hand: players_hand[0])  # max selon la main du joueur
+        winners = utils.maxes(players_hands, key=lambda players_hand: players_hand[0])  # max selon la main du joueur
         return [pot_winner[1] for pot_winner in winners]
 
     def give_pots(self, all_folded=False):
         """Répartit chaque pot à ses vainqueurs"""
         if all_folded:
             winner = [player for player in self.players if not player.is_folded][0]
+            #print(f"Everyone folded, {winner} wins {sum(v for v, _ in self.pots)}")
         else:
             self.get_final_hands()
         for pot_value, pot_players in self.pots:
@@ -165,6 +192,7 @@ class Table:
             n = len(pot_winners)
             for player in pot_winners:
                 value_for_player = pot_value // n  # au cas où le pot n'est pas divisible par n
+                #print(f"{player.name} wins {pot_value}")
                 player.stack += value_for_player
                 pot_value -= value_for_player
                 n -= 1

@@ -11,3 +11,6 @@ class Card:
 
     def __str__(self):
         return Card.dic_values[self.value] + ' of ' + Card.dic_suits[self.suit]
+
+    def __repr__(self):
+        return Card.dic_values[self.value] + ' of ' + Card.dic_suits[self.suit]

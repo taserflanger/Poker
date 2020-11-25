@@ -21,3 +21,6 @@ class Deck:
         self.cards = self.cards[:-1]
 
         return card
+
+    def __len__(self):
+        return len(self.cards)

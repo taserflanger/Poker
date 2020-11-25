@@ -1,11 +1,18 @@
-from bot.genectic.Bot import Bot
-import numpy as np
+from bot.genectic.GenerationManager import GenerationManager
+from numpy import array
 
-b = Bot("TheBot", 100, [100, 200])
-b.forward_propagate([
-    [1, 0, 0, 12, 20],
-    [0, 1, 0, 12, 25],
-    [1, 0, 0, 12, 20],
-    [1, 0, 0, 12, 20],
-])
-print(b.L[-1])
+engine = GenerationManager(sizes=[50, 50], mutation_factor=1)
+Params = {"W":None, "b": None, "f": None}
+
+# read params
+for s in "W", "b","f":
+    with open(f"bot/genectic/{s}.csv") as file:
+        Params[s] = eval(file.read())
+
+W, b, f = engine.train(100, 100, 5, 5, 1)
+
+# write params
+for s, X in zip(("W", "b", "f"), W, b, f):
+    with open(f"bot/genectic/{s}.csv") as file:
+        file.write(str(X))
+
