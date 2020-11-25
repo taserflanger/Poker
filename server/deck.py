@@ -21,3 +21,4 @@ class Deck:
         self.cards = self.cards[:-1]
 
         return card
+print("test_linode_pull")
