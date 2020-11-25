@@ -33,7 +33,7 @@ class Tournoi(Salon): #self.n_max est le nombre maximal de joueur par table
     def remplir_tables(self, repartition_):
         marqueur=0
         for taille_table in repartition_:
-            self.créer_table(self.players[marqueur : marqueur+taille_table])
+            self.creer_table(self.players[marqueur : marqueur+taille_table])
             marqueur+=taille_table
 
     def vainqueur(self, winner):

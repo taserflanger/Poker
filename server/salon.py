@@ -74,7 +74,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         try_send(joueur, "ok".encode("utf-8"))
         return msg_reçu
    
-    def créer_table(self, joueurs):
+    def creer_table(self, joueurs):
         nouvelle_table=Table(joueurs, self.sb, self.bb)  # qui contient les joueurs de marqueurs à marqueurs + i
         for joueur in nouvelle_table.players:
                 joueur.table=nouvelle_table

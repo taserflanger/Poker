@@ -45,7 +45,7 @@ class Cash_game(Salon):  #à  faire
         repartit_tables=[len(table) for table in self.tables]
         current_wait_file=self.wait_file[:]  #empeche les actualisations qui ferait tout bugger
         while len(current_wait_file) > give_chaises_dispo(repartit_tables, self.n_max):
-            self.créer_table(current_wait_file[:self.n_max])
+            self.creer_table(current_wait_file[:self.n_max])
             for _ in range(self.n_max):
                self.wait_file.pop(0)
             current_wait_file=self.wait_file[:]
