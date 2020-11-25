@@ -126,7 +126,7 @@ class Table:
         self.give_pots(all_folded)
     
     def pre_flop(self):
-        print(f'Dealer : {self.dealer.name}')
+        print("Dealer", self.dealer.name)
         self.deal_and_blinds()
         self.players_speak(self.bb)
     

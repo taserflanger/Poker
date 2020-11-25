@@ -49,13 +49,13 @@ class Player:
 
     def folds(self):
         self.is_folded = True
-        print(f"{self.name} folds")
+        print(self.name, "folds")
         return 'f', 0
 
     def print_action(self, player_action, bet, blind):
         if self.is_all_in:
-            print(f"{self.name} is now all in and bets {bet} ")
+            print(self.name, "is now all in and bets", bet)
         elif blind:
-            print(f"{self.name} bets {bet}")
+            print(self.name, "bets", bet)
         else:
-            print({'c': 'calls', 'r': 'raises'}[player_action] + f" and bets {bet}.")
+            print({'c': 'calls', 'r': 'raises'}[player_action] + " and bets", bet)
