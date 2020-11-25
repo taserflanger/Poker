@@ -18,12 +18,12 @@ def action():
     client.send(reponse.encode("utf-8"))
 
 def give_name_and_ready():
-    msg_reçu="erreur nom"
-    while msg_reçu == "erreur nom":
+    msg="erreur nom"
+    while msg == "erreur nom":
         print("Quel est ton nom?")
         reponse=input("> ")
         client.send(reponse.encode("utf-8"))
-        msg_reçu=client.recv(1024).decode("utf-8")
+        msg=client.recv(1024).decode("utf-8")
     reponse=input("pret?\n >  ")
     client.send(reponse.encode("utf-8"))
 
@@ -33,21 +33,21 @@ fichier.close()
 fichier=open(nom_fichier, "r")
 
 def actualisation(fichi):
-    msg_reçu=client.recv(1024).decode("utf-8")
-    msg_reçu=json.loads(msg_reçu)
+    msg=client.recv(1024).decode("utf-8")
+    msg=json.loads(msg)
     fichi.close()
     with open(nom_fichier, "w") as dossier:
-        dossier.write(str(msg_reçu))
+        dossier.write(str(msg))
 
 fichier_cartes=open(nom_fichier_cartes, "w")
 fichier_cartes.close()
 fichier_cartes=open(nom_fichier_cartes, "r")
 def actualisation_debut(cartes):
-    msg_reçu=client.recv(1024).decode("utf-8")
-    msg_reçu=json.loads(msg_reçu)
+    msg=client.recv(1024).decode("utf-8")
+    msg=json.loads(msg)
     cartes.close()
     with open(nom_fichier_cartes, "w") as dossier:
-        dossier.write(str(msg_reçu))
+        dossier.write(str(msg))
 
 while reponse!= b"etape fin":
     reponse = client.recv(1024).decode("utf-8")

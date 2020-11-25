@@ -11,8 +11,8 @@ def try_recv(joueur):
     salon=joueur.salon
     if not joueur.disco:
         try:
-            msg_reçu=client.recv(1024).decode("utf-8")
-            return msg_reçu
+            msg=client.recv(1024).decode("utf-8")
+            return msg
         except: # joueur deconnecté de force
             salon.gerer_deconnexion(joueur)
             return 'f'

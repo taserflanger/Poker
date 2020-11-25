@@ -67,12 +67,12 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
 
     def ask_name(self, joueur):   #on peut ajouter une confirmation
         try_send(joueur, "preparation".encode("utf-8"))
-        msg_reçu=try_recv(joueur)
-        while msg_reçu in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
+        msg=try_recv(joueur)
+        while msg in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
             try_send(joueur, "erreur nom".encode("utf-8"))   #erreur nom correspond à un nom deja pris
-            msg_reçu=try_recv(joueur)
+            msg=try_recv(joueur)
         try_send(joueur, "ok".encode("utf-8"))
-        return msg_reçu
+        return msg
    
     def creer_table(self, joueurs):
         nouvelle_table=Table(joueurs, self.sb, self.bb)  # qui contient les joueurs de marqueurs à marqueurs + i
