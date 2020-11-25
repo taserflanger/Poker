@@ -134,17 +134,17 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         while table_max.in_change:
             time.sleep(0.01)
         if table_max.wait_in:
-            joueur_à_changer=table_max.wait_in.pop(0)  
+            joueurchanger=table_max.wait_in.pop(0)  
         else:
-            joueur_à_changer = table_max.players[ randint( 0, len(table_max.players)-1 ) ] #embettant car la vrai taille est table.taille
+            joueurchanger = table_max.players[ randint( 0, len(table_max.players)-1 ) ] #embettant car la vrai taille est table.taille
             # et si ils sont tous discnt? ==> impossible grace au while table.in_change qui assure la suppresion des joueurs disconnected dans table
         
         while table_max.in_game:
             time.sleep(3)
         table_max.in_change=True
         #joueur_à_changer.connexion.send("Vous allez changer de table, patientez un instant".encode()) #mettre un trysend
-        table_max.wait_out.append(joueur_à_changer)
-        table_min.wait_in.append(joueur_à_changer)
+        table_max.wait_out.append(joueurchanger)
+        table_min.wait_in.append(joueurchanger)
         table_max.in_change=False
 
     #si il y a de la place dans une table, on ajoute le joueur à la table
