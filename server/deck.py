@@ -14,7 +14,7 @@ class Deck:
         random.shuffle(self.cards)
 
     def deal(self):
-        """Enlève une carte à la fin du paquet et la renvoie"""
+        """Enleve une carte a la fin du paquet et la renvoie"""
 
         last_card_ind = len(self.cards) - 1
         card = self.cards[last_card_ind]
