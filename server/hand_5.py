@@ -118,7 +118,7 @@ def test_class(nb_players=6):
     print("table cards: ", [str(card) for card in table_cards])
     t1 = time.time()
     for i in range(nb_players):
-        print(f"player {i} cards: ", [str(card) for card in players_cards[i]])
+        print("player",  i, " cards: ", [str(card) for card in players_cards[i]])
         possible_hands = [Hand_5(i) for i in combinations(table_cards + players_cards[i], 5)]
         best_hand = max(possible_hands)
         players_fh[i] = best_hand
@@ -126,9 +126,10 @@ def test_class(nb_players=6):
     best_hand = max(players_fh)
     t2 = time.time()
     for i in range(nb_players):
-        print(f"player {i} : rank {ranked_hands[i]}")
+        print("player ", i,  ": rank", ranked_hands[i])
     print("Meilleure main : player ", players_fh.index(best_hand), [str(card) for card in best_hand.cards])
-    print(f"Temps d'exécution : {round((t2-t1)*1000, 5)} ms")
+    print("Temps d'exécution :", round((t2-t1)*1000, 5) )
+
 
 if __name__ == '__main__':
     test_class()
