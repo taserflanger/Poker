@@ -231,7 +231,7 @@ class Table:
             player.final_hand = None
             player.on_going_bet=0
         self.dealer = self.next_player(self.dealer)
-        self.speaker = self.next_player(self.speaker)
+        self.speaker = self.next_player(self.dealer)
         self.pots = []
         self.cards = []
         self.deck = Deck()

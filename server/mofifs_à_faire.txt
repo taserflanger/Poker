@@ -3,7 +3,7 @@ IP internet: 176.160.246.2
 
 bug:
 si raise<call
-si raise>player.stack
+si raise > player.stack
 dealer
 cahnger tournoi en salon
 
@@ -29,3 +29,6 @@ protocole table.in_change pendant remaniement
  voir si client envoie prêt trop tard (ie alors que tournoi.started) ==> pblm?
 
  redistribution est faux
+
+ si deco pendant speak ==> bug
+
