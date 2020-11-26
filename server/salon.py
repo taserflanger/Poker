@@ -66,12 +66,12 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
             self.supprimer_joueur(joueur)
 
     def ask_name(self, joueur):   #on peut ajouter une confirmation
-        try_send(joueur, "preparation".encode("utf-8"))
+        try_send(joueur, {"flag":"preparation"})
         msg=try_recv(joueur)
         while msg in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
-            try_send(joueur, "erreur nom".encode("utf-8"))   #erreur nom correspond à un nom deja pris
+            try_send(joueur, {"flag":"erreur nom"})   #erreur nom correspond à un nom deja pris
             msg=try_recv(joueur)
-        try_send(joueur, "ok".encode("utf-8"))
+        try_send(joueur, {"flag": "fin preparation"})
         return msg
    
     def creer_table(self, joueurs):
@@ -94,6 +94,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         #del joueur
 
     def remaniement(self):
+        """reéquilibrage des tables du tournoi"""
         print("remaniement")
         table_min, table_max=give_table_min_max(self.tables)
         repartit_tables=[len(table) for table in self.tables]
@@ -105,6 +106,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
             print("redistribution de ", table_min, "au prochain tour")
 
     def redistribution(self, r_table):
+        """redistribution des joueurs d'une table vers les autres tables du tournoi"""
         while not self.let_modif_thread:   # ainsi 2 threads ne peuvent pas faire tourner cette fonction en meme temps
             time.sleep(1)                   # et donc ne se gènent pas lors des modifications des tables
         self.let_modif_thread=False
@@ -128,6 +130,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
     #on attend tmax est fini le tour pour lui retirer un joueur et l'envoyer sur tbale_min
     #pendant ce temps la table_min attend
     def transfert_joueur(self): 
+        """transfert un joueur de la table la plus grande vers la plus petite"""
         print("transfert")
         table_min, table_max=give_table_min_max(self.tables)
 

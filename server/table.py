@@ -106,6 +106,7 @@ class Table:
         return len(self.players) + len(self.wait_in) - len(self.wait_out)
 
     def check_player_stack(self):
+        """vérifie si un joueur n'est pas à stack==0"""
         for player in self.players:
             if player.stack < self.bb:
                 self.delete(player)

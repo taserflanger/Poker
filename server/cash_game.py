@@ -5,7 +5,7 @@ from player import Player
 from table import Table 
 import select
 from salon import Salon
-from fonction_serveur import give_table_min_max, give_chaises_dispo
+from fonctions_serveur import give_table_min_max, give_chaises_dispo
 
 class Cash_game(Salon):  #à  faire
 
@@ -22,11 +22,11 @@ class Cash_game(Salon):  #à  faire
         player_out.deco=True
         self.ask_thread()
         #uniquement si le joueur est dans une table
-        if player_out is in self.players:
+        if player_out in self.players:
             if player_out.table is not None:
                 table=player_out.table
                 table.wait_out.append(player_out)
-            elif player_out is in self.wait_file:
+            elif player_out in self.wait_file:
                 self.wait_file.remove(player_out)
             else:
                 print("error")
@@ -52,7 +52,7 @@ class Cash_game(Salon):  #à  faire
         
         """ajoute les joueurs de la file d'attente à la table la plus petite"""
         while current_wait_file:
-            table_min=give_table_min_max(self.tables)
+            table_min, t=give_table_min_max(self.tables)
             player_in=current_wait_file.pop(0)
             table_min.wait_in.append(player_in)
 
@@ -69,7 +69,6 @@ class Cash_game(Salon):  #à  faire
 
     #redefinir gerer_joueur_seul
     def gerer_joueur_seul(self, joueur_seul):
-
         self.wait_file.append(joueur_seul)
         
 

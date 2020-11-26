@@ -5,7 +5,7 @@ import select
 import time
 import json
 from random import randint
-from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread, gerer_table, try_recv, try_send, wait_for_table, give_table_min_max
+from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread, gerer_table, try_recv, wait_for_table, give_table_min_max
 from table import Table
 from player import Player
 from salon import Salon
@@ -31,6 +31,7 @@ class Tournoi(Salon): #self.n_max est le nombre maximal de joueur par table
         return True if sum([joueur.ready for joueur in self.players]) >= coefficient*len(self.players) and len(self.players) >= 2 else False
 
     def remplir_tables(self, repartition_):
+        """lorsque les joueurs sont prets, on les répartit sur les tables de façon équilibrée"""
         marqueur=0
         for taille_table in repartition_:
             self.creer_table(self.players[marqueur : marqueur+taille_table])
@@ -43,6 +44,7 @@ class Tournoi(Salon): #self.n_max est le nombre maximal de joueur par table
         pass
 
     def gerer_deconnexion(self, player_out):
+        """réorganisaion des tables lorsqu'un joueur se deconnecte"""
         player_out.disco=True
         self.ask_thread()
         if self.started: 

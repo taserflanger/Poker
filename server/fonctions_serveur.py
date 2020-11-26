@@ -23,48 +23,49 @@ def try_send(joueur, message):
     salon=joueur.salon
     if not joueur.disco:
         try:
-            client.send(message)
+            message_json=json.dumps(message).encode("utf-8")
+            client.send(message_json)
         except: # joueur deconnecté de force
             salon.gerer_deconnexion(joueur)
 
 #utiliser info_dictionnaire=json.loads(message)   pour retranscrir en dict
 def initialiser_actualisation(table, small_blind, big_blind):
+    time.sleep(0.3)
     for joueur in table:
-        try_send(joueur,"actualisation debut".encode("utf-8"))
-        info_round={"nom joueurs" : str([player.name for player in table.players]),
-                           "dealer": table.dealer.name,
-                           "cartes" : str(joueur.hand[0]) + "/" + str(joueur.hand[1]),
-                           "small and big blinds": str([small_blind, big_blind])
+        info_round={"flag": "actualisation debut",
+                    "nom joueurs" : str([player.name for player in table.players]),
+                    "dealer": table.dealer.name,
+                    "cartes" : str(joueur.hand[0]) + "/" + str(joueur.hand[1]),
+                    "small and big blinds": str([small_blind, big_blind])
                            }
-        info_round_json=json.dumps(info_round).encode("utf-8")
-        time.sleep(0.1)
-        try_send(joueur, info_round_json)
-    time.sleep(0.1)
+        try_send(joueur, info_round)
+    time.sleep(0.3)
 
 def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
+    time.sleep(0.3)
     for joueur in table:
-        try_send(joueur, "actualisation tour".encode("utf-8"))
-        info_table={"stacks": str([gamer.stack for gamer in table.players]), 
-                           "on going bet" : str([gamer.on_going_bet for gamer in table.players]),
-                           "folded" : str([gamer.is_folded for gamer in table.players]),
-                           "all in" : str([gamer.is_all_in for gamer in table.players]),
-                           "pots" : str( [pot[0] for pot in table.pots]),
-                           "cartes table": str( [str(carte) for carte in table.cards ])
+        info_table={"flag": "actualisation tour",
+                    "stacks": str([gamer.stack for gamer in table.players]), 
+                    "on going bet" : str([gamer.on_going_bet for gamer in table.players]),
+                    "folded" : str([gamer.is_folded for gamer in table.players]),
+                    "all in" : str([gamer.is_all_in for gamer in table.players]),
+                    "pots" : str( [pot[0] for pot in table.pots]),
+                    "cartes table": str( [str(carte) for carte in table.cards ])
                            }
-        info_table_json=json.dumps(info_table)
-        time.sleep(0.1)
-        try_send(joueur, info_table_json.encode("utf-8"))
+        
+        try_send(joueur, info_table)
+    time.sleep(0.3)
 
     if table.final_hand:
+        time.sleep(0.3)
         for joueur in table:
-            try_send(joueur, "actualisation fin".encode("utf-8"))
-            info_winners= {"gagnants" : str([gagnant.name for gagnant in table.final_winners])}
+            info_winners= { "flag": "actualisation fin",
+                            "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
             #{"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
              #               "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
-            info_winners_json=json.dumps(info_winners)
-            time.sleep(0.1)
-            try_send(joueur, info_winners_json.encode("utf-8"))
-    time.sleep(0.1)
+        
+            try_send(joueur, info_winners)
+        time.sleep(0.3)
 
         
 def gerer_table(table):
@@ -101,24 +102,6 @@ def repartion_joueurs_sur_tables(nbr_joueurs, n_max):
 
 def supprimer_thread(thread):
     thread.exit()
-
-
-"""
-def demander_reequilibrage(salon):  
-    repartit_tables=[len(table.players) for table in salon.tables]
-    nbr_j_mal_repartis=give_chaises_dispo(repartit_tables, min(repartit_tables))
-    #joueur_seul= True if sum([True if len(salon.players)==1 else False]) else False
-    if nbr_j_mal_repartis >= len(salon.tables) and len(salon.tables)>=2:  
-        transfert_joueur(salon.tables)
-
-
-#salon fait reference à tournoi ou cashgame
-def remaniement(joueur): # si cette fonction est appelée c'est qu'un joueur s'est déconnecté
-    salon=joueur.tournoi
-    joueur.table.players.remove(joueur)
-    demander_reequilibrage(salon)
-    #salon.supprimer_joueur(joueur)
-"""
 
 
 #fonction qui sert à mettre en pause 2 tables sans interrompre leur partie, donc 

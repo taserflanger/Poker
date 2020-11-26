@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import socket
 import json
-#adresseIP_server_andres = "192.168.1.11"	# Ici, le poste local
-#adresseIP_local="127.0.0.1"
+adresseIP_server_andres = "192.168.1.11"	# Ici, le poste local
+adresseIP_local="127.0.0.1"
 adresseIP_server_linode="178.79.165.80"
 port = 12800	# Se connecter sur le port 50000
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((adresseIP_server_linode, port))
+client.connect((adresseIP_local, port))
 print("Connecté au serveur")
 print("Tapez FIN pour terminer la conversation. ")
 message = ""
@@ -32,34 +32,31 @@ fichier=open(nom_fichier, "w")
 fichier.close()
 fichier=open(nom_fichier, "r")
 
-def actualisation(fichi):
-    msg=client.recv(1024).decode("utf-8")
-    msg=json.loads(msg)
+def actualisation(fichi, infos_act):
     fichi.close()
     with open(nom_fichier, "w") as dossier:
-        dossier.write(str(msg))
+        dossier.write(str(infos_act))
 
 fichier_cartes=open(nom_fichier_cartes, "w")
 fichier_cartes.close()
 fichier_cartes=open(nom_fichier_cartes, "r")
-def actualisation_debut(cartes):
-    msg=client.recv(1024).decode("utf-8")
-    msg=json.loads(msg)
+def actualisation_debut(cartes, infos_act):
     cartes.close()
     with open(nom_fichier_cartes, "w") as dossier:
-        dossier.write(str(msg))
+        dossier.write(str(infos_act))
 
 while reponse!= b"etape fin":
     reponse = client.recv(1024).decode("utf-8")
-    if reponse== "actualisation tour" or reponse== "actualisation fin": 
-        actualisation(fichier)
+    infos=json.loads(reponse)
+    if infos["flag"]== "actualisation tour" or reponse== "actualisation fin": 
+        actualisation(fichier, infos)
         fichier=open(nom_fichier, "r")
-    elif  reponse== "actualisation debut":
-        actualisation_debut(fichier_cartes)
+    elif infos["flag"]== "actualisation debut":
+        actualisation_debut(fichier_cartes, infos)
         fichier_cartes=open(nom_fichier_cartes, "r")
-    elif reponse=="preparation":
+    elif infos["flag"]=="preparation":
         give_name_and_ready() 
-    elif reponse=="action":
+    elif infos["flag"]=="action":
         action()
 print("Connexion fermée")
 client.close()
