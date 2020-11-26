@@ -58,7 +58,7 @@ class Table:
         self.dealer = self.next_player(self.dealer)
         while self.dealer.is_folded:
             self.dealer = self.next_player(self.dealer)
-        #print(f"Dealer is {self.dealer.name}")
+        print(f"Dealer is {self.dealer.name}")
         self.speaker = self.next_player(self.speaker) # ?? je ne comprends pas ça
         self.pots = []
         self.cards = []
@@ -100,20 +100,20 @@ class Table:
             self.speaker = self.next_player(self.speaker)
 
     def pre_flop(self):
-        #print(f'Dealer : {self.dealer.name}')
+        print(f'Dealer : {self.dealer.name}')
         self.deal_and_blinds()
         self.players_speak(self.bb)
 
     def flop(self):
         self.initialise_round()
         self.cards += [self.deck.deal() for _ in range(3)]
-        #print([str(card) for card in self.cards])
+        print(" -".join([str(card) for card in self.cards]))
         self.players_speak()
 
     def turn_river(self):
         self.initialise_round()
         self.cards += [self.deck.deal()]
-        #print([str(card) for card in self.cards])
+        print(" -".join([str(card) for card in self.cards]))
         self.players_speak()
 
     def players_speak(self, mise=0, raiser=None):
@@ -181,7 +181,7 @@ class Table:
         """Répartit chaque pot à ses vainqueurs"""
         if all_folded:
             winner = [player for player in self.players if not player.is_folded][0]
-            #print(f"Everyone folded, {winner} wins {sum(v for v, _ in self.pots)}")
+            print(f"Everyone folded, {winner} wins {sum(v for v, _ in self.pots)}")
         else:
             self.get_final_hands()
         for pot_value, pot_players in self.pots:
@@ -192,7 +192,7 @@ class Table:
             n = len(pot_winners)
             for player in pot_winners:
                 value_for_player = pot_value // n  # au cas où le pot n'est pas divisible par n
-                #print(f"{player.name} wins {pot_value}")
+                print(f"{player.name} wins {pot_value}")
                 player.stack += value_for_player
                 pot_value -= value_for_player
                 n -= 1
