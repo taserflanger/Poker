@@ -1,18 +1,27 @@
 from bot.genectic.GenerationManager import GenerationManager
-from numpy import array
+import numpy as np
 
-engine = GenerationManager(sizes=[50], mutation_factor=1)
-Params = {"W":None, "b": None, "f": None}
+SIZES = [50]
+# ne pas modifier sans générer de nouveaux paramètres
+Params = {"W": [], "b": [], "f": []}
 
 # read params
-# for s in "W", "b","f":
-#     with open(f"bot/genectic/{s}.csv") as file:
-#         Params[s] = eval(file.read())
+for s in "W", "b", "f":
+    for i in range(len(SIZES) + 2):
+        # car on ajoute les layer (il y en a un pour les indices)
+        Params[s].append(np.loadtxt(f"bot/genectic/data/{s}{str(i)}.csv"))
 
-W, b, f = engine.train(100, 1, 5, 5, 1)
+engine = GenerationManager(
+    sizes=SIZES,
+    mutation_factor=1,
+    W=Params["W"],
+    b=Params["b"],
+    f=Params["f"]
+)
+
+W, b, f = engine.train(N=100, m=1, nb_players=5, small_blind=5, max_round=1)
 
 # write params
 for s, X in zip(("W", "b", "f"), (W, b, f)):
-    with open(f"bot/genectic/{s}.csv", "w") as file:
-        file.write(str(X))
-
+    for i in range(len(X)):
+        np.savetxt(f"bot/genectic/data/{s}{str(i)}.csv", X[i])

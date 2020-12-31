@@ -16,6 +16,14 @@ class GenerationManager:
                  W: Union[str, List[NDArray]] = "random",
                  b: Union[str, List[NDArray]] = "random",
                  f: Union[str, List[NDArray]] = "random"):
+        """
+        Classe pour entraîner l’algorithme génétique en jouant contre lui-même
+        :param sizes: taille des layers cachés dans cerveau des bots
+        :param mutation_factor: facteur de mutation
+        :param W: poids synaptiques initiaux (random si non spécifié)
+        :param b: biais synaptiques initiax (random si non spécifié)
+        :param f: fonction de transfert d’éléments d’histoire (random si non sécifié)
+        """
         self.MUTATION_FACTOR = mutation_factor
         self.sizes = sizes
         self.current_generation = Generation(mutation_factor=0.1, sizes=self.sizes, W=W, b=b, f=f)
