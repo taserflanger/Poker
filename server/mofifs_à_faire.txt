@@ -4,7 +4,6 @@ IP internet: 176.160.246.2
 bug:
 si raise<call
 si raise > player.stack
-dealer
 cahnger tournoi en salon
 
 
@@ -21,10 +20,10 @@ And in run() just loop on while(self._is_running)
 pblm de retard avec ask reeady, if not started car peut tournoi peut commencer entre temps
 revoir:
 table.delete et suppression de tables
-protocole table.in_change pendant remaniement
+protocole table.in_change pendant reequilibrage
  joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) ) #embettant car la vrai taille est table.taille
 
- tester transfert_joueur, remaniement, redistribution, check player.stack=0, gagnant finale
+ tester transfert_joueur, reequilibrage, redistribution, check player.stack=0, gagnant finale
  reussir à fermer les threads mieux
  voir si client envoie prêt trop tard (ie alors que tournoi.started) ==> pblm?
 
@@ -32,3 +31,24 @@ protocole table.in_change pendant remaniement
 
  si deco pendant speak ==> bug
 
+ liste des noms !
+
+BOT:
+si personne ne mise parfois il se couche alors qu'il pourrait check
+mettre une limite de temps sur les bots au cas ou ils beug
+si fold avant le ot, le bot beug (au turn)
+le bot devrait avoir conscience de ce qu'il peut gagner et de ce qu'il a déjà misé
+le ot folds trop quand ils sont à 2
+si l'amount to call est faible le bot devrait etre plus succeptible de suivre que s'il est fort
+==> doit dépendre de la mise
+
+dans cash game, le nom ne doit etre ni dans la listre de nom ni dans les noms dela base de donnée
+
+ajout de qqun à la table OU raise ==> bug tout sarrete (cashgame)
+
+
+*bot cash game #à mettre autre part car pour le cashgame ça marche pas...
+
+*pret.? ne sert plus a rien dans cashgame
+
+*sauvegarder les données si deco forcée

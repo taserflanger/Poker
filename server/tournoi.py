@@ -15,8 +15,8 @@ from salon import Salon
 
 class Tournoi(Salon): #self.n_max est le nombre maximal de joueur par table
     
-    def __init__(self, serveur, n_max, stack, small_blind, big_blind):
-        Salon.__init__(self, serveur, n_max, stack, small_blind, big_blind)
+    def __init__(self, serveur, n_max, stack, small_blind, big_blind, nbr_bot):
+        Salon.__init__(self, serveur, n_max, stack, small_blind, big_blind, nbr_bot)
         
 
     def lancer_tournoi(self):
@@ -51,7 +51,7 @@ class Tournoi(Salon): #self.n_max est le nombre maximal de joueur par table
             table=player_out.table
             table.wait_out.append(player_out)
             if len(self.tables) > 1 and len(table)>1: # s'il n'y a qu'une table et qu'un joueur pas de transfert, ces cas la sont gérés dans la table
-                self.remaniement()
+                self.reequilibrage()
         else:
             self.supprimer_joueur(player_out) 
         self.let_modif_thread=True

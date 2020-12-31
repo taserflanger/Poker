@@ -8,13 +8,14 @@ from random import randint
 from fonctions_serveur import repartion_joueurs_sur_tables, supprimer_thread, gerer_table, try_recv, try_send, wait_for_table, give_table_min_max, give_chaises_dispo
 from table import Table
 from player import Player
+from bot_proba import Bot_matheux
 
 #TODO: gerer une deconnexion de force d'un client
 
         
 class Salon: #self.n_max est le nombre maximal de joueur par table
     
-    def __init__(self, serveur, n_max, stack, small_blind, big_blind):
+    def __init__(self, serveur, n_max, stack, small_blind, big_blind, nbr_bot):
         self.liste_noms, self.players, self.tables, self.wait_file=map(list, ([] for _ in range(4)))
         self.n_max=n_max
         self.stack=stack
@@ -25,11 +26,13 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         self.started=False
         self.let_modif_thread=True
         self.gap_max=2
+        self.nbr_bot=nbr_bot
    
     def ready(self):
         return False
         
     def connexion_des_joueurs(self):
+        print("ouverture des connexions au salon")
         while not self.ready():  
             connexions_demandees, wlist, xlist = select.select([self.serveur], [], [], 0.05)
             #self.send_len_players()
@@ -41,6 +44,15 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
                 nouveau_joueur.salon=self
                 self.thread_client[str(client)]=threading.Thread(None, self.ask_ready_and_name, None, [nouveau_joueur] , {})
                 self.thread_client[str(client)].start()
+        print("fermeture des connexions au Salon")
+        #à mettre autre part car pour le cashgame ça marche pas...
+        for i in range(self.nbr_bot):
+            nom_bot="bot_"+str(i)
+            nouveau_bot=Bot_matheux(nom_bot, self.stack)
+            nouveau_bot.salon=self
+            self.players.append( nouveau_bot )
+            self.wait_file.append(nouveau_bot)
+            
 
     def send_len_players(self):
         for player in self.players:
@@ -54,21 +66,21 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         
     def ask_ready_and_name(self, joueur): 
         joueur.connexion.settimeout(600)  #on laisse 1 min pour que le joueur donne son nom
-        joueur.name=self.ask_name(joueur)
-        if not self.started:
+        joueur.name=self.sign_in(joueur)
+        if not self.started and joueur.name!="f":
             self.liste_noms.append(joueur.name)
             self.players.append( joueur )
-            self.wait_file.append(joueur)
             try_recv(joueur) #le client envoie "pret", il ne peut rien envoyer d'autre
+            self.wait_file.append(joueur)
             joueur.ready=True     
             joueur.connexion.settimeout(300)  # pour la suite on laisse 30 seconde au joueur pour faire une action
         else: # le tournoi a déjà commencé, marche aussi en cash game car self.started=False tout le temps
             self.supprimer_joueur(joueur)
 
-    def ask_name(self, joueur):   #on peut ajouter une confirmation
+    def sign_in(self, joueur):   #on peut ajouter une confirmation
         try_send(joueur, {"flag":"preparation"})
         msg=try_recv(joueur)
-        while msg in self.liste_noms + [""] :  #il faut que le nom du joueur soit != ""
+        while msg in self.liste_noms + [""] + ["f"]  :  #il faut que le nom du joueur soit != "" # ajouter or in self.fichier_data["name"].values
             try_send(joueur, {"flag":"erreur nom"})   #erreur nom correspond à un nom deja pris
             msg=try_recv(joueur)
         try_send(joueur, {"flag": "fin preparation"})
@@ -93,9 +105,9 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         joueur.connexion.close()
         #del joueur
 
-    def remaniement(self):
+    def reequilibrage(self):
         """reéquilibrage des tables du tournoi"""
-        print("remaniement")
+        print("reequilibrage")
         table_min, table_max=give_table_min_max(self.tables)
         repartit_tables=[len(table) for table in self.tables]
         if len(table_max) - len(table_min) >= self.gap_max: 

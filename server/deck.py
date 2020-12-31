@@ -21,5 +21,12 @@ class Deck:
         card = self.cards[last_card_ind]
         self.cards = self.cards[:-1]
 
-        return card
-print("test_linode_pull")
+        return card   #peut etre on peut remplacer par self.cards.pop(-1) ?
+
+    def remove(self, card):
+        for deck_card in self.cards:
+            if card.value==deck_card.value and card.suit==deck_card.suit:
+                self.cards.remove(deck_card)
+
+
+

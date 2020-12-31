@@ -18,6 +18,9 @@ class Player:
         self.disco=False #disconnected
         self.table=None
         self.salon=None
+        self.bot=False
+        self.deco=False
+        
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''

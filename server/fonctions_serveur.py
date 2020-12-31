@@ -14,7 +14,9 @@ def try_recv(joueur):
             msg=client.recv(1024).decode("utf-8")
             return msg
         except: # joueur deconnecté de force
-            salon.gerer_deconnexion(joueur)
+            if not joueur.deco:
+                salon.gerer_deconnexion(joueur)
+               
             return 'f'
 
 
@@ -26,45 +28,50 @@ def try_send(joueur, message):
             message_json=json.dumps(message).encode("utf-8")
             client.send(message_json)
         except: # joueur deconnecté de force
-            salon.gerer_deconnexion(joueur)
+            if not joueur.deco:
+                salon.gerer_deconnexion(joueur)
+            
 
 #utiliser info_dictionnaire=json.loads(message)   pour retranscrir en dict
 def initialiser_actualisation(table, small_blind, big_blind):
     time.sleep(0.3)
     for joueur in table:
-        info_round={"flag": "actualisation debut",
-                    "nom joueurs" : str([player.name for player in table.players]),
-                    "dealer": table.dealer.name,
-                    "cartes" : str(joueur.hand[0]) + "/" + str(joueur.hand[1]),
-                    "small and big blinds": str([small_blind, big_blind])
-                           }
-        try_send(joueur, info_round)
-    time.sleep(0.3)
+        if not joueur.bot:
+            info_round={"flag": "actualisation debut",
+                        "nom joueurs" : str([player.name for player in table.players]),
+                        "dealer": table.dealer.name,
+                        "cartes" : str(joueur.hand[0]) + "/" + str(joueur.hand[1]),
+                        "small and big blinds": str([small_blind, big_blind])
+                               }
+            try_send(joueur, info_round)
+        time.sleep(0.3)
 
 def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
     time.sleep(0.3)
     for joueur in table:
-        info_table={"flag": "actualisation tour",
-                    "stacks": str([gamer.stack for gamer in table.players]), 
-                    "on going bet" : str([gamer.on_going_bet for gamer in table.players]),
-                    "folded" : str([gamer.is_folded for gamer in table.players]),
-                    "all in" : str([gamer.is_all_in for gamer in table.players]),
-                    "pots" : str( [pot[0] for pot in table.pots]),
-                    "cartes table": str( [str(carte) for carte in table.cards ])
-                           }
+        if not joueur.bot:
+            info_table={"flag": "actualisation tour",
+                        "stacks": str([gamer.stack for gamer in table.players]), 
+                        "on going bet" : str([gamer.on_going_bet for gamer in table.players]),
+                        "folded" : str([gamer.is_folded for gamer in table.players]),
+                        "all in" : str([gamer.is_all_in for gamer in table.players]),
+                        "pots" : str( [pot[0] for pot in table.pots]),
+                        "cartes table": str( [str(carte) for carte in table.cards ])
+                               }
         
-        try_send(joueur, info_table)
+            try_send(joueur, info_table)
     time.sleep(0.3)
 
     if table.final_hand:
         time.sleep(0.3)
         for joueur in table:
-            info_winners= { "flag": "actualisation fin",
-                            "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
-            #{"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
-             #               "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
+            if not joueur.bot:
+                info_winners= { "flag": "actualisation fin",
+                                "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
+                #{"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
+                #               "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
         
-            try_send(joueur, info_winners)
+                try_send(joueur, info_winners)
         time.sleep(0.3)
 
         
