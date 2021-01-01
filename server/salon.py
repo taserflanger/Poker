@@ -73,7 +73,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
     def ask_name(self, joueur, name):   #on peut ajouter une confirmation
         while name in self.liste_noms + [""] + ["f"]  :  #il faut que le nom du joueur soit != "" # ajouter or in self.fichier_data["name"].values
             try_send(joueur, {"flag":"error name"})   #erreur nom correspond à un nom deja pris
-            msg=try_recv(joueur)
+            msg=json.loads(try_recv(joueur))
             if msg['flag']=='name':
                 name=msg['name']
         try_send(joueur, {"flag": "name ok"})
