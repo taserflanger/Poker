@@ -34,6 +34,11 @@ class Table:
         for player in self.players[speaker_id:] + self.players[:speaker_id]:
             yield player
 
+    def init_client_table(self):
+        for joueur in self.players:
+            f_s.try_send(joueur, {"flag":"init_table", "players_data":str([{"name":gamer.name, "id":gamer.id, "stack": gamer.stack, "condition": False} for gamer in self.players])})
+            
+
     def give_players_ids(self):
         i = 0
         for player in self.players:
@@ -43,11 +48,16 @@ class Table:
     def manage_file(self):
         """ gere les joueurs qui attendent d'entrer ou sortir de la table"""
         self.in_change=True
+        changes=False
         while self.wait_in:
             self.add_player(self.wait_in.pop(0))
+            changes=True
         while self.wait_out: #players disconnected
             #print(self.wait_out, self.wait_in)
             self.delete(self.wait_out.pop(0))
+            changes=True
+        if changes:
+            self.init_client_table()
         self.in_change=False
         
     def set_up_game(self):
@@ -225,6 +235,12 @@ class Table:
                 n -= 1
             self.final_winners= pot_winners[:]
         f_s.actualiser(self)
+    
+    def give_pot_total(self):
+        pot_total=0
+        for pot in self.pots:
+            pot_total+=pot[0]
+        return pot_total
 
     def initialisation_attributs(self):
         for player in self.players:

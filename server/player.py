@@ -19,7 +19,7 @@ class Player:
         self.table=None
         self.salon=None
         self.bot=False
-        self.deco=False
+        self.disco=False
         
 
     def speaks(self, amount_to_call, blind=False):

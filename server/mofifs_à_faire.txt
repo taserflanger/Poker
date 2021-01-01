@@ -52,3 +52,7 @@ ajout de qqun à la table OU raise ==> bug tout sarrete (cashgame)
 *pret.? ne sert plus a rien dans cashgame
 
 *sauvegarder les données si deco forcée
+
+A 2 3 4 5 == pas gérer
+
+raise à gérer

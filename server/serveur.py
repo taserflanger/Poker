@@ -19,5 +19,5 @@ def cash_game(joueur_par_table, stack_initial, sb, bb, nbr_bot, data ):
     cash_game.launch()
     
 #tournoi(4, 500, 5, 10, 2)
-cash_game(4, 500, 5, 10, 0, fichier_data)
+tournoi(4, 500, 5, 10, 0)
 serveur.close()

@@ -42,7 +42,7 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
                 nouveau_joueur.connexion=client
                 nouveau_joueur.infos_connexion=infos_client    
                 nouveau_joueur.salon=self
-                self.thread_client[str(client)]=threading.Thread(None, self.ask_ready_and_name, None, [nouveau_joueur] , {})
+                self.thread_client[str(client)]=threading.Thread(None, self.gerer_preparation, None, [nouveau_joueur] , {})
                 self.thread_client[str(client)].start()
         print("fermeture des connexions au Salon")
         #à mettre autre part car pour le cashgame ça marche pas...
@@ -52,45 +52,42 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
             nouveau_bot.salon=self
             self.players.append( nouveau_bot )
             self.wait_file.append(nouveau_bot)
-            
-
-    def send_len_players(self):
-        for player in self.players:
-            player.connexion.send(str(len(self.players))).encode("utf-8")
-    
+  
     def ask_thread(self):
         """Demande d'autorisation de modification des variables globales: ainsi 2 threads ne peuvent pas modifier les variables globales en meme temps"""
         while not self.let_modif_thread:   
             time.sleep(1)                   
         self.let_modif_thread=False
         
-    def ask_ready_and_name(self, joueur): 
-        joueur.connexion.settimeout(600)  #on laisse 1 min pour que le joueur donne son nom
-        joueur.name=self.sign_in(joueur)
+    def gerer_preparation(self, joueur):
+        for _ in range(2):
+            infos=try_recv(joueur)
+            msg=json.loads(infos)
+            if msg["flag"]=="name":
+                self.ask_name(joueur)
+            elif msg["flag"]=="ready":
+                self.wait_file.append(joueur) 
+                joueur.ready=True   
+
+    def ask_name(self, joueur):   #on peut ajouter une confirmation
+        name=try_recv(joueur)
+        while name in self.liste_noms + [""] + ["f"]  :  #il faut que le nom du joueur soit != "" # ajouter or in self.fichier_data["name"].values
+            try_send(joueur, {"flag":"error name"})   #erreur nom correspond à un nom deja pris
+            name=try_recv(joueur)
+        try_send(joueur, {"flag": "name ok"})
+        joueur.name=name
         if not self.started and joueur.name!="f":
             self.liste_noms.append(joueur.name)
-            self.players.append( joueur )
-            try_recv(joueur) #le client envoie "pret", il ne peut rien envoyer d'autre
-            self.wait_file.append(joueur)
-            joueur.ready=True     
-            joueur.connexion.settimeout(300)  # pour la suite on laisse 30 seconde au joueur pour faire une action
+            self.players.append(joueur)
         else: # le tournoi a déjà commencé, marche aussi en cash game car self.started=False tout le temps
             self.supprimer_joueur(joueur)
-
-    def sign_in(self, joueur):   #on peut ajouter une confirmation
-        try_send(joueur, {"flag":"preparation"})
-        msg=try_recv(joueur)
-        while msg in self.liste_noms + [""] + ["f"]  :  #il faut que le nom du joueur soit != "" # ajouter or in self.fichier_data["name"].values
-            try_send(joueur, {"flag":"erreur nom"})   #erreur nom correspond à un nom deja pris
-            msg=try_recv(joueur)
-        try_send(joueur, {"flag": "fin preparation"})
-        return msg
    
     def creer_table(self, joueurs):
         nouvelle_table=Table(joueurs, self.sb, self.bb)  # qui contient les joueurs de marqueurs à marqueurs + i
         for joueur in nouvelle_table.players:
                 joueur.table=nouvelle_table
         self.tables.append(nouvelle_table)
+        nouvelle_table.init_client_table()
         self.thread_table[str(nouvelle_table)]=threading.Thread(None, gerer_table, None, [nouvelle_table], {})
         self.thread_table[str(nouvelle_table)].start()
 

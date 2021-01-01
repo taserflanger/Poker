@@ -12,20 +12,26 @@ print("Tapez FIN pour terminer la conversation. ")
 message = ""
 nom_fichier=input("nom fichier\n >" )
 nom_fichier_cartes=nom_fichier+"_cartes"
+
 def action():
     print("(f), (c), or raise: enter how much if you raise")
     reponse=input("> ")
     client.send(reponse.encode("utf-8"))
 
 def give_name_and_ready():
-    msg="erreur nom"
-    while msg == "erreur nom":
+    message={"flag":"name"}
+    data=json.dumps(message).encode("utf-8")
+    client.send(data)
+    msg="error name"
+    while msg == "error name":
         print("Quel est ton nom?")
         reponse=input("> ")
         client.send(reponse.encode("utf-8"))
         msg=client.recv(1024).decode("utf-8")
     reponse=input("pret?\n >  ")
-    client.send(reponse.encode("utf-8"))
+    message={"flag":"ready"}
+    data=json.dumps(message).encode("utf-8")
+    client.send(data)
 
 reponse=""
 fichier=open(nom_fichier, "w")
@@ -40,22 +46,22 @@ def actualisation(fichi, infos_act):
 fichier_cartes=open(nom_fichier_cartes, "w")
 fichier_cartes.close()
 fichier_cartes=open(nom_fichier_cartes, "r")
+
 def actualisation_debut(cartes, infos_act):
     cartes.close()
     with open(nom_fichier_cartes, "w") as dossier:
         dossier.write(str(infos_act))
 
+give_name_and_ready()
 while reponse!= b"etape fin":
     reponse = client.recv(1024).decode("utf-8")
     infos=json.loads(reponse)
-    if infos["flag"]== "actualisation tour" or reponse== "actualisation fin": 
+    if infos["flag"]== "update table" or reponse== "end_game" or reponse=="init_game": 
         actualisation(fichier, infos)
         fichier=open(nom_fichier, "r")
-    elif infos["flag"]== "actualisation debut":
+    elif infos["flag"]== "new_game":
         actualisation_debut(fichier_cartes, infos)
         fichier_cartes=open(nom_fichier_cartes, "r")
-    elif infos["flag"]=="preparation":
-        give_name_and_ready() 
     elif infos["flag"]=="action":
         action()
 print("Connexion fermée")
