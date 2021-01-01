@@ -235,6 +235,7 @@ class Table:
                 n -= 1
             self.final_winners= pot_winners[:]
         f_s.actualiser(self)
+        f_s.actualsation_finale(self)
     
     def give_pot_total(self):
         pot_total=0

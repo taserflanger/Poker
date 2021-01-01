@@ -6,7 +6,7 @@ adresseIP_local="127.0.0.1"
 adresseIP_server_linode="178.79.165.80"
 port = 12800	# Se connecter sur le port 50000
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((adresseIP_local, port))
+client.connect((adresseIP_server_linode, port))
 print("Connecté au serveur")
 print("Tapez FIN pour terminer la conversation. ")
 message = ""
@@ -56,9 +56,11 @@ give_name_and_ready()
 while reponse!= b"etape fin":
     reponse = client.recv(1024).decode("utf-8")
     infos=json.loads(reponse)
-    if infos["flag"]== "update table" or reponse== "end_game" or reponse=="init_game": 
+    if infos["flag"]== "update table" or infos["flag"]=="init_game": 
         actualisation(fichier, infos)
         fichier=open(nom_fichier, "r")
+    elif  infos["flag"]== "end_game":
+        print(infos)
     elif infos["flag"]== "new_game":
         actualisation_debut(fichier_cartes, infos)
         fichier_cartes=open(nom_fichier_cartes, "r")

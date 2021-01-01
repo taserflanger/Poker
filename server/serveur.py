@@ -7,7 +7,7 @@ serveur=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 adresse_serveur_linode="178.79.165.80"
 adresse_serveur_local=""
-serveur.bind((adresse_serveur_local, 12800))  
+serveur.bind((adresse_serveur_linode, 12800))  
 serveur.listen(5)  
 fichier_data=pd.read_csv("data.csv", sep=",")
 def tournoi(joueur_par_table, stack_initial, sb, bb, nbr_bot):

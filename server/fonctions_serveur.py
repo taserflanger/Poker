@@ -53,7 +53,7 @@ def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
                                           "player_stack": gamer.stack, 
                                           "on_going_bet" :gamer.on_going_bet,
                                           "is_folded" : gamer.is_folded,
-                                          "is_all_in" : gamer.is_all_in} for gamer in table.player]),
+                                          "is_all_in" : gamer.is_all_in} for gamer in table.players]),
                         "pot" : str(table.give_pot_total()),
                         "table_cards": str([(carte.value, carte.suit) for carte in table.cards ]),
                         "speaker_id": str(table.next_player(table.speaker))
@@ -62,27 +62,27 @@ def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
             try_send(joueur, info_table)
     time.sleep(0.3)
 
-    if table.final_hand:
-        time.sleep(0.3)
-        for joueur in table:
-            if not joueur.bot:
-                players_cards=[]
-                if table.folded_players() == len(table.players)-1: #il ne reste qu'une personne ==> on ne montre pas les cartes
-                    show_cards=False   
-                else: 
-                    show_cards=True
-                    for player in table.players:
-                        if not player.is_folded:
-                            players_cards.append( ( player.id, ((player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit)) ))
+def actualsation_finale(table):
+    time.sleep(0.3)
+    for joueur in table:
+        if not joueur.bot:
+            players_cards=[]
+            if table.folded_players() == len(table.players)-1: #il ne reste qu'une personne ==> on ne montre pas les cartes
+                show_cards=False   
+            else: 
+                show_cards=True
+                for player in table.players:
+                    if not player.is_folded:
+                        players_cards.append( ( player.id, ((player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit)) ))
                 
-                info_winners= { "flag": "end_game",
-                                "winners_id" : str([winner.id for winner in table.final_winners]),
-                                "show_cards": str(show_cards),
-                                "cards": str(players_cards)
-                                }
+            info_winners= { "flag": "end_game",
+                            "winners_id" : str([winner.id for winner in table.final_winners]),
+                            "show_cards": str(show_cards),
+                            "cards": str(players_cards)
+                            }
         
-                try_send(joueur, info_winners)
-        time.sleep(0.3)
+            try_send(joueur, info_winners)
+    time.sleep(0.3)
 
         
 def gerer_table(table):
