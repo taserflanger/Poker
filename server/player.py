@@ -28,7 +28,15 @@ class Player:
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur       
             try_send(self, {"flag": "action"})
             time.sleep(0.3)
-            player_action = try_recv(self) if not self.disco else "f"
+            data = try_recv(self) if not self.disco else "f"
+            if data!= "f":
+                flag=json.loads(data)["flag"]
+                while flag != "action" and data!="f":
+                    data = try_recv(self) if not self.disco else "f"
+                    flag=json.loads(data)["flag"]
+                player_action=data["action"]
+            else:
+                player_action="f"
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'f':
