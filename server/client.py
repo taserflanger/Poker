@@ -2,11 +2,11 @@
 import socket
 import json
 adresseIP_server_andres = "192.168.1.11"	# Ici, le poste local
-adresseIP_local="127.0.0.1"
+adresseIP_server_local="127.0.0.1"
 adresseIP_server_linode="178.79.165.80"
 port = 12800	# Se connecter sur le port 50000
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((adresseIP_server_linode, port))
+client.connect((adresseIP_server_local, port))
 print("Connecté au serveur")
 print("Tapez FIN pour terminer la conversation. ")
 message = ""
@@ -16,18 +16,21 @@ nom_fichier_cartes=nom_fichier+"_cartes"
 def action():
     print("(f), (c), or raise: enter how much if you raise")
     reponse=input("> ")
-    client.send(reponse.encode("utf-8"))
+    msg={"flag":"action", "action":str(reponse)}
+    data=json.dumps(msg).encode("utf-8")
+    client.send(data)
 
 def give_name_and_ready():
-    message={"flag":"name"}
-    data=json.dumps(message).encode("utf-8")
-    client.send(data)
     msg="error name"
     while msg == "error name":
         print("Quel est ton nom?")
         reponse=input("> ")
-        client.send(reponse.encode("utf-8"))
+        envoie={"flag":"name", "name":reponse}
+        data=json.dumps(envoie).encode("utf-8")
+        client.send(data)
         msg=client.recv(1024).decode("utf-8")
+        infos=json.loads(msg)
+        msg=infos["flag"]
     reponse=input("pret?\n >  ")
     message={"flag":"ready"}
     data=json.dumps(message).encode("utf-8")

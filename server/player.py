@@ -30,7 +30,8 @@ class Player:
             time.sleep(0.3)
             data = try_recv(self) if not self.disco else "f"
             if data!= "f":
-                flag=json.loads(data)["flag"]
+                data=json.loads(data)
+                flag=data["flag"]
                 while flag != "action" and data!="f":
                     data = try_recv(self) if not self.disco else "f"
                     flag=json.loads(data)["flag"]
