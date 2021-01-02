@@ -37,8 +37,8 @@ def initialiser_actualisation(table, small_blind, big_blind):
     for joueur in table:
         if not joueur.bot:
             info_round={"flag": "new_game",
-                        "dealer_id": str(table.dealer.id),
-                        "client_cards" : str([(joueur.hand[0].value, joueur.hand[0].suit), (joueur.hand[1].value, joueur.hand[1].suit)]),
+                        "dealer_id": table.dealer.id,
+                        "client_cards" : [(joueur.hand[0].value, joueur.hand[0].suit), (joueur.hand[1].value, joueur.hand[1].suit)],
                                                        }
             try_send(joueur, info_round)
         time.sleep(0.3)
@@ -49,14 +49,14 @@ def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
     for joueur in table:
         if not joueur.bot:
             info_table={"flag": "update table",
-                        "infos_players": str([{"player_id":gamer.id,
+                        "infos_players": [{"player_id":gamer.id,
                                           "player_stack": gamer.stack, 
                                           "on_going_bet" :gamer.on_going_bet,
                                           "is_folded" : gamer.is_folded,
-                                          "is_all_in" : gamer.is_all_in} for gamer in table.players]),
-                        "pot" : str(table.give_pot_total()),
-                        "table_cards": str([(carte.value, carte.suit) for carte in table.cards ]),
-                        "speaker_id": str(table.next_player(table.speaker))
+                                          "is_all_in" : gamer.is_all_in} for gamer in table.players],
+                        "pot" : table.give_pot_total(),
+                        "table_cards": [(carte.value, carte.suit) for carte in table.cards ],
+                        "speaker_id": table.next_player(table.speaker)
                                }
         
             try_send(joueur, info_table)
@@ -76,9 +76,9 @@ def actualsation_finale(table):
                         players_cards.append( ( player.id, ((player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit)) ))
                 
             info_winners= { "flag": "end_game",
-                            "winners_id" : str([winner.id for winner in table.final_winners]),
-                            "show_cards": str(show_cards),
-                            "cards": str(players_cards)
+                            "winners_id" : [winner.id for winner in table.final_winners],
+                            "show_cards": (show_cards),
+                            "cards": players_cards
                             }
         
             try_send(joueur, info_winners)

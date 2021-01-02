@@ -36,7 +36,7 @@ class Table:
 
     def init_client_table(self):
         for joueur in self.players:
-            f_s.try_send(joueur, {"flag":"init_table", "players_data":[{"name":gamer.name, "id":gamer.id, "stack": gamer.stack, "condition": False} for gamer in self.players]})
+            f_s.try_send(joueur, {"flag":"init_table", "players_data":[{"name":gamer.name, "id":gamer.id, "stack": gamer.stack, "is_player": True if gamer==joueur else False} for gamer in self.players]} )
             
 
     def give_players_ids(self):
