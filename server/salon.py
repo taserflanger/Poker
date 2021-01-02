@@ -44,6 +44,8 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
                 nouveau_joueur.salon=self
                 self.thread_client[str(client)]=threading.Thread(None, self.gerer_preparation, None, [nouveau_joueur] , {})
                 self.thread_client[str(client)].start()
+                
+                    
         print("fermeture des connexions au Salon")
         #à mettre autre part car pour le cashgame ça marche pas...
         for i in range(self.nbr_bot):
@@ -60,24 +62,35 @@ class Salon: #self.n_max est le nombre maximal de joueur par table
         self.let_modif_thread=False
         
     def gerer_preparation(self, joueur):
-        for _ in range(2):
-            infos=try_recv(joueur)
-            msg=json.loads(infos)
-            if msg["flag"]=="name":
-                name=msg['name']
-                self.ask_name(joueur, name)
-            elif msg["flag"]=="ready":
-                self.wait_file.append(joueur) 
-                joueur.ready=True   
+        try:
+            for _ in range(2):
+                infos=try_recv(joueur)
+                msg=json.loads(infos)
+                if msg["flag"]=="name":
+                    name=msg['name']
+                    self.ask_name(joueur, name)
+                elif msg["flag"]=="ready":
+                    self.wait_file.append(joueur) 
+                    joueur.ready=True  
+        except:
+            print("exception3 player disconnected")
+            self.supprimer_joueur(joueur)
+            try: 
+                self.liste_noms.remove(joueur.name)
+                self.players.remove(joueur)
+            except:
+                print("exeption2")
+                
 
     def ask_name(self, joueur, name):   #on peut ajouter une confirmation
         while name in self.liste_noms + [""] + ["f"]  :  #il faut que le nom du joueur soit != "" # ajouter or in self.fichier_data["name"].values
             try_send(joueur, {"flag":"error name"})   #erreur nom correspond à un nom deja pris
             msg=json.loads(try_recv(joueur))
-            if msg['flag']=='name':
-                name=msg['name']
+            if msg["flag"]=="name":
+                name=msg["name"]
         try_send(joueur, {"flag": "name ok"})
         joueur.name=name
+        joueur.connexion.settimeout(30)
         if not self.started and joueur.name!="f":
             self.liste_noms.append(joueur.name)
             self.players.append(joueur)
