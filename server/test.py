@@ -1,8 +1,10 @@
-import os
-import pandas as pd
-data=pd.read_csv("data.csv")
-
-data=data.append({"name":"andres", "stack":1000, "password":"password"}, ignore_index=True)
-data.to_csv(r"c:\Users\VIE ShareWizMe\Desktop\CPES L2\Algo\Projet poker\Poker\server\data.csv", index=False)
-
-print(data)
+import json
+d={"an":12, "a": "andres", "c":[1,2,3], "d": {"a":2}}
+d=json.dumps(d)
+a=d.encode("utf-8")
+c={"b":[{"andres": None} for i in range(3)]}
+c=json.dumps(c)
+a=c.encode("utf-8")
+c={"a":[{"andres": None} for i in range(3)], "flag": 1000}
+c=json.dumps(c)
+a=c.encode("utf-8")

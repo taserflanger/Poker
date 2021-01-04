@@ -56,3 +56,9 @@ ajout de qqun à la table OU raise ==> bug tout sarrete (cashgame)
 A 2 3 4 5 == pas gérer
 
 raise à gérer
+
+modifs de fonctions:
+*vanqueur dans tournoi
+*supprimer table, supprimer joueur dans salon
+*si plus qu'un joueur à une table, ce n'est pas forcément un vainqueur s'il y a d'autres tables!!
+*on peut peu etre creer un minute check pour le tournoi aussi...

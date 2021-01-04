@@ -6,48 +6,58 @@ import time
 from random import randint
 
 
-def try_recv(joueur):
-    client=joueur.connexion
-    salon=joueur.salon
-    if not joueur.disco:
+def try_recv(player):
+    """attend que le client envoie qqchose, si le client est deconnecté ==> execption"""
+    client=player.connexion
+    salon=player.salon
+    if not player.disco:
         try:
             msg=client.recv(1024).decode("utf-8")
             return msg
-        except: # joueur deconnecté de force
-            if not joueur.disco:
-                salon.gerer_deconnexion(joueur)
+        except: # player deconnecté de force
+            if not player.disco:
+                salon.gerer_deconnexion(player)
             return 'f'
 
 
-def try_send(joueur, message):
-    client=joueur.connexion
-    salon=joueur.salon
-    if not joueur.disco:
+def try_send(player, message):
+    """envoie au client le message, si le client est deconnecté ==> execption"""
+    client=player.connexion
+    salon=player.salon
+    if not player.disco:
         try:
             message_json=json.dumps(message).encode("utf-8")
             client.send(message_json)
-        except: # joueur deconnecté de force
-            if not joueur.disco:
-                salon.gerer_deconnexion(joueur)
-            
+        except: # player deconnecté de force
+            if not player.disco:
+                salon.gerer_deconnexion(player)
 
-#utiliser info_dictionnaire=json.loads(message)   pour retranscrir en dict
-def initialiser_actualisation(table, small_blind, big_blind):
+
+
+#******LES REFRESH: sont des fonctions qui envoient aux clients les nouvelles infos de la table *****
+def refresh_new_game(table, sb_player, bb_player):
     time.sleep(0.3)
-    for joueur in table:
-        if not joueur.bot:
+    for player in table:
+        if not player.bot:
             info_round={"flag": "new_game",
                         "dealer_id": table.dealer.id,
-                        "client_cards" : [(joueur.hand[0].value, joueur.hand[0].suit), (joueur.hand[1].value, joueur.hand[1].suit)],
-                                                       }
-            try_send(joueur, info_round)
+                        "client_cards" : [(player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit)],
+                        "blinds": [{"player_id":sb_player.id,
+                                          "player_stack": sb_player.stack, 
+                                          "on_going_bet" :sb_player.on_going_bet},
+                                     {"player_id":bb_player.id,
+                                          "player_stack": bb_player.stack, 
+                                          "on_going_bet" :bb_player.on_going_bet}
+                                          ]
+            }                         
+            try_send(player, info_round)
         time.sleep(0.3)
 
 
-def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
+def refresh_update(table): # l'envoie des cartes des players à la fin manquent
     time.sleep(0.3)
-    for joueur in table:
-        if not joueur.bot:
+    for player in table:
+        if not player.bot:
             info_table={"flag": "update table",
                         "infos_players": [{"player_id":gamer.id,
                                           "player_stack": gamer.stack, 
@@ -56,16 +66,16 @@ def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
                                           "is_all_in" : gamer.is_all_in} for gamer in table.players],
                         "pot" : table.give_pot_total(),
                         "table_cards": [(carte.value, carte.suit) for carte in table.cards ],
-                        "speaker_id": table.next_player(table.speaker)
+                        "speaker_id": table.next_player(table.speaker).id
                                }
         
-            try_send(joueur, info_table)
+            try_send(player, info_table)
     time.sleep(0.3)
 
-def actualsation_finale(table):
+def refresh_end_game(table):
     time.sleep(0.3)
-    for joueur in table:
-        if not joueur.bot:
+    for player in table:
+        if not player.bot:
             players_cards=[]
             if table.folded_players() == len(table.players)-1: #il ne reste qu'une personne ==> on ne montre pas les cartes
                 show_cards=False   
@@ -77,54 +87,54 @@ def actualsation_finale(table):
                 
             info_winners= { "flag": "end_game",
                             "winners_id" : [winner.id for winner in table.final_winners],
-                            "show_cards": (show_cards),
+                            "show_cards": show_cards,
                             "cards": players_cards
                             }
         
-            try_send(joueur, info_winners)
+            try_send(player, info_winners)
     time.sleep(0.3)
 
-        
+
+#*****************FONCTIONS SALON *************************
 def gerer_table(table):
     while not table.end:
         table.set_up_game()
     return
 
-def give_chaises_dispo(repartition_des_tables, reference): #repartition_des_tables est une liste contenant    # le nbr de joueurs par table
-        nbr_joueurs_mal_repartis=0
-        for taille_table in repartition_des_tables:
-            nbr_joueurs_mal_repartis += abs(taille_table - reference)
-        return nbr_joueurs_mal_repartis
+def give_chaises_dispo(repartition_des_tables, reference): #repartition_des_tables est une liste contenant   le nbr de players par table
+    """renvoie les places libres des tables du tournoi"""
+    chaises_dispo=0
+    for taille_table in repartition_des_tables:
+        chaises_dispo += abs(taille_table - reference)
+    return chaises_dispo
     
-def repartion_joueurs_sur_tables(nbr_joueurs, n_max):  
-    nbr_tables= nbr_joueurs // n_max
-    table_min=nbr_joueurs % n_max  
+def divide_players_on_tables(nbr_players, n_max):  
+    """renvoie un tableau = repartition équilibrée des players: si 15 players et n_max=4, renvoie: [4,4,4,3]"""
+    nbr_tables= nbr_players // n_max
+    table_min=nbr_players % n_max  
     repartition_tables=[n_max]*nbr_tables  
     if table_min != 0:
         repartition_tables += [table_min]   
         nbr_tables+=1
     
-
     #interresant car recursif  ==> à présenter devant le jury
-    nbr_joueurs_mal_repartis = give_chaises_dispo(repartition_tables, min (repartition_tables) ) 
-    while nbr_joueurs_mal_repartis >= nbr_tables:   
+    nbr_players_mal_repartis = give_chaises_dispo(repartition_tables, min (repartition_tables) ) 
+    while nbr_players_mal_repartis >= nbr_tables:   
         id_table_min= repartition_tables.index( min (repartition_tables) )
         id_table_max= repartition_tables.index( max (repartition_tables) )
         repartition_tables[id_table_min]+=1
         repartition_tables[id_table_max]-=1
-        nbr_joueurs_mal_repartis = give_chaises_dispo(repartition_tables, min(repartition_tables))
+        nbr_players_mal_repartis = give_chaises_dispo(repartition_tables, min(repartition_tables))
  
     return repartition_tables
 
 
-def supprimer_thread(thread):
+def del_thread(thread):
     thread.exit()
 
 
-#fonction qui sert à mettre en pause 2 tables sans interrompre leur partie, donc 
-#les mettre en pause pendant table.in_game= False
-#la premiere qui finit attend l'autre
 def wait_for_table(table1, table2): 
+    """met en pause 2 tables à la fin de leur partie pour d'éventuels modifications"""
     boucle=[table1, table2]
     actuel=True
     while boucle[actuel].in_game:
@@ -136,11 +146,12 @@ def wait_for_table(table1, table2):
         time.sleep(3)
     boucle[actuel].in_change=True
 
-def give_table_min_max(list_tables, booleen=True): #mettre en pause les autres threads pour pas de pblm
+def give_table_min_max(list_tables): 
+    """renvoie la plus petite table et la plus grande selon le nbr de player"""
     list_tables.sort(key=lambda table: len(table))
     table_min=list_tables[0]
     table_max=list_tables[-1]
-    return table_min, table_max if booleen else table_min
+    return table_min, table_max
         
 
 
