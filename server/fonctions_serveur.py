@@ -58,7 +58,7 @@ def refresh_update(table): # l'envoie des cartes des players à la fin manquent
     time.sleep(0.3)
     for player in table:
         if not player.bot:
-            info_table={"flag": "update table",
+            info_table={"flag": "update_table",
                         "infos_players": [{"player_id":gamer.id,
                                           "player_stack": gamer.stack, 
                                           "on_going_bet" :gamer.on_going_bet,
