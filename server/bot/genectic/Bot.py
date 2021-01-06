@@ -4,6 +4,7 @@ import numpy as np
 from nptyping import NDArray
 from bot.genectic.utils import relu, softmax
 from player import Player
+from time import time
 
 
 class Bot(Player):
@@ -61,6 +62,8 @@ class Bot(Player):
         metaW = [self.W[1]]
         for i in range(len(history) - 1):
             metaW = list(map(self.history_mapper, metaW))
+            # TODO: Cette opération prend beacoup trop de temps. calculer une fois le mapping au
+            #  début puis tronquer selon le nombre nécessaire
             metaW.append(self.W[1])
         W1 = np.concatenate(metaW)
         self.L[1] = W1.transpose() @ history.flatten() + self.b[1]
@@ -81,6 +84,28 @@ class Bot(Player):
         for k in range(2, self.nb_layers-1):
             self.calculate_hidden_layer(k)
         self.calculate_last_layer()
+
+    def speaks(self, amount_to_call, blind=False):
+        player_action = ''
+        bet = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
+        c = "check"
+        if bet > 0:
+            c = f"{bet} to call {amount_to_call}"
+        a = time()
+        player_action = self.ask_action(bet, blind, c, player_action, 120)
+        decision_time = time() - a
+        # on calcule le temps de décision car ask_action est implémenté sans timer pour les bots
+        if player_action == 'c' or blind:
+            bet = self.calls(bet)
+        if player_action == 'r':
+            a = time()
+            bet, player_action = self.ask_amount(bet, 120 - decision_time)
+            decision_time += time() - a
+        if player_action == 'f':
+            self.is_folded = True
+            bet = 0
+        self.finalize_action(bet, blind, player_action)
+        return player_action, bet, decision_time
 
     def ask_action(self, bet, blind, c, player_action, max_time):
         if blind:

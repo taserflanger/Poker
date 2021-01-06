@@ -14,7 +14,8 @@ class Table:
                  table_players: List[Player],
                  small_blind: int,
                  big_blind: int,
-                 id_dealer="random"):
+                 id_dealer="random",
+                 verbose=True):
         self.nb_players = len(table_players)
         self.players = table_players
         self.nb_players = len(self.players)
@@ -30,6 +31,7 @@ class Table:
         self.cards = []
         self.pots = []
         self.history = []
+        self.verbose = verbose
 
         # rajouter les joueurs à la table
         for p in self.players:
@@ -40,6 +42,10 @@ class Table:
         speaker_id = self.speaker.id
         for player in self.players[speaker_id:] + self.players[:speaker_id]:
             yield player
+
+    def print(self, *values, sep=..., end=..., file=..., flush=...):
+        if self.verbose:
+            print(*values, sep, end, file, flush)
 
     def give_players_ids(self):
         i = 0
@@ -58,11 +64,11 @@ class Table:
         self.dealer = self.next_player(self.dealer)
         while self.dealer.is_folded:
             self.dealer = self.next_player(self.dealer)
-        print(f"Dealer is {self.dealer.name}")
-        self.speaker = self.next_player(self.speaker) # ?? je ne comprends pas ça
+        self.print(f"Dealer is {self.dealer.name}")
+        self.speaker = self.next_player(self.speaker)  # ?? je ne comprends pas ça
         self.pots = []
         self.cards = []
-        if len(self.deck) < self.nb_players*2 + 5:
+        if len(self.deck) < self.nb_players * 2 + 5:
             # on remélange tout le paquet lorsque le paquet précédent est fini
             # ou pas assez de cartes restantes
             self.deck = Deck()
@@ -100,20 +106,20 @@ class Table:
             self.speaker = self.next_player(self.speaker)
 
     def pre_flop(self):
-        print(f'Dealer : {self.dealer.name}')
+        self.print(f'Dealer : {self.dealer.name}')
         self.deal_and_blinds()
         self.players_speak(self.bb)
 
     def flop(self):
         self.initialise_round()
         self.cards += [self.deck.deal() for _ in range(3)]
-        print(" -".join([str(card) for card in self.cards]))
+        self.print(" -".join([str(card) for card in self.cards]))
         self.players_speak()
 
     def turn_river(self):
         self.initialise_round()
         self.cards += [self.deck.deal()]
-        print(" -".join([str(card) for card in self.cards]))
+        self.print(" -".join([str(card) for card in self.cards]))
         self.players_speak()
 
     def players_speak(self, mise=0, raiser=None):
@@ -136,11 +142,11 @@ class Table:
                 return self.players_speak(amount_to_call, raiser=player)
 
     def distance_to_dealer(self, player):
-        d=0
+        d = 0
         i = self.players.index(player)
         while self.players[i] != self.dealer:
-            i=(i+1)%self.nb_players
-            d+=1
+            i = (i + 1) % self.nb_players
+            d += 1
         return d
 
     def active_players(self):
@@ -181,7 +187,7 @@ class Table:
         """Répartit chaque pot à ses vainqueurs"""
         if all_folded:
             winner = [player for player in self.players if not player.is_folded][0]
-            print(f"Everyone folded, {winner} wins {sum(v for v, _ in self.pots)}")
+            self.print(f"Everyone folded, {winner} wins {sum(v for v, _ in self.pots)}")
         else:
             self.get_final_hands()
         for pot_value, pot_players in self.pots:
@@ -192,7 +198,7 @@ class Table:
             n = len(pot_winners)
             for player in pot_winners:
                 value_for_player = pot_value // n  # au cas où le pot n'est pas divisible par n
-                print(f"{player.name} wins {pot_value}")
+                self.print(f"{player.name} wins {pot_value}")
                 player.stack += value_for_player
                 pot_value -= value_for_player
                 n -= 1

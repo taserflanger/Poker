@@ -92,7 +92,7 @@ class Player:
             txt = f"raises for {bet}."
         elif player_action == "f":
             txt = f"folds"
-        print(self.name, txt, f"     (new stack: {self.stack})")
+        self.table.print(self.name, txt, f"     (new stack: {self.stack})")
 
     def get_current_best_hand(self):
         # ne fonctionne qu’à partir du flop

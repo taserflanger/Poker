@@ -34,13 +34,13 @@ class Generation:
         nb_layers = len(W)
         for i in range(size):
             if self.ref_W != "random":
-                W = [self.ref_W[i] + (2 * np.random.random(np.shape(self.ref_W[i])) - 1) * self.alpha
-                     for i in range(nb_layers)]
+                W = [self.ref_W[j] + (2 * np.random.random(np.shape(self.ref_W[j])) - 1) * self.alpha
+                     for j in range(nb_layers)]
             if self.ref_b != "random":
-                b = [self.ref_b[i] + (2 * np.random.random(np.shape(self.ref_b[i])) - 1) * self.alpha
-                     for i in range(nb_layers)]
+                b = [self.ref_b[j] + (2 * np.random.random(np.shape(self.ref_b[j])) - 1) * self.alpha
+                     for j in range(nb_layers)]
             if self.ref_f != "random":
-                f = [self.ref_f[i] + (2 * np.random.random(np.shape(self.ref_f[i])) - 1) * self.alpha
-                     for i in range(nb_layers)]
+                f = [self.ref_f[j] + (2 * np.random.random(np.shape(self.ref_f[j])) - 1) * self.alpha
+                     for j in range(len(self.ref_f))]
 
             yield Bot(f"bot{i}", stacks[i], self.sizes, W, b, f)

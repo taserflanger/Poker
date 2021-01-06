@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 from nptyping import NDArray
+# from matplotlib.pyplot import draw, imshow, show, plot
 
 from bot.genectic.Bot import Bot
 from bot.genectic.Generation import Generation
@@ -47,6 +48,7 @@ class GenerationManager:
         scores = np.ndarray((nb_players,))
 
         for g in range(N):
+
             bots = []
             os.system('cls')
             print("*" * (g * 50 // N), f"generation {g}")
@@ -57,13 +59,19 @@ class GenerationManager:
                 table = Table(
                     table_players=bots,
                     small_blind=small_blind,
-                    big_blind=2 * small_blind)
+                    big_blind=2 * small_blind,
+                    verbose=False
+                )
                 for _ in range(max_round):
                     table.game()
                     # si un joueur ruine tous les autres, on arrête la partie
                     if sum([b.stack > 0 for b in bots]) == 1:
                         break
                 scores += np.array([b.stack for b in bots])
+            # for i in range(len(bots[0].W)):
+            #     plot(bots[0].W[i])
+            # draw()
+            # show()
             scores /= m
 
             winner = bots[scores.argmax()]
