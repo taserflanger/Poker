@@ -25,14 +25,25 @@ class Player:
         self.disco=False #disconnected
         self.table=None
         self.salon=None
+        self.bot=False
+
 
     def speaks(self, amount_to_call, blind=False):
         player_action = ''
         bet = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
-        if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
-            try_send(self, "action".encode("utf-8"))
+        if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur       
+            try_send(self, {"flag": "action", "amount_to_call":amount_to_call})
             time.sleep(0.3)
-            player_action = try_recv(self) if not self.disco else "f"
+            data = try_recv(self) if not self.disco else "f"
+            if data!= "f":
+                data=json.loads(data)
+                flag=data["flag"]
+                while flag != "action" and data!="f":
+                    data = try_recv(self) if not self.disco else "f"
+                    flag=json.loads(data)["flag"]
+                player_action=data["action"]
+            else:
+                player_action="f"
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         elif player_action == 'f':
@@ -56,7 +67,7 @@ class Player:
 
     def folds(self):
         self.is_folded = True
-        print(f"{self.name} folds")
+        print(self.name, "folds")
         return 'f', 0
 
     def print_action(self, player_action, bet, blind):

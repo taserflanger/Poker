@@ -1,7 +1,6 @@
 from bot.genectic.Bot import Bot
 from player import Player
 from table import Table
-from numpy import array
 
 
 def main(GUI=False):
@@ -25,7 +24,6 @@ def main(GUI=False):
     table.game()
     for player in table.players:
         print(player.stack)
-
 
 if __name__ == '__main__':
     main()

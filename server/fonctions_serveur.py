@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import json
 import threading
 import itertools
@@ -5,125 +6,135 @@ import time
 from random import randint
 
 
-def try_recv(joueur):
-    client=joueur.connexion
-    salon=joueur.salon
-    if not joueur.disco:
+def try_recv(player):
+    """attend que le client envoie qqchose, si le client est deconnecté ==> execption"""
+    client=player.connexion
+    salon=player.salon
+    if not player.disco:
         try:
-            msg_reçu=client.recv(1024).decode("utf-8")
-            return msg_reçu
-        except: # joueur deconnecté de force
-            salon.gerer_deconnexion(joueur)
+            msg=client.recv(1024).decode("utf-8")
+            return msg
+        except: # player deconnecté de force
+            if not player.disco:
+                salon.gerer_deconnexion(player)
             return 'f'
 
 
-def try_send(joueur, message):
-    client=joueur.connexion
-    salon=joueur.salon
-    if not joueur.disco:
+def try_send(player, message):
+    """envoie au client le message, si le client est deconnecté ==> execption"""
+    client=player.connexion
+    salon=player.salon
+    if not player.disco:
         try:
-            client.send(message)
-        except: # joueur deconnecté de force
-            salon.gerer_deconnexion(joueur)
+            message_json=json.dumps(message).encode("utf-8")
+            client.send(message_json)
+        except: # player deconnecté de force
+            if not player.disco:
+                salon.gerer_deconnexion(player)
 
-#utiliser info_dictionnaire=json.loads(message)   pour retranscrir en dict
-def initialiser_actualisation(table, small_blind, big_blind):
-    for joueur in table:
-        try_send(joueur,"actualisation debut".encode("utf-8"))
-        info_round={"nom joueurs" : str([player.name for player in table.players]),
-                           "dealer": table.dealer.name,
-                           "cartes" : str(joueur.hand[0]) + "/" + str(joueur.hand[1]),
-                           "small and big blinds": str([small_blind, big_blind])
-                           }
-        info_round_json=json.dumps(info_round).encode("utf-8")
-        time.sleep(0.1)
-        try_send(joueur, info_round_json)
-    time.sleep(0.1)
 
-def actualiser(table): # l'envoie des cartes des joueurs à la fin manquent
-    for joueur in table:
-        try_send(joueur, "actualisation tour".encode("utf-8"))
-        info_table={"stacks": str([gamer.stack for gamer in table.players]), 
-                           "on going bet" : str([gamer.on_going_bet for gamer in table.players]),
-                           "folded" : str([gamer.is_folded for gamer in table.players]),
-                           "all in" : str([gamer.is_all_in for gamer in table.players]),
-                           "pots" : str( [pot[0] for pot in table.pots]),
-                           "cartes table": str( [str(carte) for carte in table.cards ])
-                           }
-        info_table_json=json.dumps(info_table)
-        time.sleep(0.1)
-        try_send(joueur, info_table_json.encode("utf-8"))
 
-    if table.final_hand:
-        for joueur in table:
-            try_send(joueur, "actualisation fin".encode("utf-8"))
-            info_winners= {"gagnants" : str([gagnant.name for gagnant in table.final_winners])}
-            #{"cartes gagnants" : str([ (  str(joueur.hand[0]) + "/" + str(joueur.hand[1]) if joueur.final_hand else None) for joueur in table.players]), 
-             #               "gagnants" : str([gagnant.name for gagnant in table.final_winners])}
-            info_winners_json=json.dumps(info_winners)
-            time.sleep(0.1)
-            try_send(joueur, info_winners_json.encode("utf-8"))
-    time.sleep(0.1)
+#******LES REFRESH: sont des fonctions qui envoient aux clients les nouvelles infos de la table *****
+def refresh_new_game(table, sb_player, bb_player):
+    time.sleep(0.3)
+    for player in table:
+        if not player.bot:
+            info_round={"flag": "new_game",
+                        "dealer_id": table.dealer.id,
+                        "client_cards" : [(player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit)],
+                        "blinds": [{"player_id":sb_player.id,
+                                          "player_stack": sb_player.stack, 
+                                          "on_going_bet" :sb_player.on_going_bet},
+                                     {"player_id":bb_player.id,
+                                          "player_stack": bb_player.stack, 
+                                          "on_going_bet" :bb_player.on_going_bet}
+                                          ]
+            }                         
+            try_send(player, info_round)
+        time.sleep(0.3)
 
+
+def refresh_update(table): # l'envoie des cartes des players à la fin manquent
+    time.sleep(0.3)
+    for player in table:
+        if not player.bot:
+            info_table={"flag": "update_table",
+                        "infos_players": [{"player_id":gamer.id,
+                                          "player_stack": gamer.stack, 
+                                          "on_going_bet" :gamer.on_going_bet,
+                                          "is_folded" : gamer.is_folded,
+                                          "is_all_in" : gamer.is_all_in} for gamer in table.players],
+                        "pot" : table.give_pot_total(),
+                        "table_cards": [(carte.value, carte.suit) for carte in table.cards ],
+                        "speaker_id": table.next_player(table.speaker).id
+                               }
         
+            try_send(player, info_table)
+    time.sleep(0.3)
+
+def refresh_end_game(table):
+    time.sleep(0.3)
+    for player in table:
+        if not player.bot:
+            players_cards=[]
+            if table.folded_players() == len(table.players)-1: #il ne reste qu'une personne ==> on ne montre pas les cartes
+                show_cards=False   
+            else: 
+                show_cards=True
+                for player in table.players:
+                    if not player.is_folded:
+                        players_cards.append( ( player.id, ((player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit)) ))
+                
+            info_winners= { "flag": "end_game",
+                            "winners_id" : [winner.id for winner in table.final_winners],
+                            "show_cards": show_cards,
+                            "cards": players_cards
+                            }
+        
+            try_send(player, info_winners)
+    time.sleep(0.3)
+
+
+#*****************FONCTIONS SALON *************************
 def gerer_table(table):
     while not table.end:
         table.set_up_game()
     return
 
-def give_chaises_dispo(repartition_des_tables, reference): #repartition_des_tables est une liste contenant    # le nbr de joueurs par table
-        nbr_joueurs_mal_repartis=0
-        for taille_table in repartition_des_tables:
-            nbr_joueurs_mal_repartis += abs(taille_table - reference)
-        return nbr_joueurs_mal_repartis
+def give_chaises_dispo(repartition_des_tables, reference): #repartition_des_tables est une liste contenant   le nbr de players par table
+    """renvoie les places libres des tables du tournoi"""
+    chaises_dispo=0
+    for taille_table in repartition_des_tables:
+        chaises_dispo += abs(taille_table - reference)
+    return chaises_dispo
     
-def repartion_joueurs_sur_tables(nbr_joueurs, n_max):  
-    nbr_tables= nbr_joueurs // n_max
-    table_min=nbr_joueurs % n_max  
+def divide_players_on_tables(nbr_players, n_max):  
+    """renvoie un tableau = repartition équilibrée des players: si 15 players et n_max=4, renvoie: [4,4,4,3]"""
+    nbr_tables= nbr_players // n_max
+    table_min=nbr_players % n_max  
     repartition_tables=[n_max]*nbr_tables  
     if table_min != 0:
         repartition_tables += [table_min]   
         nbr_tables+=1
     
-
     #interresant car recursif  ==> à présenter devant le jury
-    nbr_joueurs_mal_repartis = give_chaises_dispo(repartition_tables, min (repartition_tables) ) 
-    while nbr_joueurs_mal_repartis >= nbr_tables:   
+    nbr_players_mal_repartis = give_chaises_dispo(repartition_tables, min (repartition_tables) ) 
+    while nbr_players_mal_repartis >= nbr_tables:   
         id_table_min= repartition_tables.index( min (repartition_tables) )
         id_table_max= repartition_tables.index( max (repartition_tables) )
         repartition_tables[id_table_min]+=1
         repartition_tables[id_table_max]-=1
-        nbr_joueurs_mal_repartis = give_chaises_dispo(repartition_tables, min(repartition_tables))
+        nbr_players_mal_repartis = give_chaises_dispo(repartition_tables, min(repartition_tables))
  
     return repartition_tables
 
 
-def supprimer_thread(thread):
+def del_thread(thread):
     thread.exit()
 
 
-"""
-def demander_reequilibrage(salon):  
-    repartit_tables=[len(table.players) for table in salon.tables]
-    nbr_j_mal_repartis=give_chaises_dispo(repartit_tables, min(repartit_tables))
-    #joueur_seul= True if sum([True if len(salon.players)==1 else False]) else False
-    if nbr_j_mal_repartis >= len(salon.tables) and len(salon.tables)>=2:  
-        transfert_joueur(salon.tables)
-
-
-#salon fait reference à tournoi ou cashgame
-def remaniement(joueur): # si cette fonction est appelée c'est qu'un joueur s'est déconnecté
-    salon=joueur.tournoi
-    joueur.table.players.remove(joueur)
-    demander_reequilibrage(salon)
-    #salon.supprimer_joueur(joueur)
-"""
-
-
-#fonction qui sert à mettre en pause 2 tables sans interrompre leur partie, donc 
-#les mettre en pause pendant table.in_game= False
-#la premiere qui finit attend l'autre
 def wait_for_table(table1, table2): 
+    """met en pause 2 tables à la fin de leur partie pour d'éventuels modifications"""
     boucle=[table1, table2]
     actuel=True
     while boucle[actuel].in_game:
@@ -135,11 +146,12 @@ def wait_for_table(table1, table2):
         time.sleep(3)
     boucle[actuel].in_change=True
 
-def give_table_min_max(list_tables, booleen=True): #mettre en pause les autres threads pour pas de pblm
+def give_table_min_max(list_tables): 
+    """renvoie la plus petite table et la plus grande selon le nbr de player"""
     list_tables.sort(key=lambda table: len(table))
     table_min=list_tables[0]
     table_max=list_tables[-1]
-    return table_min, table_max if booleen else table_min
+    return table_min, table_max
         
 
 

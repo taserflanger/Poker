@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Fonctions quelconques utilisées dans les autres fichiers du projet
 """

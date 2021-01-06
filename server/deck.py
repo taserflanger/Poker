@@ -16,11 +16,16 @@ class Deck:
     def deal(self):
         """Enlève une carte à la fin du paquet et la renvoie"""
 
-        last_card_ind = len(self.cards) - 1
-        card = self.cards[last_card_ind]
-        self.cards = self.cards[:-1]
-
-        return card
+        return self.cards.pop()
 
     def __len__(self):
         return len(self.cards)
+
+
+    def remove(self, card):
+        for deck_card in self.cards:
+            if card.value==deck_card.value and card.suit == deck_card.suit:
+                self.cards.remove(deck_card)
+
+
+
