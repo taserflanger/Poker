@@ -1,8 +1,5 @@
 from itertools import combinations
-
-from inputimeout import inputimeout, TimeoutOccurred
 from time import time
-
 from hand_5 import Hand_5
 
 
