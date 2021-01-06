@@ -25,7 +25,7 @@ class Table:
         self.deck = Deck()
         self.cards, self.pots, self.final_winners, self.wait_in, self.wait_out=map(list, ([] for i in range(5)))
         self.final_hand = self.in_change = self.in_game = self.end = self.redistribution = False
-        
+        self.salon=None
     # ********************** OPERATIONS ***********************:
     def __iter__(self):
         """Parcourt tous les joueurs de la table, à partir du speaker."""
@@ -43,7 +43,6 @@ class Table:
         while self.in_change: 
             time.sleep(2)
 
-    
     
     #******************* PREPARATION DE LA PARTIE *********************        
     def set_up_game(self):
@@ -92,13 +91,15 @@ class Table:
     def check_len(self):
         """verifie si il reste des joueurs dans la table"""
         self.manage_file() 
+        if len(self)==0:
+            self.salon.del_table(self)
         if len(self.players) == 1:
             print('len1')
             unique_joueur=self.players[0]
             salon=unique_joueur.salon
             if len(salon.tables) == 1:
                 self.end=True
-                salon.vainqueur(unique_joueur)
+                print(unique_joueur.name, "a gagné")
             else:
                 salon.gerer_joueur_seul(self, unique_joueur) 
         self.manage_file()

@@ -52,11 +52,6 @@ class Tournoi(Salon): #self.n_max est le nombre maximal de player par table
         self.let_modif_thread=True
             #si le tournoi n'a pas commencé alors le player est supprimé
     
-    def vainqueur(self, winner):
-        #fin du tournoi
-        print(winner.name, "a gagné")
-        #stop le thread
-        pass
 
     
     

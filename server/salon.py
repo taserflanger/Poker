@@ -46,11 +46,11 @@ class Salon: #self.n_max est le nombre maximal de player par table
                 self.thread_client[str(client)]=threading.Thread(None, self.gerer_preparation, None, [new_player] , {})
                 self.thread_client[str(client)].start()
                 
-                    
+        isinstance
         print("fermeture des connexions au Salon")
         #à mettre autre part car pour le cashgame ça marche pas...
         for i in range(self.nbr_bot):
-            bot_name="bot_"+str(i)
+            bot_name="bot_"+ str(i)
             new_bot=Bot_matheux(bot_name, self.stack)
             new_bot.salon=self
             self.players.append( new_bot )
@@ -106,39 +106,38 @@ class Salon: #self.n_max est le nombre maximal de player par table
         for player in new_table.players:
                 player.table=new_table
         self.tables.append(new_table)
+        new_table.salon=self
         ft.init_client_table(new_table)
         self.thread_table[str(new_table)]=threading.Thread(None, gerer_table, None, [new_table], {})
         self.thread_table[str(new_table)].start()
 
-    def del_table(self, table): 
-        #self.tables.remove(table)
+    def del_table(self, table):
+        if table in self.tables: 
+            self.tables.remove(table)
         table.end=True
-        #del table
 
     def del_player(self, player):
-        #del_thread(self.thread_client[ str(player.connexion) ])
-        #del self.thread_client[ str(player.connexion) ]
         player.connexion.close()
-        #del player
+        if player in self.players:
+            self.players.remove(player)
 
 
     #*************** FONCTIONS DE REEQUILIBRAGE DES TABLES ***************************
     def reequilibrage(self):
-        """reéquilibrage des tables du tournoi"""
-        print("reequilibrage")
+        """reéquilibre le nombre de joueur par table"""
+        print("reéquilibrage")
         table_min, table_max=give_table_min_max(self.tables)
         repartit_tables=[len(table) for table in self.tables]
         if len(table_max) - len(table_min) >= self.gap_max: 
             self.transfert_player()
         elif give_chaises_dispo(repartit_tables, self.n_max) - self.n_max >=0: 
-            # ie on peut répartir les players d'une des tables sur toutes les autres tables, "étape de redistribution"
             table_min.redistribution=True
             print("redistribution de ", table_min, "au prochain tour")
 
     def redistribution(self, r_table):
-        """redistribution des players d'une table vers les autres tables du tournoi"""
+        """on répartit les players d'une des tables vers toutes les autres tables"""
         while not self.let_modif_thread:   # ainsi 2 threads ne peuvent pas faire tourner cette fonction en meme temps
-            time.sleep(1)                   # et donc ne se gènent pas lors des modifications des tables
+            time.sleep(1)                   # et donc ne se gènent pas lors des modifications des tables 
         self.let_modif_thread=False
         r_table.in_change=True
         k=len(r_table)
@@ -193,8 +192,6 @@ class Salon: #self.n_max est le nombre maximal de player par table
             self.transfert_player()
 
         else: # on insere le player dans la table qui a une place dispo et on détruit la 1ere table 
-            #self.del_table(table)
-            self.tables.remove(table)
-            table.end=True
+            self.del_table(table)
             table_min=give_table_min_max(self.tables)[0]
             table_min.wait_in.append(player_seul)

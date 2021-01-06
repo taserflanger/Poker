@@ -6,7 +6,7 @@ adresseIP_server_local="127.0.0.1"
 adresseIP_server_linode="178.79.165.80"
 port = 12800	# Se connecter sur le port 50000
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-client.connect((adresseIP_server_local, port))
+client.connect((adresseIP_server_linode, port))
 print("Connecté au serveur")
 print("Tapez FIN pour terminer la conversation. ")
 message = ""

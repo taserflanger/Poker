@@ -1,38 +1,6 @@
 192.168.1.11 est IP réseau local
 IP internet: 176.160.246.2
 
-bug:
-si raise<call
-si raise > player.stack
-cahnger tournoi en salon
-
-
-pour fermer le thread:
-A little late, but I use a _is_running variable to tell the thread when I want to close. It's easy to use, just implement a stop() inside your thread class.
-
-implémentation d'un thread.close() ?
-def stop(self):
-  self._is_running = False
-And in run() just loop on while(self._is_running)
-
-
-
-pblm de retard avec ask reeady, if not started car peut tournoi peut commencer entre temps
-revoir:
-table.delete et suppression de tables
-protocole table.in_change pendant reequilibrage
- joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) ) #embettant car la vrai taille est table.taille
-
- tester transfert_joueur, reequilibrage, redistribution, check player.stack=0, gagnant finale
- reussir à fermer les threads mieux
- voir si client envoie prêt trop tard (ie alors que tournoi.started) ==> pblm?
-
- redistribution est faux
-
- si deco pendant speak ==> bug
-
- liste des noms !
-
 BOT:
 si personne ne mise parfois il se couche alors qu'il pourrait check
 mettre une limite de temps sur les bots au cas ou ils beug
@@ -42,23 +10,31 @@ le ot folds trop quand ils sont à 2
 si l'amount to call est faible le bot devrait etre plus succeptible de suivre que s'il est fort
 ==> doit dépendre de la mise
 
-dans cash game, le nom ne doit etre ni dans la listre de nom ni dans les noms dela base de donnée
+** supprimer_thread:
+pour fermer le thread:
+A little late, but I use a _is_running variable to tell the thread when I want to close. It's easy to use, just implement a stop() inside your thread class.
+implémentation d'un thread.close() ?
+def stop(self):
+  self._is_running = False
+And in run() just loop on while(self._is_running)
 
-ajout de qqun à la table OU raise ==> bug tout sarrete (cashgame)
 
+*table.delete et suppression de tables
+*protocole table.in_change pendant reequilibrage
+*joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) ) #embettant car la vrai taille est table.taille
+*tester transfert_joueur, reequilibrage, redistribution, check player.stack=0, gagnant finale
+*redistribution est faux
+*si deco pendant speak ==> bug
 
+CASHGAME:
+*bug général revoir
 *bot cash game #à mettre autre part car pour le cashgame ça marche pas...
-
 *pret.? ne sert plus a rien dans cashgame
-
 *sauvegarder les données si deco forcée
 
-A 2 3 4 5 == pas gérer
-
-raise à gérer
+*A 2 3 4 5 == pas gérer
+*raise à gérer
 
 modifs de fonctions:
-*vanqueur dans tournoi
 *supprimer table, supprimer joueur dans salon
-*si plus qu'un joueur à une table, ce n'est pas forcément un vainqueur s'il y a d'autres tables!!
 *on peut peu etre creer un minute check pour le tournoi aussi...
