@@ -5,6 +5,8 @@ import select
 import time
 import json
 from random import randint
+
+from bot.genectic.Bot import Bot
 from fonctions_serveur import del_thread, gerer_table, try_recv, try_send, wait_for_table, give_table_min_max, give_chaises_dispo
 from table import Table
 from player import Player
@@ -46,12 +48,11 @@ class Salon: #self.n_max est le nombre maximal de player par table
                 self.thread_client[str(client)]=threading.Thread(None, self.gerer_preparation, None, [new_player] , {})
                 self.thread_client[str(client)].start()
                 
-        isinstance
         print("fermeture des connexions au Salon")
         #à mettre autre part car pour le cashgame ça marche pas...
         for i in range(self.nbr_bot):
             bot_name="bot_"+ str(i)
-            new_bot=Bot_matheux(bot_name, self.stack)
+            new_bot=Bot(f"Jean Pierre ({i})", 500, [100, 100, 100])
             new_bot.salon=self
             self.players.append( new_bot )
             self.wait_file.append(new_bot)

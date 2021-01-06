@@ -30,6 +30,7 @@ class Bot(Player):
         self.b = [np.random.randn(self.sizes[k]) for k in range(self.nb_layers)] if b == "random" else b
         self.L = [np.zeros((self.sizes[k])) for k in range(self.nb_layers)]
         self.f = [np.random.randn(self.sizes[0], self.sizes[1]) for _ in range(4)] if f == "random" else f
+        self.bot = True
 
     def __str__(self):
         return self.name
