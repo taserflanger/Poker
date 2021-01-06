@@ -1,5 +1,4 @@
 from typing import List, Union
-import nptyping
 import numpy as np
 from nptyping import NDArray
 from bot.genectic.utils import relu, softmax
