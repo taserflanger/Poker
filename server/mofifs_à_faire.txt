@@ -1,0 +1,31 @@
+192.168.1.11 est IP réseau local
+IP internet: 176.160.246.2
+
+bug:
+si raise<call
+si raise>player.stack
+dealer
+cahnger tournoi en salon
+
+
+pour fermer le thread:
+A little late, but I use a _is_running variable to tell the thread when I want to close. It's easy to use, just implement a stop() inside your thread class.
+
+implémentation d'un thread.close() ?
+def stop(self):
+  self._is_running = False
+And in run() just loop on while(self._is_running)
+
+
+
+pblm de retard avec ask reeady, if not started car peut tournoi peut commencer entre temps
+revoir:
+table.delete et suppression de tables
+protocole table.in_change pendant remaniement
+ joueur_à_changer = table_max.players.pop( randint( 0, len(table_max.players) ) ) #embettant car la vrai taille est table.taille
+
+ tester transfert_joueur, remaniement, redistribution, check player.stack=0, gagnant finale
+ reussir à fermer les threads mieux
+ voir si client envoie prêt trop tard (ie alors que tournoi.started) ==> pblm?
+
+ redistribution est faux
