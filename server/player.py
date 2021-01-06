@@ -57,7 +57,7 @@ class Player:
         if self.stack == 0:
             self.is_all_in = True
         self.print_action(player_action, bet, blind)
-        return player_action, bet
+        return player_action, bet, 0
 
     def calls(self, bet):
         if bet > self.stack:
