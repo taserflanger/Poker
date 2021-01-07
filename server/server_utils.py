@@ -1,7 +1,6 @@
+# -*- coding: utf-8 -*-
 import json
 import time
-
-from .bot import Bot
 
 
 def try_recv(player):
@@ -35,7 +34,7 @@ def try_send(player, message):
 def refresh_new_game(table, sb_player, bb_player):
     time.sleep(0.3)
     for player in table:
-        if not isinstance(player, type(Bot)):
+        if not player.bot:
             info_round = {"flag": "new_game",
                           "dealer_id": table.dealer.id,
                           "client_cards": [(player.hand[0].value, player.hand[0].suit),
@@ -55,7 +54,7 @@ def refresh_new_game(table, sb_player, bb_player):
 def refresh_update(table):  # l'envoie des cartes des players à la fin manquent
     time.sleep(0.3)
     for player in table:
-        if not isinstance(player, type(Bot)):
+        if not player.bot:
             info_table = {"flag": "update_table",
                           "infos_players": [{"player_id": gamer.id,
                                              "player_stack": gamer.stack,
@@ -73,19 +72,17 @@ def refresh_update(table):  # l'envoie des cartes des players à la fin manquent
 
 def refresh_end_game(table):
     time.sleep(0.3)
+    players_cards = []
+    if table.folded_players() == len(table.players) - 1:  # il ne reste qu'une personne ==> on ne montre pas les cartes
+        show_cards = False
+    else:
+        show_cards = True
+        for player in table.players:
+            if not player.is_folded:
+                players_cards.append((player.id, (
+                (player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit))))
     for player in table:
-        if not isinstance(player, type(Bot)):
-            players_cards = []
-            if table.folded_players() == len(
-                    table.players) - 1:  # il ne reste qu'une personne ==> on ne montre pas les cartes
-                show_cards = False
-            else:
-                show_cards = True
-                for player in table.players:
-                    if not player.is_folded:
-                        players_cards.append((player.id, (
-                        (player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit))))
-
+        if not player.bot:
             info_winners = {"flag": "end_game",
                             "winners_id": [winner.id for winner in table.final_winners],
                             "show_cards": show_cards,
