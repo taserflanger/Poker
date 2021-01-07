@@ -1,4 +1,4 @@
-from bot.genectic.GenerationManager import GenerationManager
+from server.bot.genectic.GenerationManager import GenerationManager
 import numpy as np
 
 SIZES = [100, 100, 100]
@@ -9,14 +9,14 @@ Params = {"W": [], "b": [], "f": []}
 for s in "W", "b", "f":
     for i in range(len(SIZES) + 2):
         # car on ajoute les layer (il y en a un pour les indices)
-        Params[s].append(np.loadtxt(f"bot/genectic/data/{s}{str(i)}.csv"))
+        Params[s].append(np.loadtxt(f"server/data/{s}{str(i)}.csv"))
 
 engine = GenerationManager(
     sizes=SIZES,
     mutation_factor=1,
-    W=Params["W"],
-    b=Params["b"],
-    f=Params["f"]
+    # W=Params["W"],
+    # b=Params["b"],
+    # f=Params["f"]
 )
 
 W, b, f = engine.train(N=1, m=10, nb_players=5, small_blind=5, max_round=10)

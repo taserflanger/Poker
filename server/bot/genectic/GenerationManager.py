@@ -5,9 +5,9 @@ import numpy as np
 from nptyping import NDArray
 # from matplotlib.pyplot import draw, imshow, show, plot
 
-from bot.genectic.Bot import Bot
-from bot.genectic.Generation import Generation
-from table import Table
+from server.bot.genectic.BotGenetic import Bot
+from server.bot.genectic.Generation import Generation
+from server.table import Table
 
 
 class GenerationManager:
@@ -56,12 +56,8 @@ class GenerationManager:
                 stacks = [100 for _ in range(nb_players)]
                 # TODO rajouter la possibilité de faire des staccks random
                 bots: List[Bot] = list(self.current_generation.generate_bot_pool(nb_players, stacks))
-                table = Table(
-                    table_players=bots,
-                    small_blind=small_blind,
-                    big_blind=2 * small_blind,
-                    verbose=False
-                )
+                table = Table(table_players=bots, small_blind=small_blind, big_blind=2 * small_blind,
+                              bot_training=True)
                 for _ in range(max_round):
                     table.game()
                     # si un joueur ruine tous les autres, on arrête la partie

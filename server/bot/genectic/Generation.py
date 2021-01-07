@@ -1,9 +1,9 @@
-from typing import Union, List, Generator
+from typing import Union, List
 
 import numpy as np
 from nptyping import NDArray
 
-from bot.genectic.Bot import Bot
+from .BotGenetic import BotGenetic
 
 
 class Generation:
@@ -43,4 +43,4 @@ class Generation:
                 f = [self.ref_f[j] + (2 * np.random.random(np.shape(self.ref_f[j])) - 1) * self.alpha
                      for j in range(len(self.ref_f))]
 
-            yield Bot(f"bot{i}", stacks[i], self.sizes, W, b, f)
+            yield BotGenetic(f"bot{i}", stacks[i], self.sizes, W, b, f)

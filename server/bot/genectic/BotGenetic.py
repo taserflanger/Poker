@@ -1,12 +1,13 @@
 from typing import List, Union
 import numpy as np
 from nptyping import NDArray
-from bot.genectic.utils import relu, softmax
-from player import Player
+from server.utils import softmax, relu
 from time import time
 
+from ..Bot import Bot
 
-class Bot(Player):
+
+class BotGenetic(Bot):
     def __init__(self, player_name: str,
                  player_stack: int,
                  sizes: List[int],
@@ -29,13 +30,6 @@ class Bot(Player):
         self.b = [np.random.randn(self.sizes[k]) for k in range(self.nb_layers)] if b == "random" else b
         self.L = [np.zeros((self.sizes[k])) for k in range(self.nb_layers)]
         self.f = [np.random.randn(self.sizes[0], self.sizes[1]) for _ in range(4)] if f == "random" else f
-        self.bot = True
-
-    def __str__(self):
-        return self.name
-
-    def __repr__(self):
-        return self.name
 
     def calculate_hidden_layer(self, k):
         """
@@ -86,20 +80,16 @@ class Bot(Player):
         self.calculate_last_layer()
 
     def speaks(self, amount_to_call, blind=False):
-        player_action = ''
         bet = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
-        c = "check"
-        if bet > 0:
-            c = f"{bet} to call {amount_to_call}"
         a = time()
-        player_action = self.ask_action(bet, blind, c, player_action, 120)
+        player_action = self.ask_action(bet, blind)
         decision_time = time() - a
         # on calcule le temps de décision car ask_action est implémenté sans timer pour les bots
         if player_action == 'c' or blind:
             bet = self.calls(bet)
         if player_action == 'r':
             a = time()
-            bet, player_action = self.ask_amount(bet, 120 - decision_time)
+            bet, player_action = self.ask_amount(bet)
             decision_time += time() - a
         if player_action == 'f':
             self.is_folded = True
@@ -107,7 +97,14 @@ class Bot(Player):
         self.finalize_action(bet, blind, player_action)
         return player_action, bet, decision_time
 
-    def ask_action(self, bet, blind, c, player_action, max_time):
+    def finalize_action(self, bet, blind, player_action):
+        self.stack -= bet
+        self.on_going_bet += bet
+        if self.stack == 0:
+            self.is_all_in = True
+        self.print_action(player_action, bet, blind)
+
+    def ask_action(self, bet, blind):
         if blind:
             return "c"
         else:
@@ -121,7 +118,7 @@ class Bot(Player):
                 action = "c"
             return action
 
-    def ask_amount(self, bet, remaining_time):
+    def ask_amount(self, bet):
         # pas besoin de recalculer le dernier layer vu qu’on demande toujours
         # la donnée de amount après avoir demandé l’action
         return max(bet+1, min(self.stack, self.L[-1][0])), "r"

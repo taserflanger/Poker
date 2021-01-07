@@ -1,6 +1,13 @@
 class Card:
-
-    def __init__(self, card_value, card_suit):
+    """
+    Carte: représentée par un dictionnaire
+    """
+    def __init__(self, card_value: int, card_suit: int):
+        """
+        constructeur d’une carte
+        :param card_value: hauteur de la carte (as = 14)
+        :param card_suit: coulour de la carte (trèfle, carreau, coeur, pique)
+        """
         self.suit = card_suit
         self.value = card_value
         self.img = str(self.value) + '_' + str(self.suit) + '.png'

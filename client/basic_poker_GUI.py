@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+
 
 # Form implementation generated from reading ui file 'basic_poker.ui'
 #
@@ -7,10 +7,12 @@
 # WARNING! All changes made in this file will be lost!
 
 
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 import time
 import threading
-import main
+import os
+print(os.getcwd())
+from scripts import main
 
 
 class Ui_MainWindow(object):
