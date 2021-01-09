@@ -10,6 +10,7 @@ Mini jeu de poker
 
 ```
 pip install nptyping
+pip install PyQt5
 ```
 
 ## Serveur
