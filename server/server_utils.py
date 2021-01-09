@@ -45,7 +45,8 @@ def refresh_new_game(table, sb_player, bb_player):
                                      {"player_id": bb_player.id,
                                       "player_stack": bb_player.stack,
                                       "on_going_bet": bb_player.on_going_bet}
-                                     ]
+                                     ],
+                          "speaker_id": table.speaker.id
                           }
             try_send(player, info_round)
         time.sleep(0.3)
@@ -63,7 +64,7 @@ def refresh_update(table):  # l'envoie des cartes des players à la fin manquent
                                              "is_all_in": gamer.is_all_in} for gamer in table.players],
                           "pot": table.give_pot_total(),
                           "table_cards": [(carte.value, carte.suit) for carte in table.cards],
-                          "speaker_id": table.next_player(table.speaker).id
+                          "speaker_id": table.speaker.id
                           }
 
             try_send(player, info_table)
