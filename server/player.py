@@ -73,7 +73,7 @@ class Player:
         if self.stack == 0:
             self.is_all_in = True
         self.print_action(player_action, bet, blind)
-        return player_action, on_going_bet, 0
+        return player_action, self.on_going_bet, 0
 
     def calls(self, bet: float) -> float:
         if bet > self.stack:
