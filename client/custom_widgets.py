@@ -602,11 +602,11 @@ class widget_game(QWidget):
             self.slider.setValue(0)
             self.text_slider.setText('')
 
-    def action(self, stack, amount_to_call):
+    def action(self, stack, ogb, amount_to_call):
         self.is_my_turn = True
         self.slider.setMinimum(amount_to_call)
         self.slider.setValue(amount_to_call)
-        self.slider.setMaximum(stack)
+        self.slider.setMaximum(stack + ogb)
         self.enable_all(True)
 
     def resizeEvent(self, e):

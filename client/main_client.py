@@ -10,9 +10,9 @@ from custom_widgets import *
 
 SERVER = "178.79.165.80"
 LOCAL = 'localhost'
-PORT = 12800
+PORT = 4502
 
-MODE = LOCAL
+MODE = SERVER
 
 class Server_handler(QObject):
 
@@ -120,8 +120,7 @@ class main_window(QMainWindow):
         for infos_player in infos_players:
             player = self.table.get_player_from_id(infos_player['player_id'])
             player.set_ogb(infos_player['on_going_bet'])
-            player.stack = infos_player['player_stack']
-            player.set_stack(player.stack)
+            player.set_stack(infos_player['player_stack'])
             if infos_player['is_folded']:
                 if not player.is_folded:
                     player.folds()
@@ -138,9 +137,9 @@ class main_window(QMainWindow):
 
 
     def action(self, serv_inf):
-        stack = self.table.client_player.stack
+        stack, ogb = self.table.client_player.stack, self.table.client_player.ogb
         amount_to_call = serv_inf['amount_to_call']
-        self.table.widget_game.action(stack, amount_to_call)
+        self.table.widget_game.action(stack, ogb, amount_to_call)
         print('Action has initiated')
 
     def end_game(self, serv_inf):
@@ -159,6 +158,7 @@ class main_window(QMainWindow):
 class Player:
     def __init__(self, name, id, stack, is_client=False):
         self.name = name
+        self.ogb = 0
         self.stack = stack
         self.is_client = is_client
         self.is_folded = self.is_all_in = False
@@ -186,6 +186,7 @@ class Player:
             self.widget_player.hide_cards()
 
     def set_ogb(self, value):
+        self.ogb = value
         if value > 0:
             self.widget_front.widget_ogb.label.setText(str(value))
             self.widget_front.widget_ogb.show()
@@ -193,6 +194,7 @@ class Player:
             self.widget_front.widget_ogb.hide()
 
     def set_stack(self, value):
+        self.stack = value
         self.widget_player.label_stack.setText(str(value))
 
     def folds(self):
