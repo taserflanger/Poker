@@ -106,7 +106,7 @@ class Table:
             if player.stack < self.bb:
                 ft.delete(self, player)
                 changes=True
-                fs.try_send(player, {"flag":"disconect"})
+                fs.try_send(player, {"flag":"disconnect"})
                 time.sleep(0.1)
                 player.connexion.close()
         if changes:
