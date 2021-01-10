@@ -77,7 +77,9 @@ class main_window(QMainWindow):
     def server_to_functions(self, msg_server):
 
         serv_inf = json.loads(msg_server)
-        print(f"\nFrom server to client : {serv_inf}\n")
+        print(f"\nFrom server to client :\n")
+        for key, value in serv_inf.items():
+            print(f"{key} : {value}")
         self.functions_dict[serv_inf['flag']](serv_inf)
 
     def init_table(self, serv_inf):
@@ -259,8 +261,8 @@ class Table:
 
 def send_server(dico, server):
     dico = json.dumps(dico)
-    server.send(dico.encode())
     print('From client to server : ', dico)
+    server.send(dico.encode())
 
 
 table_ids_order = [0, 4, 3, 2, 5, 1, 6]
