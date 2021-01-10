@@ -3,8 +3,8 @@ from time import time
 
 from typing import Tuple
 
-from .hand5 import Hand5
-from server.server_utils import try_send, try_recv
+from hand5 import Hand5
+from server_utils import try_send, try_recv
 import json
 import time
 
