@@ -37,7 +37,8 @@ class main_window(QMainWindow):
         self.init_widget_home()
         self.functions_dict = {'init_table': self.init_table, 'new_game': self.new_game,
                                'update_table': self.update_table, 'end_game': self.end_game, 'action': self.action,
-                               'name ok': self.widget_home.ask_if_ready, 'error name': self.widget_home.wrong_name}
+                               'name ok': self.widget_home.ask_if_ready, 'error name': self.widget_home.wrong_name,
+                               'diconnect': self.disconnect}
 
 
         self.setObjectName("main_window")
@@ -149,6 +150,10 @@ class main_window(QMainWindow):
         if serv_inf['show_cards']:
             self.widget_end_game = widget_end_game(serv_inf['cards'])
         print('Game has ended')
+
+    def disconnect(self, serv_inf):
+        print('Player has been disconnected')
+        app.quit()
 
     def resizeEvent(self, e):
         w = self.width()
