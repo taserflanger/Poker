@@ -7,6 +7,7 @@ from server.tournoi import Tournoi
 
 SERVER = "178.79.165.80"
 LOCAL = "localhost"
+PORT = int(input('PORT : '))
 MODE = SERVER
 
 def tournoi(joueur_par_table, stack_initial, sb, bb, nbr_bot):
@@ -16,7 +17,7 @@ def tournoi(joueur_par_table, stack_initial, sb, bb, nbr_bot):
 
 if __name__ == '__main__':
     serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    serveur.bind((MODE, 12800))
+    serveur.bind((MODE, PORT))
     serveur.listen(5)
 
     # fichier_data=pd.read_csv("data.csv", sep=",")
