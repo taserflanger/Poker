@@ -55,7 +55,8 @@ class Player:
                 flag = data["flag"]
                 while flag != "action" and data != "f":
                     player_message = try_recv(self) if not self.disco else "f"
-                    flag = json.loads(player_message)["flag"]
+                    if player_message!="f":
+                        flag = json.loads(player_message)["flag"]
                 player_action = data["action"]
             else:
                 player_action = "f"
