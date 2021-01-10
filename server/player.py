@@ -64,11 +64,11 @@ class Player:
         elif player_action == 'f':
             return self.folds()
         else:  # si non (f) et non (c) c'est que le joueur raise
-            bet = int(player_action)
+            bet = int(player_action) - self.on_going_bet
             player_action = "r"
         time.sleep(0.3)
-        self.stack -= bet - self.on_going_bet
-        self.on_going_bet = bet
+        self.stack -= bet
+        self.on_going_bet += bet
         if self.stack == 0:
             self.is_all_in = True
         self.print_action(player_action, bet, blind)
