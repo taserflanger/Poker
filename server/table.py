@@ -271,6 +271,7 @@ class Table:
             self.final_winners = pot_winners[:]
         fs.refresh_update(self)
         fs.refresh_end_game(self)
+        time.sleep(5)
 
     def give_pot_total(self):
         pot_total = 0
