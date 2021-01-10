@@ -3,9 +3,10 @@ from server.server_utils import try_send
 
 def init_client_table(table):
     for player in table.players:
-        try_send(player, {"flag": "init_table", "players_data": [
-            {"name": gamer.name, "id": gamer.id, "stack": gamer.stack, "is_player": True if gamer == player else False}
-            for gamer in table.players]})
+        if not player.bot:
+            try_send(player, {"flag": "init_table", "players_data": [
+                {"name": gamer.name, "id": gamer.id, "stack": gamer.stack, "is_player": True if gamer == player else False}
+                for gamer in table.players]})
 
 
 def give_players_ids(table):
