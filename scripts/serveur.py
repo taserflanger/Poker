@@ -7,7 +7,7 @@ from server.tournoi import Tournoi
 
 SERVER = "178.79.165.80"
 LOCAL = "localhost"
-MODE = LOCAL
+MODE = SERVER
 
 def tournoi(joueur_par_table, stack_initial, sb, bb, nbr_bot):
     t = Tournoi(serveur, joueur_par_table, stack_initial, sb, bb, nbr_bot)
