@@ -255,7 +255,7 @@ class Table:
     def give_pots(self, all_folded=False):
         """Répartit chaque pot à ses vainqueurs"""
         winner = None
-        self.total_winners=[]
+        self.total_winners = []
         if all_folded:
             winner = [player for player in self.players if not player.is_folded][0]
             self.print(f"Everyone folded, {winner} wins {sum(v for v, _ in self.pots)}")
@@ -274,8 +274,7 @@ class Table:
                 value_for_player = pot_value // n  # au cas où le pot n'est pas divisible par n
                 self.print(f"{player.name} wins {pot_value}")
                 player.stack += value_for_player
-                pot_value -= value_for_player
-                n -= 1
+
 
         fs.refresh_update(self)
         fs.refresh_end_game(self)
