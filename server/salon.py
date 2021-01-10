@@ -4,7 +4,7 @@ import threading
 import time
 from random import randint
 
-import table_utils as ft
+from .table_utils import init_client_table
 from .bot.genectic.BotGenetic import Bot
 from .player import Player
 from .server_utils import gerer_table, try_recv, try_send, give_table_min_max, give_chaises_dispo
@@ -107,7 +107,7 @@ class Salon:  # self.n_max est le nombre maximal de player par table
             player.table = new_table
         self.tables.append(new_table)
         new_table.salon = self
-        ft.init_client_table(new_table)
+        init_client_table(new_table)
         self.thread_table[str(new_table)] = threading.Thread(None, gerer_table, None, [new_table], {})
         self.thread_table[str(new_table)].start()
 

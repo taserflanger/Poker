@@ -1,5 +1,8 @@
 from itertools import combinations
 from time import time
+
+from typing import Tuple
+
 from .hand5 import Hand5
 from server.server_utils import try_send, try_recv
 import json
@@ -33,7 +36,7 @@ class Player:
         self.salon = None
         self.bot = False
 
-    def speaks(self, amount_to_call: float, blind: bool = False) -> tuple[str, float, int]:
+    def speaks(self, amount_to_call: float, blind: bool = False) -> Tuple[str, float, int]:
         """
         renvoie player_action: f pour fold, r pour raise, c pour check/call
         Interface entre le joueur et la table. Peut être override pour les comportements particuliers
