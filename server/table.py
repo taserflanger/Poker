@@ -101,12 +101,16 @@ class Table:
 
     def check_player_stack(self):
         """vérifie si un joueur n'est pas à stack==0"""
+        changes=False
         for player in self.players:
             if player.stack < self.bb:
                 ft.delete(self, player)
+                changes=True
                 fs.try_send(player, {"flag:":"disconect"})
                 time.sleep(0.1)
                 player.connexion.close()
+        if changes:
+            ft.init_client_table(self)
 
     def check_len(self):
         """verifie si il reste des joueurs dans la table"""
