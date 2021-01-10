@@ -6,6 +6,7 @@ from random import randint
 
 from .table_utils import init_client_table
 from .bot.genectic.BotGenetic import Bot
+from .bot.monte_carlo.BotProba import BotMatheux
 from .player import Player
 from .server_utils import gerer_table, try_recv, try_send, give_table_min_max, give_chaises_dispo
 from .table import Table
@@ -51,8 +52,8 @@ class Salon:  # self.n_max est le nombre maximal de player par table
         print("fermeture des connexions au Salon")
         # à mettre autre part car pour le cashgame ça marche pas...
         for i in range(self.nbr_bot):
-            bot_name = "bot_" + str(i)
-            new_bot = Bot(f"Jean Pierre ({i})", 500, [100, 100, 100])
+            #bot_name = "bot_" + str(i)
+            new_bot = BotMatheux("Jean Pierre", 500)
             new_bot.salon = self
             self.players.append(new_bot)
             self.wait_file.append(new_bot)

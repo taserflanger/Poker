@@ -29,5 +29,5 @@ if __name__ == '__main__':
     """
 
     # tournoi(4, 500, 5, 10, 2)
-    tournoi(7, 500, 5, 10, 0)
+    tournoi(7, 500, 5, 10, 1)
     serveur.close()
