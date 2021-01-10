@@ -104,6 +104,8 @@ class Table:
         for player in self.players:
             if player.stack < self.bb:
                 ft.delete(self, player)
+                fs.try_send(player, {"flag:":"disconect"})
+                time.sleep(0.1)
                 player.connexion.close()
 
     def check_len(self):
