@@ -26,7 +26,7 @@ class Table:
         self.speaker = self.next_player(self.dealer)
         self.sb, self.bb = small_blind, big_blind
         self.deck = Deck()
-        self.cards, self.pots, self.final_winners, self.wait_in, self.wait_out = map(list, ([] for _ in range(5)))
+        self.cards, self.pots, self.total_winners, self.wait_in, self.wait_out = map(list, ([] for _ in range(5)))
         self.final_hand, self.in_change, self.in_game, self.end, self.redistribution = map(bool,
                                                                                            (False for _ in range(5)))
         self.history = []
@@ -255,10 +255,11 @@ class Table:
     def give_pots(self, all_folded=False):
         """Répartit chaque pot à ses vainqueurs"""
         winner = None
+        self.total_winners=[]
         if all_folded:
             winner = [player for player in self.players if not player.is_folded][0]
             self.print(f"Everyone folded, {winner} wins {sum(v for v, _ in self.pots)}")
-            self.final_winners = [winner]
+            self.total_winners = [winner]
         else:
             self.get_final_hands()
         for pot_value, pot_players in self.pots:
@@ -268,12 +269,14 @@ class Table:
             pot_winners = self.get_winners(pot_players)
             n = len(pot_winners)
             for player in pot_winners:
+                if player not in self.total_winners:
+                    self.total_winners.append(player)
                 value_for_player = pot_value // n  # au cas où le pot n'est pas divisible par n
                 self.print(f"{player.name} wins {pot_value}")
                 player.stack += value_for_player
                 pot_value -= value_for_player
                 n -= 1
-            self.final_winners = pot_winners[:]
+
         fs.refresh_update(self)
         fs.refresh_end_game(self)
         time.sleep(5)

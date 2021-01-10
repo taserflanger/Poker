@@ -85,7 +85,7 @@ def refresh_end_game(table):
     for player in table:
         if not player.bot:
             info_winners = {"flag": "end_game",
-                            "winners_id": [winner.id for winner in table.final_winners],
+                            "winners_id": [winner.id for winner in table.total_winners],
                             "show_cards": show_cards,
                             "cards": players_cards
                             }
