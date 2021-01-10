@@ -33,7 +33,7 @@ class Table:
         if bot_training:
             for p in self.players:
                 p.table = self
-        self.verbose = not bot_training
+        self.verbose = True
         # TODO: fait dans salon.py. Pour train les bots, utiliser l’ancienne version
         # # rajouter les joueurs à la table
         # for p in self.players:
