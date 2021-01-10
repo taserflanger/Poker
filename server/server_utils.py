@@ -80,7 +80,7 @@ def refresh_end_game(table):
         show_cards = True
         for player in table.players:
             if not player.is_folded:
-                players_cards.append((player.id, (
+                players_cards.append((player.name, (
                 (player.hand[0].value, player.hand[0].suit), (player.hand[1].value, player.hand[1].suit))))
     for player in table:
         if not player.bot:

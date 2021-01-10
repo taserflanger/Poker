@@ -1,5 +1,8 @@
 from itertools import combinations
 from time import time
+
+from typing import Tuple
+
 from .hand5 import Hand5
 from server.server_utils import try_send, try_recv
 import json
@@ -33,7 +36,7 @@ class Player:
         self.salon = None
         self.bot = False
 
-    def speaks(self, amount_to_call: float, blind: bool = False) -> tuple[str, float, int]:
+    def speaks(self, amount_to_call: float, blind: bool = False) -> Tuple[str, float, int]:
         """
         renvoie player_action: f pour fold, r pour raise, c pour check/call
         Interface entre le joueur et la table. Peut être override pour les comportements particuliers
@@ -52,7 +55,8 @@ class Player:
                 flag = data["flag"]
                 while flag != "action" and data != "f":
                     player_message = try_recv(self) if not self.disco else "f"
-                    flag = json.loads(player_message)["flag"]
+                    if player_message!="f":
+                        flag = json.loads(player_message)["flag"]
                 player_action = data["action"]
             else:
                 player_action = "f"
@@ -61,15 +65,15 @@ class Player:
         elif player_action == 'f':
             return self.folds()
         else:  # si non (f) et non (c) c'est que le joueur raise
-            bet = int(player_action)
+            bet = int(player_action) - self.on_going_bet
             player_action = "r"
         time.sleep(0.3)
-        self.stack -= bet - self.on_going_bet
-        self.on_going_bet = bet
+        self.stack -= bet
+        self.on_going_bet += bet
         if self.stack == 0:
             self.is_all_in = True
         self.print_action(player_action, bet, blind)
-        return player_action, bet, 0
+        return player_action, self.on_going_bet, 0
 
     def calls(self, bet: float) -> float:
         if bet > self.stack:

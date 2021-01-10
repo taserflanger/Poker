@@ -185,7 +185,7 @@ class Table:
 
     def players_speak(self, mise: float = 0, raiser=None):
         for player in self:
-            if self.active_players() == 1:
+            if self.active_players() == 1 and player.on_going_bet == mise:
                 return
             if player == raiser or player.is_all_in or player.is_folded:
                 continue
@@ -271,6 +271,7 @@ class Table:
             self.final_winners = pot_winners[:]
         fs.refresh_update(self)
         fs.refresh_end_game(self)
+        time.sleep(5)
 
     def give_pot_total(self):
         pot_total = 0
