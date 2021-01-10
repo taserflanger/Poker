@@ -4,26 +4,29 @@ import socket
 from server.tournoi import Tournoi
 
 # from cash_game import CashGame
-serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-adresse_serveur_linode = "178.79.165.80"
-adresse_serveur_local = ""
-serveur.bind((adresse_serveur_local, 12800))
-serveur.listen(5)
+SERVER = "178.79.165.80"
+LOCAL = "localhost"
+MODE = LOCAL
 
-
-# fichier_data=pd.read_csv("data.csv", sep=",")
 def tournoi(joueur_par_table, stack_initial, sb, bb, nbr_bot):
     t = Tournoi(serveur, joueur_par_table, stack_initial, sb, bb, nbr_bot)
     t.lancer_tournoi()
 
 
-"""
-def cash_game(joueur_par_table, stack_initial, sb, bb, nbr_bot, data ):
-    cash_game=CashGame(serveur, joueur_par_table, stack_initial, sb, bb, nbr_bot, data)
-    cash_game.launch()
-"""
+if __name__ == '__main__':
+    serveur = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    serveur.bind((MODE, 12800))
+    serveur.listen(5)
 
-# tournoi(4, 500, 5, 10, 2)
-tournoi(4, 500, 5, 10, 5)
-serveur.close()
+    # fichier_data=pd.read_csv("data.csv", sep=",")
+
+    """
+    def cash_game(joueur_par_table, stack_initial, sb, bb, nbr_bot, data ):
+        cash_game=CashGame(serveur, joueur_par_table, stack_initial, sb, bb, nbr_bot, data)
+        cash_game.launch()
+    """
+
+    # tournoi(4, 500, 5, 10, 2)
+    tournoi(7, 500, 5, 10, 5)
+    serveur.close()

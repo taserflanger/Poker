@@ -96,6 +96,8 @@ class main_window(QMainWindow):
         sb, bb = serv_inf['blinds']
         for player in players:
             player.widget_player.is_not_speaking_and_did_not_win()
+            if player.id == serv_inf['speaker_id']:
+                player.widget_player.is_speaking()
             player.is_folded = player.is_all_in = False
             player.set_ogb(0)
             if player.id == dealer_id:
