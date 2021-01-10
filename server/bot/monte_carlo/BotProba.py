@@ -1,7 +1,7 @@
 import random
 from math import exp
 
-from odds import give_odds
+from server.bot.monte_carlo.odds import give_odds
 from ..Bot import Bot
 
 
