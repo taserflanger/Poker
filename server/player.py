@@ -46,7 +46,8 @@ class Player:
         """
         player_action = ''
         bet: float = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
-        if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur       
+        if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
+            time.sleep(0.3)       
             try_send(self, {"flag": "action", "amount_to_call": amount_to_call})
             time.sleep(0.3)
             player_message = try_recv(self) if not self.disco else "f"
