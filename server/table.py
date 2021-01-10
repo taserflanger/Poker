@@ -77,8 +77,7 @@ class Table:
         """protocole deconnexion forcée client cf tournoi.changement_table"""
         self.in_game = False
         if self.redistribution:
-            salon = self.players[0].salon  # moche à changer
-            salon.redistribution(self)
+            self.salon.redistribution(self)
         time.sleep(1)
         if not self.in_change:
             self.in_game = True
@@ -105,6 +104,8 @@ class Table:
         for player in self.players:
             if player.stack < self.bb:
                 ft.delete(self, player)
+                fs.try_send(player, {"flag:":"disconect"})
+                time.sleep(0.1)
                 player.connexion.close()
 
     def check_len(self):
@@ -112,7 +113,7 @@ class Table:
         self.manage_file()
         if len(self) == 0:
             self.salon.del_table(self)
-        if len(self.players) == 1:
+        elif len(self.players) == 1:
             print('len1')
             unique_joueur = self.players[0]
             salon = unique_joueur.salon
