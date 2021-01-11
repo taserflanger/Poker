@@ -146,11 +146,14 @@ class main_window(QMainWindow):
         print('Action has initiated')
 
     def end_game(self, serv_inf):
+        for player in self.table.players:
+            player.widget_player.is_not_speaking_and_did_not_win()
         for winner_id in serv_inf['winners_id']:
             winner = self.table.get_player_from_id(winner_id)
             winner.widget_player.won()
         if serv_inf['show_cards']:
             self.widget_end_game = widget_end_game(serv_inf['cards'])
+        self.table.set_pot(0)
         print('Game has ended')
 
     def disconnect(self, serv_inf):
