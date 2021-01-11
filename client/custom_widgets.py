@@ -2,11 +2,11 @@
 Regroupe toutes les classes de 'Widgets' PyQt5 personnalisés, exceptée la fenêtre principale écrite dans main_client.
 """
 
-import gui_resources, random
+import client.gui_resources, random
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from main_client import *
+from scripts.main_client import *
 
 class widget_home(QWidget):
 
@@ -111,7 +111,9 @@ class widget_empty(QWidget):
         QWidget.__init__(self, parent)
         self.setObjectName(name)
 
-        sizePolicy2 = sizePolicy
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy2.setHeightForWidth(True)
+        sizePolicy2.setRetainSizeWhenHidden(True)
         sizePolicy2.setHorizontalStretch(hstretch)
         sizePolicy2.setVerticalStretch(vstretch)
         self.setSizePolicy(sizePolicy2)
@@ -173,18 +175,24 @@ class widget_end_game(QWidget):
 
         self.glayout = QGridLayout(self)
         n = len(cards_inf)
-        self.names = [None] * 5
-        self.cards = [None] * 5
+        self.names = [None] * n
+        self.cards = [None] * n
         for ind in range(n):
             player_name, card1, card2 = cards_inf[ind][0], cards_inf[ind][1][0], cards_inf[ind][1][1]
             self.names[ind] = (QLabel(self))
+            self.names[ind].setSizePolicy(sizePolicy)
             self.names[ind].setText(player_name)
             self.cards[ind] = widget_cards_player(self)
             self.cards[ind].set_cards(card1, card2)
             self.glayout.addWidget(self.names[ind], ind, 0, 1, 1)
             self.glayout.addWidget(self.cards[ind], ind, 1, 1, 1)
-        self.resize(75, n * 35)
+        self.resize(300, n * 175)
+        font, w = self.names[0].font(), self.names[0].width()
+        font.setPointSize(0.2 * w)
+        for label in self.names:
+            label.setFont(font)
         self.show()
+
 
 
 class widget_player(QWidget):
@@ -305,6 +313,10 @@ class widget_front(QWidget):
         self.glayout_front.addWidget(self.label_dealer, 0, 0, 1, 1)
 
         self.widget_ogb = widget_ogb(self)
+        self.widget_ogb.setSizePolicy(sizePolicy)
+
+
+
         self.glayout_front.addWidget(self.widget_ogb, 0, 1, 1, 1)
 
         self.glayout_front.setColumnStretch(0, 1)
@@ -325,6 +337,7 @@ class widget_ogb(QWidget):
     def __init__(self, parent=None, pot=False):
 
         QWidget.__init__(self, parent)
+
         self.setSizePolicy(sizePolicy)
         self.setMinimumSize(QSize(0, 0))
         self.setMaximumSize(QSize(169, 151))
@@ -458,7 +471,6 @@ class widget_table(QWidget):
         self.glayout_table.addWidget(self.widget_fronts[ind], pfx, pfy, 1, 1, align(ind))
         self.widget_players[ind].hide()
         self.widget_fronts[ind].hide()
-
 
     def clear_ogbs(self):
         for widget_front in self.widget_fronts:

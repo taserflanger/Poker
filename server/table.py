@@ -13,7 +13,7 @@ from .player import Player
 class Table:
 
     def __init__(self, table_players: List[Player], small_blind: int, big_blind: int, id_dealer: int = -1,
-                 bot_training=True):
+                 bot_training=False):
         self.nb_players = len(table_players)
         self.players = table_players
         self.nb_players = len(self.players)
@@ -281,7 +281,7 @@ class Table:
 
         fs.refresh_update(self)
         fs.refresh_end_game(self)
-        time.sleep(10)
+        time.sleep(15)
 
     def give_pot_total(self):
         pot_total = 0

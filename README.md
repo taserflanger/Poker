@@ -2,7 +2,7 @@
 
 ---
 
-Mini jeu de poker
+Mini jeu de poker en ligne.
 
 ---
 
@@ -13,16 +13,25 @@ pip install nptyping
 pip install PyQt5
 ```
 
-## Serveur
+## Utilisation
 
-Pour lancer le serveur local, exécuter
+Pour jouer en local, spécifier dans les fichiers scripts.main_server et scripts.main_client :
+
+``
+MODE = LOCAL
+``
+
+
+### Serveur
+
+Pour lancer le programme serveur, exécuter :
 ```
-python -m scripts.server
+python3 -m scripts.main_server
 ```
 
-## Client
+### Client
 
-Pour lancer le programme client et sa GUI, il faut télécharger le fichier 'gui_resources.py' et le mettre dans le même dossier que main_client.py et custom_widgets.py : 
+Pour lancer le programme client et sa GUI, exécuter :
 ```
-https://drive.google.com/file/d/1GCKrcVV6ytLl9g7x9ETK47kjUQXEAKpA/view?usp=sharing
+python3 -m scripts.main_client
 ```
