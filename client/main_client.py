@@ -10,9 +10,9 @@ from custom_widgets import *
 
 SERVER = "178.79.165.80"
 LOCAL = 'localhost'
-PORT = 4502
+PORT = 4503
 
-MODE = SERVER
+MODE = LOCAL
 
 class Server_handler(QObject):
 

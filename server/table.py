@@ -224,6 +224,8 @@ class Table:
 
     def manage_pots(self):
         ogb_values = [0] + list(set([player.on_going_bet for player in self.players if not player.is_folded]))
+        ogb_values.sort()
+        self.print(f"ogb_values : {ogb_values}")
         # on met le 0 pour la ligne 18, pour le ogb_values[i-1]
         if ogb_values[1] > 0:  # dans le cas où tout le monde a check, on ne crée pas de pot -> gain de temps
             for i in range(1, len(ogb_values)):
@@ -236,6 +238,7 @@ class Table:
                     if player.on_going_bet >= ogb_values[i]:
                         pot_players.append(player)
                 self.pots.append((pot_value, pot_players))
+                self.print(f"           Pot {i} - players : {pot_players}, {pot_value}")
 
     # FIN DE LA PARTIE
     def get_final_hands(self):
