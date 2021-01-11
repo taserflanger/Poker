@@ -320,6 +320,8 @@ class widget_front(QWidget):
 
 class widget_ogb(QWidget):
 
+    resized = pyqtSignal()
+
     def __init__(self, parent=None, pot=False):
 
         QWidget.__init__(self, parent)
@@ -394,6 +396,7 @@ class widget_table_cards(QWidget):
         for card in self.table_cards:
             card.setMaximumSize(0.1*w, 0.15*h)
 
+
     def new_game(self):
         for card in self.table_cards:
             card.hide()
@@ -410,6 +413,8 @@ class widget_table_cards(QWidget):
 
 
 class widget_table(QWidget):
+
+
 
     def __init__(self, parent):
 
@@ -454,14 +459,16 @@ class widget_table(QWidget):
         self.widget_players[ind].hide()
         self.widget_fronts[ind].hide()
 
-    def paintEvent(self, pe):
-        """Nécessaire de redéfinir le paintEvent pour appliquer les stylesheet des custom widgets"""
-        custom_paintEvent(self, pe)
 
     def clear_ogbs(self):
         for widget_front in self.widget_fronts:
             widget_front.widget_ogb.hide()
             widget_front.widget_ogb.label.setText('')
+
+    def paintEvent(self, pe):
+        """Nécessaire de redéfinir le paintEvent pour appliquer les stylesheet des custom widgets"""
+        custom_paintEvent(self, pe)
+
 
 
 class widget_game(QWidget):

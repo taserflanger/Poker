@@ -281,7 +281,7 @@ class Table:
 
         fs.refresh_update(self)
         fs.refresh_end_game(self)
-        time.sleep(5)
+        time.sleep(10)
 
     def give_pot_total(self):
         pot_total = 0

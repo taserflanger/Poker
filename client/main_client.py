@@ -92,6 +92,10 @@ class main_window(QMainWindow):
         self.table.show_used_widgets()
         self.repaint()
         print('Table has been initiated')
+        #######
+        for player in self.table.players:
+            print(f"{player.name} : width = {player.widget_front.widget_ogb.label.width()}")
+        #######
 
     def new_game(self, serv_inf):
         players, table_cards, dealer_id = self.table.players, self.table.widget_table.table_cards, serv_inf['dealer_id']
@@ -103,10 +107,7 @@ class main_window(QMainWindow):
                 player.widget_player.is_speaking()
             player.is_folded = player.is_all_in = False
             player.set_ogb(0)
-            if player.id == dealer_id:
-                player.show_dealer_button(True)
-            else:
-                player.show_dealer_button(False)
+            player.show_dealer_button(player.id == dealer_id)
             if player.is_client:
                 player.widget_player.p_0_cards.set_cards(card1=client_cards[0], card2=client_cards[1])
             player.show_cards(True)
@@ -116,6 +117,10 @@ class main_window(QMainWindow):
                     player.set_stack(blind['player_stack'])
         table_cards.new_game()
         print('New_game has been started')
+        ########
+        for player in self.table.players:
+            print(f"{player.name} : width = {player.widget_front.widget_ogb.label.width()}")
+        ########@
 
 
     def update_table(self, serv_inf):
