@@ -2,7 +2,9 @@ import random
 from math import exp
 
 from server.bot.monte_carlo.odds import give_odds
-from ..Bot import Bot
+from server.bot.Bot import Bot
+#from odds import give_odds
+
 
 
 class BotMatheux(Bot):
@@ -49,8 +51,3 @@ class BotMatheux(Bot):
         return player_action, bet, 0
 
 
-"""
-hand=[Card(12, 3), Card(9, 2)]
-board=[Card(11, 3), Card(7, 2), Card(2, 1), Card(13, 3)]
-print(speaks(hand, board, 2, 2))
-"""

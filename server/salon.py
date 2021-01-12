@@ -5,7 +5,7 @@ import time
 from random import randint
 
 from .table_utils import init_client_table
-from .bot.genectic.BotGenetic import Bot
+from .bot.genectic.BotGenetic import BotGenetic
 from .bot.monte_carlo.BotProba import BotMatheux
 from .player import Player
 from .server_utils import gerer_table, try_recv, try_send, give_table_min_max, give_chaises_dispo
@@ -17,7 +17,7 @@ from .table import Table
 
 class Salon:  # self.n_max est le nombre maximal de player par table
 
-    def __init__(self, serveur, n_max, stack, small_blind, big_blind, nbr_bot):
+    def __init__(self, serveur, n_max, stack, small_blind, big_blind, nbr_bot_matheux, nbr_bot_darwin):
         self.liste_names, self.players, self.tables, self.wait_file = map(list, ([] for _ in range(4)))
         self.n_max = n_max
         self.stack = stack
@@ -28,7 +28,8 @@ class Salon:  # self.n_max est le nombre maximal de player par table
         self.started = False
         self.let_modif_thread = True
         self.gap_max = 2
-        self.nbr_bot = nbr_bot
+        self.nbr_bot_matheux = nbr_bot_matheux
+        self.nbr_bot_darwin=nbr_bot_darwin
 
     def ready(self):
         # cette fonction est redéfinie dans tournoi, mais ne l'est pas dans cashgame
@@ -48,12 +49,17 @@ class Salon:  # self.n_max est le nombre maximal de player par table
                 new_player.salon = self
                 self.thread_client[str(client)] = threading.Thread(None, self.gerer_preparation, None, [new_player], {})
                 self.thread_client[str(client)].start()
-
         print("fermeture des connexions au Salon")
-        # à mettre autre part car pour le cashgame ça marche pas...
-        for i in range(self.nbr_bot):
-            #bot_name = "bot_" + str(i)
-            new_bot = BotMatheux("Jean Pierre", 500)
+        self.bot_creation()
+
+    def bot_creation(self):
+        for i in range(self.nbr_bot_matheux):
+            new_bot = BotMatheux(f"Adechola {i}", 500)
+            new_bot.salon = self
+            self.players.append(new_bot)
+            self.wait_file.append(new_bot)
+        for i in range(self.nbr_bot_darwin):
+            new_bot = BotGenetic(f"Gazeau {i}", 500, [50])
             new_bot.salon = self
             self.players.append(new_bot)
             self.wait_file.append(new_bot)

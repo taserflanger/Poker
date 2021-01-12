@@ -22,3 +22,12 @@ class Deck(List):
 
     def shuffle(self):
         random.shuffle(self)
+  
+    def remove(self, card):
+        card_value=card.value
+        card_suit=card.suit
+        for card in self:
+            if card_value==card.value and card_suit==card.suit:
+                super(Deck, self).remove(card)
+                return
+
