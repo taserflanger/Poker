@@ -12,7 +12,7 @@ N_BOT_MATHEUX=int(input('NBR BOT MATHEUX : '))
 N_BOT_DARWIN=int(input('NBR BOT DARWIN : '))
 MODE = SERVER
 
-def tournoi(joueur_par_table, stack_initial, sb, bb, nbr_bot):
+def tournoi(joueur_par_table, stack_initial, sb, bb, nbr_bot_matheux, nbr_bot_darwin):
     t = Tournoi(serveur, joueur_par_table, stack_initial, sb, bb, nbr_bot_matheux, nbr_bot_darwin)
     t.lancer_tournoi()
 

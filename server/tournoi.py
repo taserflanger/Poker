@@ -8,8 +8,8 @@ from server.salon import Salon
 
 class Tournoi(Salon):  # self.n_max est le nombre maximal de player par table
 
-    def __init__(self, serveur, n_max, stack, small_blind, big_blind, nbr_bot):
-        super().__init__(serveur, n_max, stack, small_blind, big_blind, nbr_bot)
+    def __init__(self, serveur, n_max, stack, small_blind, big_blind, nbr_bot_matheux, nbr_bot_darwin):
+        super().__init__(serveur, n_max, stack, small_blind, big_blind, nbr_bot_matheux, nbr_bot_darwin)
 
     def lancer_tournoi(self):
         self.players_connexion()
