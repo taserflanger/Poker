@@ -19,7 +19,7 @@ def action():
     reponse=input("> ")
     client.send(reponse.encode("utf-8"))
 
-data=pd.read_csv("server/tmp_data/data.csv")
+data=pd.read_csv("../server/tmp_data/data.csv")
   
 def ask_password(name):
     actual_password_idx=data[data["name"]==name].index.values

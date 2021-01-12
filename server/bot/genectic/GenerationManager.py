@@ -1,13 +1,15 @@
-from typing import List, Union
 import os
+from typing import List, Union
 
 import numpy as np
 from nptyping import NDArray
-# from matplotlib.pyplot import draw, imshow, show, plot
 
-from server.bot.genectic.BotGenetic import Bot
+from server.bot.genectic.BotGenetic import BotGenetic
 from server.bot.genectic.Generation import Generation
 from server.table import Table
+
+
+# from matplotlib.pyplot import draw, imshow, show, plot
 
 
 class GenerationManager:
@@ -45,21 +47,20 @@ class GenerationManager:
         :return: W, b, f trained
         """
 
-        scores = np.ndarray((nb_players,))
-
         for g in range(N):
-
-            bots = []
-            os.system('cls')
-            print("*" * (g * 50 // N), f"generation {g}")
+            scores = np.ndarray((nb_players,))
+            stacks = [100 for _ in range(nb_players)]
+            bots: List[BotGenetic] = list(self.current_generation.generate_bot_pool(nb_players, stacks))
             for game in range(m):
-                stacks = [100 for _ in range(nb_players)]
                 # TODO rajouter la possibilité de faire des staccks random
-                bots: List[Bot] = list(self.current_generation.generate_bot_pool(nb_players, stacks))
                 table = Table(table_players=bots, small_blind=small_blind, big_blind=2 * small_blind,
                               bot_training=True)
                 for _ in range(max_round):
-                    table.game()
+                    table.initialisation_attributs()
+                    try:
+                        table.game()
+                    except:
+                        pass
                     # si un joueur ruine tous les autres, on arrête la partie
                     if sum([b.stack > 0 for b in bots]) == 1:
                         break
@@ -69,7 +70,9 @@ class GenerationManager:
             # draw()
             # show()
             scores /= m
-
+            os.system('cls')
+            print("*" * (g * 50 // N), f"generation {g}")
+            print(scores)
             winner = bots[scores.argmax()]
             # la nouvelle génération a comme poids de référence ceux du winner
             self.current_generation = Generation(self.MUTATION_FACTOR, self.sizes, winner.W, winner.b, winner.f)

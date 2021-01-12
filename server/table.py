@@ -30,10 +30,11 @@ class Table:
         self.final_hand, self.in_change, self.in_game, self.end, self.redistribution = map(bool,
                                                                                            (False for _ in range(5)))
         self.history = []
+        self.bot_training = bot_training
         if bot_training:
             for p in self.players:
                 p.table = self
-        self.verbose = True
+        self.verbose = not bot_training
         # TODO: fait dans salon.py. Pour train les bots, utiliser l’ancienne version
         # # rajouter les joueurs à la table
         # for p in self.players:
@@ -55,13 +56,18 @@ class Table:
     def next_player(self, player):
         return self.players[(player.id + 1) % self.nb_players]
 
+    def sleep(self, ms):
+        if not self.bot_training:
+            print("Alerte rouge!")
+            time.sleep(ms)
+
     def print(self, *values, sep=" ", end="\n"):
         if self.verbose:
             print(*values, sep, end)
 
     def pause_game(self):
         while self.in_change:
-            time.sleep(2)
+            self.sleep(2)
 
     # ******************* PREPARATION DE LA PARTIE *********************
     def set_up_game(self):
@@ -78,7 +84,7 @@ class Table:
         self.in_game = False
         if self.redistribution:
             self.salon.redistribution(self)
-        time.sleep(1)
+        self.sleep(1)
         if not self.in_change:
             self.in_game = True
         else:
@@ -107,7 +113,7 @@ class Table:
                 ft.delete(self, player)
                 changes=True
                 fs.try_send(player, {"flag":"disconnect"})
-                time.sleep(0.1)
+                self.sleep(0.1)
                 player.connexion.close()
         if changes:
             ft.init_client_table(self)
@@ -118,12 +124,12 @@ class Table:
         if len(self) == 0:
             self.salon.del_table(self)
         elif len(self.players) == 1:
-            print('len1')
+            self.print('len1')
             unique_joueur = self.players[0]
             salon = unique_joueur.salon
             if len(salon.tables) == 1:
                 self.end = True
-                print(unique_joueur.name, "a gagné")
+                self.print(unique_joueur.name, "a gagné")
             else:
                 salon.gerer_joueur_seul(self, unique_joueur)
         self.manage_file()
@@ -154,7 +160,7 @@ class Table:
         self.give_pots(all_folded)
 
     def pre_flop(self):
-        print("Dealer", self.dealer.name)
+        self.print("Dealer", self.dealer.name)
         self.deal_and_blinds()
         self.players_speak(self.bb)
 
@@ -163,17 +169,31 @@ class Table:
             player.hand.append(self.deck.pop())
         sb_player = self.speaker
         sb_player.speaks(self.sb, blind=True)
+        self.history.append(
+            (self.distance_to_dealer(sb_player),
+             ["r", "c", "f"].index("r"),
+             self.sb,
+             0,
+             0)
+        )
         self.speaker = self.next_player(self.speaker)
         bb_player = self.speaker
         bb_player.speaks(self.bb, blind=True)
+        self.history.append(
+            (self.distance_to_dealer(bb_player),
+             ["r", "c", "f"].index("r"),
+             self.bb,
+             0,
+             0)
+        )
         self.speaker = self.next_player(self.speaker)
-        fs.refresh_new_game(self, sb_player, bb_player)  # envoie aux clients les infos du tour cf fonction_serveur
+        fs.refresh_new_game(self, sb_player, bb_player, self.bot_training)  # envoie aux clients les infos du tour cf fonction_serveur
 
     def flop(self):
         self.initialise_round()
         self.cards += [self.deck.pop() for _ in range(3)]
         self.print(" -".join([str(card) for card in self.cards]))
-        fs.refresh_update(self)
+        fs.refresh_update(self, self.bot_training)
         self.players_speak()
 
     def initialise_round(self):
@@ -185,7 +205,7 @@ class Table:
         self.initialise_round()
         self.cards += [self.deck.pop()]
         self.print(" -".join([str(card) for card in self.cards]))
-        fs.refresh_update(self)
+        fs.refresh_update(self, self.bot_training)
         self.players_speak()
 
     def players_speak(self, mise: float = 0, raiser=None):
@@ -194,7 +214,7 @@ class Table:
                 return
             if player == raiser or player.is_all_in or player.is_folded:
                 continue
-            # TODO: implémenter timer et renvoyer decision time dans player.speaks
+            # TODO: implémenter timer et renvoyer decision ms dans player.speaks
             action, amount, decision_time = player.speaks(mise)
             self.history.append(
                 (self.distance_to_dealer(player),
@@ -204,7 +224,7 @@ class Table:
                  player.get_current_best_hand())
             )
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
-            fs.refresh_update(self)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur
+            fs.refresh_update(self, self.bot_training)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
 
@@ -275,10 +295,9 @@ class Table:
                 self.print(f"{player.name} wins {pot_value}")
                 player.stack += value_for_player
 
-
-        fs.refresh_update(self)
-        fs.refresh_end_game(self)
-        time.sleep(5)
+        fs.refresh_update(self, self.bot_training)
+        fs.refresh_end_game(self, self.bot_training)
+        self.sleep(5)
 
     def give_pot_total(self):
         pot_total = 0

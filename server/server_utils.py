@@ -31,8 +31,9 @@ def try_send(player, message):
 
 
 # ******LES REFRESH: sont des fonctions qui envoient aux clients les nouvelles infos de la table *****
-def refresh_new_game(table, sb_player, bb_player):
-    time.sleep(0.3)
+def refresh_new_game(table, sb_player, bb_player, bot_training=False):
+    if not bot_training:
+        time.sleep(0.3)
     for player in table:
         if not player.bot:
             info_round = {"flag": "new_game",
@@ -49,11 +50,13 @@ def refresh_new_game(table, sb_player, bb_player):
                           "speaker_id": table.speaker.id
                           }
             try_send(player, info_round)
+        if not bot_training:
+            time.sleep(0.3)
+
+
+def refresh_update(table, bot_training):  # l'envoie des cartes des players à la fin manquent
+    if not bot_training:
         time.sleep(0.3)
-
-
-def refresh_update(table):  # l'envoie des cartes des players à la fin manquent
-    time.sleep(0.3)
     for player in table:
         if not player.bot:
             info_table = {"flag": "update_table",
@@ -68,11 +71,13 @@ def refresh_update(table):  # l'envoie des cartes des players à la fin manquent
                           }
 
             try_send(player, info_table)
-    time.sleep(0.3)
+    if not bot_training:
+        time.sleep(0.3)
 
 
-def refresh_end_game(table):
-    time.sleep(0.3)
+def refresh_end_game(table, bot_training):
+    if not bot_training:
+        time.sleep(0.3)
     players_cards = []
     if table.folded_players() == len(table.players) - 1:  # il ne reste qu'une personne ==> on ne montre pas les cartes
         show_cards = False
@@ -91,7 +96,8 @@ def refresh_end_game(table):
                             }
 
             try_send(player, info_winners)
-    time.sleep(0.3)
+    if not bot_training:
+        time.sleep(0.3)
 
 
 # *****************FONCTIONS SALON *************************

@@ -53,12 +53,12 @@ class BotGenetic(Bot):
         :param history:
         :return:
         """
-        metaW = [self.W[1]]
-        for i in range(len(history) - 1):
-            metaW = list(map(self.history_mapper, metaW))
-            # TODO: Cette opération prend beacoup trop de temps. calculer une fois le mapping au
-            #  début puis tronquer selon le nombre nécessaire
-            metaW.append(self.W[1])
+        metaW = [self.W[1]]*len(history)
+        # for i in range(len(history) - 1):
+        #     metaW = list(map(self.history_mapper, metaW))
+        #     # TODO: Cette opération prend beacoup trop de temps. calculer une fois le mapping au
+        #     #  début puis tronquer selon le nombre nécessaire
+        #     metaW.append(self.W[1])
         W1 = np.concatenate(metaW)
         self.L[1] = W1.transpose() @ history.flatten() + self.b[1]
 
