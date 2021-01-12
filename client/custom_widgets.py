@@ -293,13 +293,16 @@ class widget_player(QWidget):
 
 class widget_front(QWidget):
 
-    def __init__(self, parent=None, name='widget_front', empty=False):
+    def __init__(self, parent=None, name='widget_front', empty=False, ind=0):
 
         QWidget.__init__(self, parent)
         self.setObjectName(name)
-        self.glayout_front = QGridLayout(self)
-        self.glayout_front.setContentsMargins(0, 0, 0, 0)
-        self.glayout_front.setObjectName("glayout_front")
+        if ind in [0, 3, 4]:
+            self.layout_front = QHBoxLayout(self)
+        else:
+            self.layout_front = QVBoxLayout(self)
+        self.layout_front.setContentsMargins(0, 0, 0, 0)
+        self.layout_front.setObjectName("layout_front")
 
 
         self.label_dealer = QLabel(self)
@@ -310,17 +313,17 @@ class widget_front(QWidget):
         self.label_dealer.setScaledContents(False)
         self.label_dealer.setObjectName("label_2")
         self.label_dealer.hide()
-        self.glayout_front.addWidget(self.label_dealer, 0, 0, 1, 1)
+        self.layout_front.addWidget(self.label_dealer)
 
         self.widget_ogb = widget_ogb(self)
         self.widget_ogb.setSizePolicy(sizePolicy)
 
 
 
-        self.glayout_front.addWidget(self.widget_ogb, 0, 1, 1, 1)
+        self.layout_front.addWidget(self.widget_ogb)
 
-        self.glayout_front.setColumnStretch(0, 1)
-        self.glayout_front.setColumnStretch(1, 3)
+        self.layout_front.setStretch(0, 1)
+        self.layout_front.setStretch(1, 3)
 
     def resizeEvent(self, e):
         w = 0.15 * self.width()
@@ -459,14 +462,14 @@ class widget_table(QWidget):
     def create_widgets_players_and_fronts(self, ind):
         po_players = [(4, 3), (3, 0), (1, 0), (0, 2), (0, 4), (1, 6), (3, 6)]
         po_fronts = [(3, 3), (3, 1), (1, 1), (1, 2), (1, 4), (1, 5), (3, 5)]
-        alignment_dict = {'0': Qt.AlignBottom, '12': Qt.AlignRight, '34': Qt.AlignTop, '56': Qt.AlignLeft}
+        alignment_dict = {'0': Qt.AlignBottom, '12': Qt.AlignLeft, '34': Qt.AlignTop, '56': Qt.AlignRight}
         align = lambda x: [alignment_dict[key] for key in alignment_dict.keys() if str(x) in key][0]
 
         p0 = True if ind == 0 else False
         ppx, ppy = po_players[ind]
         pfx, pfy = po_fronts[ind]
         self.widget_players[ind] = widget_player(parent=self, name="widget_player_"+str(ind), empty=False, p_0=p0)
-        self.widget_fronts[ind] = widget_front(parent=self, name="widget_front_"+str(ind), empty=False)
+        self.widget_fronts[ind] = widget_front(parent=self, name="widget_front_"+str(ind), empty=False, ind=ind)
         self.glayout_table.addWidget(self.widget_players[ind], ppx, ppy, 1, 1)
         self.glayout_table.addWidget(self.widget_fronts[ind], pfx, pfy, 1, 1, align(ind))
         self.widget_players[ind].hide()
