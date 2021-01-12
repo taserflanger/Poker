@@ -1,6 +1,5 @@
 import random
-from scipy.special import softmax
-
+import numpy as np
 from server.bot.monte_carlo.odds import give_odds
 from server.bot.Bot import Bot
 #from odds import give_odds
@@ -12,6 +11,8 @@ class BotMatheux(Bot):
         super().__init__(bot_name, bot_stack)
         self.coef_bluff = 1
 
+    def softmax(x):
+        return np.exp(x)/sum(np.exp(x))
 
     # + coef de bluff est bas + le bot bluff, il évolue entre 0 et +infini
     def speaks(self, amount_to_call, blind=False):
