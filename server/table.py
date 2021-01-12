@@ -96,6 +96,7 @@ class Table:
             ft.delete(self, self.wait_out.pop(0))
             changes = True
         if changes:
+            print("changes_manage_file")
             ft.init_client_table(self)
         self.in_change = False
 
@@ -110,6 +111,7 @@ class Table:
                 time.sleep(0.1)
                 player.connexion.close()
         if changes:
+            print("changes")
             ft.init_client_table(self)
 
     def check_len(self):
