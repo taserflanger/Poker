@@ -11,7 +11,7 @@ class BotMatheux(Bot):
         super().__init__(bot_name, bot_stack)
         self.coef_bluff = 1
 
-    def softmax(x):
+    def softmax(self, x):
         return np.exp(x)/sum(np.exp(x))
 
     # + coef de bluff est bas + le bot bluff, il évolue entre 0 et +infini
@@ -27,13 +27,13 @@ class BotMatheux(Bot):
         if not blind:
             exp_winnings = give_odds(self.hand, board, num_opp)[1]
             reference_ratio=1/num_opp
-            action_proba = softmax([self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
+            action_proba = self.softmax([self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
             x = random.random()
             if x < action_proba:
                 player_action = "c"
                 average_stack=sum([players.stack for players in self.table.players])/len(self.players)
                 coef_richesse=self.stack/average_stack
-                proba_raise=softmax([coef_richesse*self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
+                proba_raise=self.softmax([coef_richesse*self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
                 y=random.random()
                 if y < proba_raise:
                     player_action=proba_raise*10*self.table.bb
