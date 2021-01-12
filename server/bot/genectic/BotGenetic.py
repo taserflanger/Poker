@@ -116,8 +116,6 @@ class BotGenetic(Bot):
             action = ["f", "c", "r"][action_layer.argmax()]
             if action == "r" and self.stack <= bet:
                 action = "c"
-            if action == "f":
-                self.is_folded = True
             return action
 
     def ask_amount(self, bet):
