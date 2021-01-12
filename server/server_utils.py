@@ -131,12 +131,6 @@ def divide_players_on_tables(nbr_players, n_max):
 
 print("15 joueurs, 4 par tables", divide_players_on_tables(15, 4))
 
-
-
-def del_thread(thread):
-    thread.exit()
-
-
 def wait_for_table(table1, table2):
     """met en pause 2 tables à la fin de leur partie pour d'éventuels modifications"""
     boucle = [table1, table2]
