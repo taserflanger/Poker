@@ -22,14 +22,5 @@ if __name__ == '__main__':
     serveur.bind((MODE, PORT))
     serveur.listen(5)
 
-    # fichier_data=pd.read_csv("data.csv", sep=",")
-
-    """
-    def cash_game(joueur_par_table, stack_initial, sb, bb, nbr_bot, data ):
-        cash_game=CashGame(serveur, joueur_par_table, stack_initial, sb, bb, nbr_bot, data)
-        cash_game.launch()
-    """
-
-    # tournoi(4, 500, 5, 10, 2)
     tournoi(7, 500, 5, 10, N_BOT_MATHEUX, N_BOT_DARWIN)
     serveur.close()
