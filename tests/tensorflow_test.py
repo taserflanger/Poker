@@ -1,5 +1,10 @@
+# %%
+import numpy as np
 import tensorflow as tf
 
-import numpy as np
-import matplotlib.pyplot as plt
+from parse_data import games, predictions
 
+model = tf.keras.layers.LSTM(3)
+
+# %%
+model(games[0])

@@ -5,7 +5,7 @@ import time
 from random import randint
 
 from .table_utils import init_client_table
-from .bot.genectic.BotGenetic import BotGenetic
+from .bot.genectic.BotGenetic import Bot, BotGenetic
 from .bot.monte_carlo.BotProba import BotMatheux
 from .player import Player
 from .server_utils import gerer_table, try_recv, try_send, give_table_min_max, give_chaises_dispo

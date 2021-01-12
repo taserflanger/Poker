@@ -1,10 +1,8 @@
 import random
-from typing import List
 
 from .card import Card
 
-
-class Deck(List):
+class Deck(list):
     """
     Paquet de cartes. C’est une liste de taille et éléments fixés, qui implément shuffle.
     """
@@ -22,7 +20,7 @@ class Deck(List):
 
     def shuffle(self):
         random.shuffle(self)
-  
+
     def remove(self, card):
         card_value=card.value
         card_suit=card.suit
@@ -30,4 +28,3 @@ class Deck(List):
             if card_value==card.value and card_suit==card.suit:
                 super(Deck, self).remove(card)
                 return
-

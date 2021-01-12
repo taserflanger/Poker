@@ -1,7 +1,8 @@
 from server.bot.genectic.GenerationManager import GenerationManager
 import numpy as np
 
-SIZES = [100, 100, 100]
+
+SIZES = [50]
 # ne pas modifier sans générer de nouveaux paramètres
 Params = {"W": [], "b": [], "f": []}
 
@@ -13,15 +14,15 @@ for s in "W", "b", "f":
 
 engine = GenerationManager(
     sizes=SIZES,
-    mutation_factor=1,
-    # W=Params["W"],
-    # b=Params["b"],
-    # f=Params["f"]
+    mutation_factor=.01,
+    W=Params["W"],
+    b=Params["b"],
+    f=Params["f"]
 )
 
-W, b, f = engine.train(N=1, m=10, nb_players=5, small_blind=5, max_round=10)
+W, b, f = engine.train(N=100, m=10, nb_players=5, small_blind=5, max_round=10)
 
 # write params
 for s, X in zip(("W", "b", "f"), (W, b, f)):
     for i in range(len(X)):
-        np.savetxt(f"bot/genectic/data/{s}{str(i)}.csv", X[i])
+        np.savetxt(f"server/data/{s}{str(i)}.csv", X[i])

@@ -69,6 +69,8 @@ class Hand5:
 
         if top_comb == 3 and 2 in hand_dict.values():  # pour le full
             combi = 'full'
+        # if top_comb == 5:
+        #     print(self.cards)
         elif top_comb == 2 and len(top_comb_values) == 2:
             combi = 'two_pair'
         else:
