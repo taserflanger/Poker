@@ -2,11 +2,11 @@
 Regroupe toutes les classes de 'Widgets' PyQt5 personnalisés, exceptée la fenêtre principale écrite dans main_client.
 """
 
-import gui_resources, random
+import client.gui_resources, random
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
-from main_client import *
+from scripts.main_client import *
 
 class widget_home(QWidget):
 
@@ -111,7 +111,9 @@ class widget_empty(QWidget):
         QWidget.__init__(self, parent)
         self.setObjectName(name)
 
-        sizePolicy2 = sizePolicy
+        sizePolicy2 = QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        sizePolicy2.setHeightForWidth(True)
+        sizePolicy2.setRetainSizeWhenHidden(True)
         sizePolicy2.setHorizontalStretch(hstretch)
         sizePolicy2.setVerticalStretch(vstretch)
         self.setSizePolicy(sizePolicy2)
@@ -173,18 +175,24 @@ class widget_end_game(QWidget):
 
         self.glayout = QGridLayout(self)
         n = len(cards_inf)
-        self.names = [None] * 5
-        self.cards = [None] * 5
+        self.names = [None] * n
+        self.cards = [None] * n
         for ind in range(n):
             player_name, card1, card2 = cards_inf[ind][0], cards_inf[ind][1][0], cards_inf[ind][1][1]
             self.names[ind] = (QLabel(self))
+            self.names[ind].setSizePolicy(sizePolicy)
             self.names[ind].setText(player_name)
             self.cards[ind] = widget_cards_player(self)
             self.cards[ind].set_cards(card1, card2)
             self.glayout.addWidget(self.names[ind], ind, 0, 1, 1)
             self.glayout.addWidget(self.cards[ind], ind, 1, 1, 1)
-        self.resize(75, n * 35)
+        self.resize(300, n * 175)
+        font, w = self.names[0].font(), self.names[0].width()
+        font.setPointSize(0.2 * w)
+        for label in self.names:
+            label.setFont(font)
         self.show()
+
 
 
 class widget_player(QWidget):
@@ -285,13 +293,16 @@ class widget_player(QWidget):
 
 class widget_front(QWidget):
 
-    def __init__(self, parent=None, name='widget_front', empty=False):
+    def __init__(self, parent=None, name='widget_front', empty=False, ind=0):
 
         QWidget.__init__(self, parent)
         self.setObjectName(name)
-        self.glayout_front = QGridLayout(self)
-        self.glayout_front.setContentsMargins(0, 0, 0, 0)
-        self.glayout_front.setObjectName("glayout_front")
+        if ind in [0, 3, 4]:
+            self.layout_front = QHBoxLayout(self)
+        else:
+            self.layout_front = QVBoxLayout(self)
+        self.layout_front.setContentsMargins(0, 0, 0, 0)
+        self.layout_front.setObjectName("layout_front")
 
 
         self.label_dealer = QLabel(self)
@@ -302,13 +313,17 @@ class widget_front(QWidget):
         self.label_dealer.setScaledContents(False)
         self.label_dealer.setObjectName("label_2")
         self.label_dealer.hide()
-        self.glayout_front.addWidget(self.label_dealer, 0, 0, 1, 1)
+        self.layout_front.addWidget(self.label_dealer)
 
         self.widget_ogb = widget_ogb(self)
-        self.glayout_front.addWidget(self.widget_ogb, 0, 1, 1, 1)
+        self.widget_ogb.setSizePolicy(sizePolicy)
 
-        self.glayout_front.setColumnStretch(0, 1)
-        self.glayout_front.setColumnStretch(1, 3)
+
+
+        self.layout_front.addWidget(self.widget_ogb)
+
+        self.layout_front.setStretch(0, 1)
+        self.layout_front.setStretch(1, 3)
 
     def resizeEvent(self, e):
         w = 0.15 * self.width()
@@ -320,9 +335,12 @@ class widget_front(QWidget):
 
 class widget_ogb(QWidget):
 
+    resized = pyqtSignal()
+
     def __init__(self, parent=None, pot=False):
 
         QWidget.__init__(self, parent)
+
         self.setSizePolicy(sizePolicy)
         self.setMinimumSize(QSize(0, 0))
         self.setMaximumSize(QSize(169, 151))
@@ -394,6 +412,7 @@ class widget_table_cards(QWidget):
         for card in self.table_cards:
             card.setMaximumSize(0.1*w, 0.15*h)
 
+
     def new_game(self):
         for card in self.table_cards:
             card.hide()
@@ -410,6 +429,8 @@ class widget_table_cards(QWidget):
 
 
 class widget_table(QWidget):
+
+
 
     def __init__(self, parent):
 
@@ -441,27 +462,28 @@ class widget_table(QWidget):
     def create_widgets_players_and_fronts(self, ind):
         po_players = [(4, 3), (3, 0), (1, 0), (0, 2), (0, 4), (1, 6), (3, 6)]
         po_fronts = [(3, 3), (3, 1), (1, 1), (1, 2), (1, 4), (1, 5), (3, 5)]
-        alignment_dict = {'0': Qt.AlignBottom, '12': Qt.AlignRight, '34': Qt.AlignTop, '56': Qt.AlignLeft}
+        alignment_dict = {'0': Qt.AlignBottom, '12': Qt.AlignLeft, '34': Qt.AlignTop, '56': Qt.AlignRight}
         align = lambda x: [alignment_dict[key] for key in alignment_dict.keys() if str(x) in key][0]
 
         p0 = True if ind == 0 else False
         ppx, ppy = po_players[ind]
         pfx, pfy = po_fronts[ind]
         self.widget_players[ind] = widget_player(parent=self, name="widget_player_"+str(ind), empty=False, p_0=p0)
-        self.widget_fronts[ind] = widget_front(parent=self, name="widget_front_"+str(ind), empty=False)
+        self.widget_fronts[ind] = widget_front(parent=self, name="widget_front_"+str(ind), empty=False, ind=ind)
         self.glayout_table.addWidget(self.widget_players[ind], ppx, ppy, 1, 1)
         self.glayout_table.addWidget(self.widget_fronts[ind], pfx, pfy, 1, 1, align(ind))
         self.widget_players[ind].hide()
         self.widget_fronts[ind].hide()
 
-    def paintEvent(self, pe):
-        """Nécessaire de redéfinir le paintEvent pour appliquer les stylesheet des custom widgets"""
-        custom_paintEvent(self, pe)
-
     def clear_ogbs(self):
         for widget_front in self.widget_fronts:
             widget_front.widget_ogb.hide()
             widget_front.widget_ogb.label.setText('')
+
+    def paintEvent(self, pe):
+        """Nécessaire de redéfinir le paintEvent pour appliquer les stylesheet des custom widgets"""
+        custom_paintEvent(self, pe)
+
 
 
 class widget_game(QWidget):

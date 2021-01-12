@@ -1,8 +1,9 @@
 import random
-from math import exp
-
+import numpy as np
 from server.bot.monte_carlo.odds import give_odds
-from ..Bot import Bot
+from server.bot.Bot import Bot
+#from odds import give_odds
+
 
 
 class BotMatheux(Bot):
@@ -10,8 +11,8 @@ class BotMatheux(Bot):
         super().__init__(bot_name, bot_stack)
         self.coef_bluff = 1
 
-    def p(self, x):
-        return 1 / (1 + exp(-self.coef_bluff * x))
+    def softmax(x):
+        return np.exp(x)/sum(np.exp(x))
 
     # + coef de bluff est bas + le bot bluff, il évolue entre 0 et +infini
     def speaks(self, amount_to_call, blind=False):
@@ -25,11 +26,17 @@ class BotMatheux(Bot):
                 num_opp += 1
         if not blind:
             exp_winnings = give_odds(self.hand, board, num_opp)[1]
-            proba = self.p(exp_winnings)
+            reference_ratio=1/num_opp
+            action_proba = softmax([self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
             x = random.random()
-            if x < proba:
+            if x < action_proba:
                 player_action = "c"
-                # ask if raise
+                average_stack=sum([players.stack for players in self.table.players])/len(self.players)
+                coef_richesse=self.stack/average_stack
+                proba_raise=softmax([coef_richesse*self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
+                y=random.random()
+                if y < proba_raise:
+                    player_action=proba_raise*10*self.table.bb
             else:
                 player_action = "f"
             if bet == 0:
@@ -48,9 +55,3 @@ class BotMatheux(Bot):
         self.print_action(player_action, bet, blind)
         return player_action, bet, 0
 
-
-"""
-hand=[Card(12, 3), Card(9, 2)]
-board=[Card(11, 3), Card(7, 2), Card(2, 1), Card(13, 3)]
-print(speaks(hand, board, 2, 2))
-"""

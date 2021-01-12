@@ -21,8 +21,10 @@ class Deck(list):
     def shuffle(self):
         random.shuffle(self)
 
-    # def pop(self, __index: int = ...):
-    #     if len(self) == 0:
-    #         self.reinitialize()
-    #     return super(Deck, self).pop()
-
+    def remove(self, card):
+        card_value=card.value
+        card_suit=card.suit
+        for card in self:
+            if card_value==card.value and card_suit==card.suit:
+                super(Deck, self).remove(card)
+                return

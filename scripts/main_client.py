@@ -6,13 +6,13 @@ Choisir le mode (local ou serveur) avant d'exécuter.
 import socket, sys, json
 from PyQt5.QtCore import *
 from PyQt5.QtWidgets import *
-from custom_widgets import *
+from client.custom_widgets import *
 
 SERVER = "178.79.165.80"
 LOCAL = 'localhost'
-PORT = 12800
+PORT = 4500
 
-MODE = LOCAL
+MODE = SERVER
 
 class Server_handler(QObject):
 
@@ -93,6 +93,7 @@ class main_window(QMainWindow):
         self.repaint()
         print('Table has been initiated')
 
+
     def new_game(self, serv_inf):
         players, table_cards, dealer_id = self.table.players, self.table.widget_table.table_cards, serv_inf['dealer_id']
         client_cards = serv_inf['client_cards']
@@ -103,10 +104,7 @@ class main_window(QMainWindow):
                 player.widget_player.is_speaking()
             player.is_folded = player.is_all_in = False
             player.set_ogb(0)
-            if player.id == dealer_id:
-                player.show_dealer_button(True)
-            else:
-                player.show_dealer_button(False)
+            player.show_dealer_button(player.id == dealer_id)
             if player.is_client:
                 player.widget_player.p_0_cards.set_cards(card1=client_cards[0], card2=client_cards[1])
             player.show_cards(True)
@@ -146,11 +144,14 @@ class main_window(QMainWindow):
         print('Action has initiated')
 
     def end_game(self, serv_inf):
+        for player in self.table.players:
+            player.widget_player.is_not_speaking_and_did_not_win()
         for winner_id in serv_inf['winners_id']:
             winner = self.table.get_player_from_id(winner_id)
             winner.widget_player.won()
         if serv_inf['show_cards']:
             self.widget_end_game = widget_end_game(serv_inf['cards'])
+        self.table.set_pot(0)
         print('Game has ended')
 
     def disconnect(self, serv_inf):
@@ -268,6 +269,7 @@ def send_server(dico, server):
 table_ids_order = [0, 4, 3, 2, 5, 1, 6]
 
 if __name__ == '__main__':
+
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.connect((MODE, PORT))
     app = QApplication(sys.argv)

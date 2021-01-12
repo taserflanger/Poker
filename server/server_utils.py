@@ -125,7 +125,6 @@ def divide_players_on_tables(nbr_players, n_max):
         repartition_tables += [table_min]
         nbr_tables += 1
 
-    # interresant car recursif  ==> à présenter devant le jury
     nbr_players_mal_repartis = give_chaises_dispo(repartition_tables, min(repartition_tables))
     while nbr_players_mal_repartis >= nbr_tables:
         id_table_min = repartition_tables.index(min(repartition_tables))
@@ -136,10 +135,7 @@ def divide_players_on_tables(nbr_players, n_max):
 
     return repartition_tables
 
-
-def del_thread(thread):
-    thread.exit()
-
+print("15 joueurs, 4 par tables", divide_players_on_tables(15, 4))
 
 def wait_for_table(table1, table2):
     """met en pause 2 tables à la fin de leur partie pour d'éventuels modifications"""

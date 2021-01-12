@@ -25,16 +25,15 @@ def get_winner(opponents_cards, bot_cards, board):
         return "null"
 
 
-# Determines the user's chance of winning given current hole cards and
-# community cards, assuming that all unseen cards (undealt community cards
-# and opponents' hole cards) are distributed randomly.
 def give_odds(hand, board, num_opponents):
+    """renvoie les probas d'avoir la meilleure main """
     cards_left = Deck()
-    cards_left.remove(hand[0]), cards_left.remove(hand[1])
+    cards_left.remove(hand[0])
+    cards_left.remove(hand[1])
     for i in range(len(board)):
         cards_left.remove(board[i])
 
-    monte_carlo_rounds = 1000
+    monte_carlo_rounds = 3000
     wins = 0
     ties = 0
     to_flop = 5 - len(board)
@@ -43,9 +42,8 @@ def give_odds(hand, board, num_opponents):
 
     # Monte Carlo simulation
     for _ in range(monte_carlo_rounds):
-        # Draw a random combination of unseen cards (remaining community
-        # cards + 2 hole cards per opponent)
-        drawn_cards = random.sample(cards_left.cards, to_draw)
+        # Simule une combinaison aléatoire des cartes des opposants et des cartes non dévilées de la table
+        drawn_cards = random.sample(cards_left, to_draw)
         complete_board = board + drawn_cards[:to_flop]
         opponents_cards = []
         for i in range(num_opponents):
@@ -62,9 +60,8 @@ def give_odds(hand, board, num_opponents):
 
     return win_ratio, exp_winnings, ties_ratio
 
-
-""" test
-from card import Card
+"""
+from server.card import Card
 hand=[Card(12, 3), Card(9, 2)]
 board=[Card(11, 3), Card(7, 2), Card(2, 1), Card(13, 3)]
 print(give_odds(hand, board, 2))
