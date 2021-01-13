@@ -215,6 +215,7 @@ class Table:
             if self.active_players() == 1 and player.on_going_bet == mise:
                 return
             if player == raiser or player.is_all_in or player.is_folded:
+                self.speaker = self.next_player(self.speaker)
                 continue
             # TODO: implémenter timer et renvoyer decision ms dans player.speaks
             action, amount, decision_time = player.speaks(mise)
