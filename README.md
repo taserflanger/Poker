@@ -3,6 +3,7 @@
 ---
 
 Mini jeu de poker en ligne.
+Courte vidéo de démonstration : https://drive.google.com/file/d/16ZDFxovlrQ-mWRvDKtP0K72Uu9xgqZNj/view?usp=sharing
 
 ---
 
