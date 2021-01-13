@@ -9,7 +9,7 @@ from server.bot.Bot import Bot
 class BotMatheux(Bot):
     def __init__(self, bot_name, bot_stack):
         super().__init__(bot_name, bot_stack)
-        self.coef_bluff = 1
+        self.coef_bluff = 2
 
     def softmax(self, x):
         return np.exp(x)/sum(np.exp(x))
