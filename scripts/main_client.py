@@ -2,20 +2,27 @@
 Correspond au script exécutable du programme client. Utilise tous les 'Widgets' PyQt5 personnalisés de custom_widgets.
 Choisir le mode (local ou serveur) avant d'exécuter.
 """
+import json
+import socket
+import sys
+from sys import argv
 
-import socket, sys, json
-from PyQt5.QtCore import *
-from PyQt5.QtWidgets import *
 from client.custom_widgets import *
 
 SERVER = "178.79.165.80"
 LOCAL = 'localhost'
-PORT = 4502
-
+PORT = 4500
 MODE = SERVER
+print(argv)
+if len(argv) >= 1 and argv[1] == "local":
+    MODE = LOCAL
+try:
+    PORT = int(argv[2])
+except (ValueError, IndexError):
+    pass
+
 
 class Server_handler(QObject):
-
     infos_server = pyqtSignal(str)
 
     @pyqtSlot()
@@ -26,7 +33,6 @@ class Server_handler(QObject):
 
 
 class main_window(QMainWindow):
-
     start_comm = pyqtSignal()
 
     def __init__(self, server):
@@ -39,7 +45,6 @@ class main_window(QMainWindow):
                                'update_table': self.update_table, 'end_game': self.end_game, 'action': self.action,
                                'name ok': self.widget_home.ask_if_ready, 'error name': self.widget_home.wrong_name,
                                'disconnect': self.disconnect}
-
 
         self.setObjectName("main_window")
         self.setWindowTitle("PSL Poker")
@@ -93,7 +98,6 @@ class main_window(QMainWindow):
         self.repaint()
         print('Table has been initiated')
 
-
     def new_game(self, serv_inf):
         players, table_cards, dealer_id = self.table.players, self.table.widget_table.table_cards, serv_inf['dealer_id']
         client_cards = serv_inf['client_cards']
@@ -115,7 +119,6 @@ class main_window(QMainWindow):
         table_cards.new_game()
         print('New_game has been started')
 
-
     def update_table(self, serv_inf):
         infos_players = serv_inf['infos_players']
         for infos_player in infos_players:
@@ -135,7 +138,6 @@ class main_window(QMainWindow):
         self.table.set_pot(serv_inf['pot'])
         self.table.widget_table.table_cards.set_cards(serv_inf['table_cards'])
         print('Table has been updated')
-
 
     def action(self, serv_inf):
         stack, ogb = self.table.client_player.stack, self.table.client_player.ogb
@@ -160,7 +162,7 @@ class main_window(QMainWindow):
 
     def resizeEvent(self, e):
         w = self.width()
-        self.setFixedHeight(0.7*w)
+        self.setFixedHeight(0.7 * w)
 
 
 class Player:
@@ -171,7 +173,6 @@ class Player:
         self.is_client = is_client
         self.is_folded = self.is_all_in = False
         self.id = id
-
 
     def set_attributes(self, widget_p, widget_f):
         self.widget_player = widget_p
@@ -214,7 +215,6 @@ class Player:
         self.is_all_in = True
 
 
-
 class Table:
     def __init__(self, players, widget_game, time_to_play):
         self.players = players
@@ -246,7 +246,6 @@ class Table:
             player.widget_front.show()
             player.widget_player.show()
 
-
     def get_player_from_id(self, id):
         for player in self.players:
             if player.id == id:
@@ -258,7 +257,7 @@ class Table:
             self.widget_table.table_cards.widget_pot.show()
         else:
             self.widget_table.table_cards.widget_pot.hide()
-        
+
 
 def send_server(dico, server):
     dico = json.dumps(dico)
@@ -269,9 +268,9 @@ def send_server(dico, server):
 table_ids_order = [0, 4, 3, 2, 5, 1, 6]
 
 if __name__ == '__main__':
-
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.connect((MODE, PORT))
     app = QApplication(sys.argv)
     game_window = main_window(server)
     sys.exit(app.exec_())
+

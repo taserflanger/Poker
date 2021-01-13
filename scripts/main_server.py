@@ -1,16 +1,33 @@
 import socket
 
 # import pandas as pd
+from sys import argv
+
 from server.tournoi import Tournoi
 
 # from cash_game import CashGame
 
 SERVER = "178.79.165.80"
 LOCAL = "localhost"
-PORT = int(input('PORT : '))
-N_BOT_MATHEUX=int(input('NBR BOT MATHEUX : '))
-N_BOT_DARWIN=int(input('NBR BOT DARWIN : '))
+print(argv)
 MODE = SERVER
+if len(argv) >= 1 and argv[1] == "local":
+    MODE = LOCAL
+try:
+    PORT = int(argv[2])
+except (ValueError, IndexError):
+    PORT = int(input('PORT : '))
+try:
+    N_BOT_MATHEUX = int(argv[3])
+except (ValueError, IndexError):
+    N_BOT_MATHEUX = int(input('NBR BOT MATHEUX : '))
+try:
+    N_BOT_DARWIN = int(argv[4])
+except (ValueError, IndexError):
+    N_BOT_DARWIN = int(input('NBR BOT DARWIN : '))
+
+
+
 
 def tournoi(joueur_par_table, stack_initial, sb, bb, nbr_bot_matheux, nbr_bot_darwin):
     t = Tournoi(serveur, joueur_par_table, stack_initial, sb, bb, nbr_bot_matheux, nbr_bot_darwin)
