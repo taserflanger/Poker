@@ -83,7 +83,7 @@ class Player:
 
     def folds(self):
         self.is_folded = True
-        print(self.name, "folds")
+        #print(self.name, "folds")
         return 'f', 0, 0
 
     def print_action(self, player_action, bet, blind):

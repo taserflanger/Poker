@@ -9,7 +9,7 @@ from server.bot.Bot import Bot
 class BotMatheux(Bot):
     def __init__(self, bot_name, bot_stack):
         super().__init__(bot_name, bot_stack)
-        self.coef_bluff = 2
+        self.coef_bluff = 1.5
 
     def softmax(self, x):
         return np.exp(x)/sum(np.exp(x))
@@ -52,6 +52,6 @@ class BotMatheux(Bot):
         self.on_going_bet += bet
         if self.stack == 0:
             self.is_all_in = True
-        self.print_action(player_action, bet, blind)
+        #self.print_action(player_action, bet, blind)
         return player_action, bet, 0
 
