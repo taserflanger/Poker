@@ -9,7 +9,7 @@ from server.bot.Bot import Bot
 class BotMatheux(Bot):
     def __init__(self, bot_name, bot_stack):
         super().__init__(bot_name, bot_stack)
-        self.coef_bluff = 1
+        self.coef_bluff = 2
 
     def softmax(self, x):
         return np.exp(x)/sum(np.exp(x))
@@ -31,7 +31,7 @@ class BotMatheux(Bot):
             x = random.random()
             if x < action_proba:
                 player_action = "c"
-                average_stack=sum([players.stack for players in self.table.players])/len(self.players)
+                average_stack=sum([players.stack for players in self.table.players])/len(self.table.players)
                 coef_richesse=self.stack/average_stack
                 proba_raise=self.softmax([coef_richesse*self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
                 y=random.random()

@@ -102,6 +102,7 @@ class Table:
             ft.delete(self, self.wait_out.pop(0))
             changes = True
         if changes:
+            print("changes_manage_file")
             ft.init_client_table(self)
         self.in_change = False
 
@@ -116,6 +117,7 @@ class Table:
                 self.sleep(0.1)
                 player.connexion.close()
         if changes:
+            print("changes")
             ft.init_client_table(self)
 
     def check_len(self):
@@ -213,6 +215,9 @@ class Table:
             if self.active_players() == 1 and player.on_going_bet == mise:
                 return
             if player == raiser or player.is_all_in or player.is_folded:
+                
+                self.speaker = self.next_player(self.speaker)
+                fs.refresh_update(self, self.bot_training)
                 continue
             # TODO: implémenter timer et renvoyer decision ms dans player.speaks
             action, amount, decision_time = player.speaks(mise)
