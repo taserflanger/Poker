@@ -4,7 +4,9 @@ from typing import List, Union
 import numpy as np
 from nptyping import NDArray
 
+from server.bot.Bot import Bot
 from server.bot.genectic.BotGenetic import BotGenetic
+from server.bot.monte_carlo.BotProba import BotMatheux
 from server.bot.genectic.Generation import Generation
 from server.table import Table
 
@@ -48,9 +50,9 @@ class GenerationManager:
         """
 
         for g in range(N):
-            scores = np.ndarray((nb_players,))
-            stacks = [100 for _ in range(nb_players)]
-            bots: List[BotGenetic] = list(self.current_generation.generate_bot_pool(nb_players, stacks))
+            scores = np.ndarray((nb_players+1,))
+            stacks = [100 for _ in range(nb_players+1)]
+            bots: List[Bot] = list(self.current_generation.generate_bot_pool(nb_players, stacks)) + [BotMatheux("Jacob", 100)]
             for game in range(m):
                 # TODO rajouter la possibilité de faire des staccks random
                 table = Table(table_players=bots, small_blind=small_blind, big_blind=2 * small_blind,
