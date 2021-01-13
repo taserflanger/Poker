@@ -10,7 +10,7 @@ from client.custom_widgets import *
 
 SERVER = "178.79.165.80"
 LOCAL = 'localhost'
-PORT = 4500
+PORT = 4502
 
 MODE = SERVER
 

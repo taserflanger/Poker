@@ -3,6 +3,7 @@ import select
 import threading
 import time
 from random import randint
+import numpy as np
 
 from .table_utils import init_client_table
 from .bot.genectic.BotGenetic import Bot, BotGenetic
@@ -30,6 +31,13 @@ class Salon:  # self.n_max est le nombre maximal de player par table
         self.gap_max = 2
         self.nbr_bot_matheux = nbr_bot_matheux
         self.nbr_bot_darwin=nbr_bot_darwin
+        sizes = [50]
+        self.Params = {"W": [], "b": [], "f": []}
+        for s in "W", "b", "f":
+            for i in range(len(sizes) + 2):
+                # car on ajoute les layer (il y en a un pour les indices)
+                self.Params[s].append(np.loadtxt(f"server/data/{s}{str(i)}.csv"))
+
 
     def ready(self):
         # cette fonction est redéfinie dans tournoi, mais ne l'est pas dans cashgame
@@ -59,7 +67,7 @@ class Salon:  # self.n_max est le nombre maximal de player par table
             self.players.append(new_bot)
             self.wait_file.append(new_bot)
         for i in range(self.nbr_bot_darwin):
-            new_bot = BotGenetic(f"Gazeau {i}", 500, [50])
+            new_bot = BotGenetic(f"Gazeau {i}", 500, [50], W=self.Params["W"],    b=self.Params["b"],    f=self.Params["f"])
             new_bot.salon = self
             self.players.append(new_bot)
             self.wait_file.append(new_bot)
