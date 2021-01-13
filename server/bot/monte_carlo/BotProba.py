@@ -31,7 +31,7 @@ class BotMatheux(Bot):
             x = random.random()
             if x < action_proba:
                 player_action = "c"
-                average_stack=sum([players.stack for players in self.table.players])/len(self.players)
+                average_stack=sum([players.stack for players in self.table.players])/len(self.table.players)
                 coef_richesse=self.stack/average_stack
                 proba_raise=self.softmax([coef_richesse*self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
                 y=random.random()
