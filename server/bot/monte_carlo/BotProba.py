@@ -29,14 +29,14 @@ class BotMatheux(Bot):
             reference_ratio=1/num_opp
             action_proba = self.softmax([self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
             x = random.random()
-            if x < action_proba:
+            if x < action_proba or amount_to_call<=5:
                 player_action = "c"
                 average_stack=sum([players.stack for players in self.table.players])/len(self.table.players)
                 coef_richesse=self.stack/average_stack
                 proba_raise=self.softmax([coef_richesse*self.coef_bluff*exp_winnings/reference_ratio, 1])[0]
                 y=random.random()
                 if y < proba_raise:
-                    player_action=proba_raise*10*self.table.bb
+                    player_action=max(proba_raise*10*self.table.bb, amount_to_call)
             else:
                 player_action = "f"
             if bet == 0:
