@@ -50,9 +50,9 @@ class GenerationManager:
         """
 
         for g in range(N):
-            scores = np.ndarray((nb_players+1,))
-            stacks = [100 for _ in range(nb_players+1)]
-            bots: List[Bot] = list(self.current_generation.generate_bot_pool(nb_players, stacks)) + [BotMatheux("Jacob", 100)]
+            scores = np.ndarray((nb_players+2,))
+            stacks = [100 for _ in range(nb_players+2)]
+            bots: List[Bot] = list(self.current_generation.generate_bot_pool(nb_players, stacks)) + [BotMatheux("Jacob", 100) for _ in range(2)]
             for game in range(m):
                 # TODO rajouter la possibilité de faire des staccks random
                 table = Table(table_players=bots, small_blind=small_blind, big_blind=2 * small_blind,
@@ -76,6 +76,10 @@ class GenerationManager:
             print("*" * (g * 50 // N), f"generation {g}")
             print(scores)
             winner = bots[scores.argmax()]
+            while isinstance(winner, BotMatheux):
+                idx = bots.index(winner)
+                scores[idx] = 0
+                winner = bots[scores.argmax()]
             # la nouvelle génération a comme poids de référence ceux du winner
             self.current_generation = Generation(self.MUTATION_FACTOR, self.sizes, winner.W, winner.b, winner.f)
 
