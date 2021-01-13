@@ -33,7 +33,7 @@ def give_odds(hand, board, num_opponents):
     for i in range(len(board)):
         cards_left.remove(board[i])
 
-    monte_carlo_rounds = 3000
+    monte_carlo_rounds = 300
     wins = 0
     ties = 0
     to_flop = 5 - len(board)
@@ -66,3 +66,4 @@ hand=[Card(12, 3), Card(9, 2)]
 board=[Card(11, 3), Card(7, 2), Card(2, 1), Card(13, 3)]
 print(give_odds(hand, board, 2))
 """
+
