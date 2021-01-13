@@ -9,7 +9,6 @@ from server.tournoi import Tournoi
 
 SERVER = "178.79.165.80"
 LOCAL = "localhost"
-print(argv)
 MODE = SERVER
 if len(argv) >= 1 and argv[1] == "local":
     MODE = LOCAL

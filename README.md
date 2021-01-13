@@ -16,23 +16,31 @@ pip install PyQt5
 
 ## Utilisation
 
-Pour jouer en local, spécifier dans les fichiers scripts.main_server et scripts.main_client :
+### Partie Rapide
 
-``
-MODE = LOCAL
-``
+Pour lancer en local une partie à 2 joueurs (+1 bot), lancer la commande depuis la racine:
 
-
-### Serveur
-
-Pour lancer le programme serveur, exécuter :
+**Windows**
+```shell
+scripts/launchgame.bat
 ```
-python3 -m scripts.main_server
+**Linux**
+```shell
+scripts/launchgame.sh
 ```
+
+### Customisation du serveur
+
+Paramètres du serveur
+
+```shell
+python -m scripts.main_server <local|distant> <PORT> <Nb BotProba> <Nb BotGenetic>
+```
+
 
 ### Client
 
-Pour lancer le programme client et sa GUI, exécuter :
-```
-python3 -m scripts.main_client
+Pour lancer le programme client et sa GUI, exécuter sur votre machine:
+```shell
+python -m scripts.main_client <PORT>
 ```
