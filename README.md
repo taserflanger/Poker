@@ -31,7 +31,7 @@ scripts/launchgame.sh
 
 ### Customisation du serveur
 
-Paramètres du serveur
+Pour lancer le serveur:
 
 ```shell
 python -m scripts.main_server <local|distant> <PORT> <Nb BotProba> <Nb BotGenetic>
@@ -42,5 +42,5 @@ python -m scripts.main_server <local|distant> <PORT> <Nb BotProba> <Nb BotGeneti
 
 Pour lancer le programme client et sa GUI, exécuter sur votre machine:
 ```shell
-python -m scripts.main_client <PORT>
+python -m scripts.main_client <local|distant> <PORT>
 ```
