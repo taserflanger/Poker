@@ -1,4 +1,4 @@
-from server.bot.genectic.GenerationManager import GenerationManager
+from server.bots.genetic import GenerationManager
 import numpy as np
 
 

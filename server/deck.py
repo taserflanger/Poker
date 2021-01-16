@@ -1,6 +1,7 @@
 import random
 
-from .card import Card
+from . import Card
+
 
 class Deck(list):
     """
@@ -22,9 +23,9 @@ class Deck(list):
         random.shuffle(self)
 
     def remove(self, card):
-        card_value=card.value
-        card_suit=card.suit
+        card_value = card.value
+        card_suit = card.suit
         for card in self:
-            if card_value==card.value and card_suit==card.suit:
+            if card_value == card.value and card_suit == card.suit:
                 super(Deck, self).remove(card)
                 return

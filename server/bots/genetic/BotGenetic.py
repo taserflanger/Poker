@@ -4,7 +4,7 @@ from nptyping import NDArray
 from server.utils import softmax, relu
 from time import time
 
-from ..Bot import Bot
+from .. import Bot
 
 
 class BotGenetic(Bot):
@@ -15,8 +15,8 @@ class BotGenetic(Bot):
                  b: Union[str, List[NDArray]] = "random",
                  f: Union[str, List[NDArray]] = "random"):
         """
-        bot dont les paramètres du réseau de neurones se modifient génétiquement
-        :param player_name: nom du bot
+        bots dont les paramètres du réseau de neurones se modifient génétiquement
+        :param player_name: nom du bots
         :param sizes: tailles des layers
         :param W: weights (doivent être dans les bonnes dimensions par rapport à sizes)
         :param b: biases (idem)
@@ -110,7 +110,7 @@ class BotGenetic(Bot):
         else:
             self.forward_propagate(reversed(self.table.history))
             action_layer = self.L[-1][1:]
-            # TODO ajouter un moyen virtuel à un bot de pouvoir jouer sur le temps de réponse
+            # TODO ajouter un moyen virtuel à un bots de pouvoir jouer sur le temps de réponse
             # à priori tant qu’on ne le fait pas jouer contre des gens chez qui l’influence du temps
             # compte, ça na marchera pas
             action = ["f", "c", "r"][action_layer.argmax()]

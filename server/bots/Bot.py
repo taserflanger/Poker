@@ -2,7 +2,7 @@ from abc import abstractmethod
 from random import randint, choice
 from typing import Tuple
 
-from ..player import Player
+from server import Player
 
 
 class Bot(Player):
@@ -12,7 +12,7 @@ class Bot(Player):
 
     @abstractmethod
     def speaks(self, amount_to_call: float, blind: bool = False) -> Tuple[str, float, int]:
-        """Ce bot fait du random"""
+        """Ce bots fait du random"""
         bet = randint(1, self.stack - amount_to_call)
         action = choice(["f", "c", "r"])
         return action, bet, 0

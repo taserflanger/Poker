@@ -13,8 +13,7 @@ low_comb_values (list) = le reste des cartes (elles forment des hauteurs sauf da
 import time
 from itertools import combinations
 
-from server import utils
-from .deck import Deck
+from server import utils, Deck
 
 
 class Hand5:

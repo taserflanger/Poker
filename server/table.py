@@ -3,18 +3,13 @@ import time
 from itertools import combinations
 from typing import List
 
-from server import server_utils as fs, table_utils as ft
-from server import utils
-from .deck import Deck
-from .hand5 import Hand5
-from .player import Player
+from server import server_utils as fs, table_utils as ft, utils, Deck, Hand5, Player
 
 
 class Table:
 
     def __init__(self, table_players: List[Player], small_blind: int, big_blind: int, id_dealer: int = -1,
                  bot_training=False):
-        self.nb_players = len(table_players)
         self.players = table_players
         self.nb_players = len(self.players)
         ft.give_players_ids(self)
@@ -27,8 +22,6 @@ class Table:
         self.sb, self.bb = small_blind, big_blind
         self.deck = Deck()
         self.cards, self.pots, self.total_winners, self.wait_in, self.wait_out = map(list, ([] for _ in range(5)))
-        self.final_hand, self.in_change, self.in_game, self.end, self.redistribution = map(bool,
-                                                                                           (False for _ in range(5)))
         self.history = []
         self.bot_training = bot_training
         if bot_training:
@@ -58,7 +51,6 @@ class Table:
 
     def sleep(self, ms):
         if not self.bot_training:
-            print("Alerte rouge!")
             time.sleep(ms)
 
     def print(self, *values, sep=" ", end="\n"):
@@ -108,12 +100,12 @@ class Table:
 
     def check_player_stack(self):
         """vérifie si un joueur n'est pas à stack==0"""
-        changes=False
+        changes = False
         for player in self.players:
             if player.stack < self.bb:
                 ft.delete(self, player)
-                changes=True
-                fs.try_send(player, {"flag":"disconnect"})
+                changes = True
+                fs.try_send(player, {"flag": "disconnect"})
                 self.sleep(0.1)
                 player.connexion.close()
         if changes:
@@ -189,7 +181,8 @@ class Table:
              0)
         )
         self.speaker = self.next_player(self.speaker)
-        fs.refresh_new_game(self, sb_player, bb_player, self.bot_training)  # envoie aux clients les infos du tour cf fonction_serveur
+        fs.refresh_new_game(self, sb_player, bb_player,
+                            self.bot_training)  # envoie aux clients les infos du tour cf fonction_serveur
 
     def flop(self):
         self.initialise_round()
@@ -215,7 +208,6 @@ class Table:
             if self.active_players() == 1 and player.on_going_bet == mise:
                 return
             if player == raiser or player.is_all_in or player.is_folded:
-                
                 self.speaker = self.next_player(self.speaker)
                 fs.refresh_update(self, self.bot_training)
                 continue
@@ -229,7 +221,8 @@ class Table:
                  player.get_current_best_hand())
             )
             self.speaker = self.next_player(self.speaker)  # on passe mtn au prochain en cas de raise
-            fs.refresh_update(self, self.bot_training)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur
+            fs.refresh_update(self,
+                              self.bot_training)  # envoie aux clients les nouvelles infos de la table cf fonction_serveur
             if action == 'r':
                 return self.players_speak(amount, raiser=player)
 

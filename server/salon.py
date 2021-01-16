@@ -3,14 +3,13 @@ import select
 import threading
 import time
 from random import randint
+
 import numpy as np
 
-from .table_utils import init_client_table
-from .bot.genectic.BotGenetic import Bot, BotGenetic
-from .bot.monte_carlo.BotProba import BotMatheux
-from .player import Player
+from server import Player, Table
+from server.bots import BotGenetic, BotMatheux
 from .server_utils import gerer_table, try_recv, try_send, give_table_min_max, give_chaises_dispo
-from .table import Table
+from .table_utils import init_client_table
 
 
 # TODO: gerer une deconnexion de force d'un client
@@ -30,14 +29,13 @@ class Salon:  # self.n_max est le nombre maximal de player par table
         self.let_modif_thread = True
         self.gap_max = 2
         self.nbr_bot_matheux = nbr_bot_matheux
-        self.nbr_bot_darwin=nbr_bot_darwin
+        self.nbr_bot_darwin = nbr_bot_darwin
         sizes = [50]
         self.Params = {"W": [], "b": [], "f": []}
         for s in "W", "b", "f":
             for i in range(len(sizes) + 2):
                 # car on ajoute les layer (il y en a un pour les indices)
                 self.Params[s].append(np.loadtxt(f"server/data/{s}{str(i)}.csv"))
-
 
     def ready(self):
         # cette fonction est redéfinie dans tournoi, mais ne l'est pas dans cashgame
@@ -67,7 +65,7 @@ class Salon:  # self.n_max est le nombre maximal de player par table
             self.players.append(new_bot)
             self.wait_file.append(new_bot)
         for i in range(self.nbr_bot_darwin):
-            new_bot = BotGenetic(f"Gazeau {i}", 500, [50], W=self.Params["W"],    b=self.Params["b"],    f=self.Params["f"])
+            new_bot = BotGenetic(f"Gazeau {i}", 500, [50], W=self.Params["W"], b=self.Params["b"], f=self.Params["f"])
             new_bot.salon = self
             self.players.append(new_bot)
             self.wait_file.append(new_bot)

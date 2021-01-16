@@ -1,9 +1,9 @@
 import threading
 import time
 
-from server_utils import give_table_min_max, give_chaises_dispo
-from server_utils import try_send, try_recv
-from salon import Salon
+from .server_utils import give_table_min_max, give_chaises_dispo
+from .server_utils import try_send, try_recv
+from server import Salon
 
 
 class CashGame(Salon):  # à  faire

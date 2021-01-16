@@ -3,7 +3,7 @@ import socket
 # import pandas as pd
 from sys import argv
 
-from server.tournoi import Tournoi
+from server import Tournoi
 
 # from cash_game import CashGame
 

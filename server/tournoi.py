@@ -1,6 +1,6 @@
 
 from server.server_utils import divide_players_on_tables
-from server.salon import Salon
+from server import Salon
 
 
 # TODO: gerer une deconnexion de force d'un client

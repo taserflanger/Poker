@@ -4,11 +4,9 @@ from typing import List, Union
 import numpy as np
 from nptyping import NDArray
 
-from server.bot.Bot import Bot
-from server.bot.genectic.BotGenetic import BotGenetic
-from server.bot.monte_carlo.BotProba import BotMatheux
-from server.bot.genectic.Generation import Generation
-from server.table import Table
+from server.bots import Bot, BotMatheux
+from . import Generation
+from server import Table
 
 
 # from matplotlib.pyplot import draw, imshow, show, plot

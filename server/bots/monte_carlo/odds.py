@@ -1,7 +1,8 @@
 import random
-from server.hand5 import Hand5
 from itertools import combinations
-from server.deck import Deck
+
+from server import Deck
+from server import Hand5
 
 
 def get_final_hand(player_cards, board):
@@ -18,9 +19,9 @@ def get_winner(opponents_cards, bot_cards, board):
         opponents_hand.append(get_final_hand(card, board))
     best_opponents_hand = max(opponents_hand)
     if bot_hand > best_opponents_hand:
-        return "bot wins"
+        return "bots wins"
     elif bot_hand < best_opponents_hand:
-        return "bot loses"
+        return "bots loses"
     else:
         return "null"
 
@@ -49,7 +50,7 @@ def give_odds(hand, board, num_opponents):
         for i in range(num_opponents):
             opponents_cards.append(drawn_cards[to_flop + 2 * i:to_flop + 2 * i + 2])
         result = get_winner(opponents_cards, hand, complete_board)
-        if result == "bot wins":
+        if result == "bots wins":
             wins += 1
         elif result == "null":
             ties += 1
@@ -62,8 +63,7 @@ def give_odds(hand, board, num_opponents):
 
 
 from server.card import Card
-hand=[Card(12, 3), Card(9, 2)]
-board=[Card(11, 3), Card(7, 2), Card(2, 1), Card(13, 3)]
+
+hand = [Card(12, 3), Card(9, 2)]
+board = [Card(11, 3), Card(7, 2), Card(2, 1), Card(13, 3)]
 print(give_odds(hand, board, 2))
-
-

@@ -3,7 +3,7 @@ from typing import Union, List
 import numpy as np
 from nptyping import NDArray
 
-from .BotGenetic import BotGenetic
+from . import BotGenetic
 
 
 class Generation:

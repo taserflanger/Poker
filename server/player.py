@@ -1,12 +1,11 @@
-from itertools import combinations
-from time import time
-
-from typing import Tuple
-
-from .hand5 import Hand5
-from server.server_utils import try_send, try_recv
 import json
 import time
+from itertools import combinations
+from time import time
+from typing import Tuple
+
+from server import Hand5
+from server.server_utils import try_send, try_recv
 
 
 class Player:
@@ -47,7 +46,7 @@ class Player:
         player_action = ''
         bet: float = amount_to_call - self.on_going_bet  # on initialise à la valeur du call
         if not blind:  # si c'est une blinde, on ne demande pas l'avis du joueur
-            time.sleep(0.3)       
+            time.sleep(0.3)
             try_send(self, {"flag": "action", "amount_to_call": amount_to_call})
             time.sleep(0.3)
             player_message = try_recv(self) if not self.disco else "f"
@@ -56,7 +55,7 @@ class Player:
                 flag = data["flag"]
                 while flag != "action" and data != "f":
                     player_message = try_recv(self) if not self.disco else "f"
-                    if player_message!="f":
+                    if player_message != "f":
                         flag = json.loads(player_message)["flag"]
                 player_action = data["action"]
             else:
@@ -83,7 +82,7 @@ class Player:
 
     def folds(self):
         self.is_folded = True
-        #print(self.name, "folds")
+        # print(self.name, "folds")
         return 'f', 0, 0
 
     def print_action(self, player_action, bet, blind):
