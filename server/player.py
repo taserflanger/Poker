@@ -1,7 +1,6 @@
 import json
 import time
 from itertools import combinations
-from time import time
 from typing import Tuple
 
 from server import Hand5
@@ -51,6 +50,7 @@ class Player:
             time.sleep(0.3)
             player_message = try_recv(self) if not self.disco else "f"
             if not player_message == "f":
+                print(player_message)
                 data: dict = json.loads(player_message)
                 flag = data["flag"]
                 while flag != "action" and data != "f":
